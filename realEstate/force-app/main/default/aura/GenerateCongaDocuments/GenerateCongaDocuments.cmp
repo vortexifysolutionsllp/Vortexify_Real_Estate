@@ -1,0 +1,216 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId" controller="GenerateCongaDocumentsController">
+    <aura:html tag="style">
+        .slds-modal__container{
+        max-width: 75rem !important;
+        width:125% !important;
+        }
+    </aura:html>
+    
+    <aura:html tag="style">
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }       
+        .slds-modal__content{
+        
+        height:auto !important;
+        max-height:auto !important;
+        min-heigth:70% !important;
+        }
+    </aura:html>
+    
+    <aura:attribute name="selectedCount" type="integer" default="0" description="selected Records Count"/>
+    <aura:attribute name="activeSections" type="List" default="['A','B']" />
+    <aura:attribute name="activeSectionsMessage" type="String" default="" />
+    <aura:attribute name="options" type="List" default="[{'label': 'Generate The Documents', 'value': 'option1'},{'label': 'Send The Documents', 'value': 'option2'}]"/>
+    <aura:attribute name="value" type="String" default="option1"/>
+    <aura:attribute name="showDetails" type="Boolean" default="false"/>
+    <aura:attribute name="spinner" type="Boolean" default="false"/>
+    <aura:attribute name="DocType" type="String[]" default="SIGNER,IN_PERSON_SIGNER,CC"/>
+    <aura:attribute Name="selItem" type="object"  access="public" />
+    <aura:attribute name="CongaCompWrapperListForUser" type="CongaCompWrapper[]"/>
+    <aura:attribute name="CongaCompWrapperList" type="CongaCompWrapper[]"/>
+    <aura:attribute name="recordId" type="string" default="" />
+    <aura:attribute name="myVal" type="String" />
+     <aura:attribute name="subjectVal" type="String" />
+
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    
+    
+    <div class="slds-m-around_xx-large">
+        
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                
+                <header class="slds-modal__header">
+                    <lightning:buttonIcon iconName="utility:close"
+                                          onclick="{! c.closeModel }"
+                                          alternativeText="close"
+                                          variant="bare-inverse"
+                                          class="slds-modal__close"/>
+                    <header class="slds-modal__header" style="background-color:#004d99;slds-table--header-fixed_container">
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                            <div>
+                                <b style="color:white">
+                                    Vortexify Document Generation<span>&#174;</span>
+                                </b> 
+                                
+                            </div>
+                        </h2>
+                    </header>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <aura:if isTrue="{!v.spinner}">
+                        <div aura:id="spinnerId" class="slds-spinner_container">
+                            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                                <span class="slds-assistive-text">Loading...</span>
+                                <div class="slds-spinner__dot-a"></div>
+                                <div class="slds-spinner__dot-b"></div>
+                            </div>
+                        </div>
+                    </aura:if>
+                    <div style="margin:1%" >
+                        <ui:message title="Reminder" severity="warning" closable="true">
+                            Maximum 2 Users  &amp; 2 Contacts Can be Selected for signature transaction!!️
+                        </ui:message>
+                        <lightning:radioGroup name="radioGroup" options="{! v.options }" value="{! v.value }" type="radio"  onchange="{! c.handleChange }"/>
+                        <br/>
+                        <aura:if isTrue="{!v.showDetails}">
+                            <div class="slds-scrollable_y" style="height:30rem;">
+                                <div>
+                                	
+                                </div>
+                                <div style="width:50%; margin: 1rem;">
+                                    <h3 style="font-size: 1rem; margin-bottom:1rem">MESSAGE </h3>
+                                    <p style="margin-bottom:1rem">Please update the Subject and Message below for a custom message.</p>
+                                    <lightning:input type="text" name="Subject"  label="Subject" value="{!v.subjectVal}" style="margin-bottom:1rem;" ></lightning:input>
+                                    <lightning:textarea name="input2" label="Message..." value="{!v.myVal}" />
+                                </div>
+                                <lightning:accordion allowMultipleSectionsOpen="true" onsectiontoggle="{! c.handleSectionToggle }" activeSectionName="{! v.activeSections }">
+                                    
+                                    <lightning:accordionSection name="A" label="Select Users 🧑🏾🧑🏾">
+                                        <aura:set attribute="body">
+                                            
+                                            <div class="slds-float_right slds-m-around_small slds-icon_container slds-icon-utility-add">
+                                                <h1 class="slds-page-header__title" style="margin-top: 10%;">
+                                                    Add Row
+                                                    <lightning:buttonIcon iconName="utility:add"  size="large" variant="bare" alternativeText="Add" onclick="{!c.handleAddRow}"/>
+                                                </h1>
+                                            </div>
+                                            <br/>
+                                            
+                                            <div style = "border-style: solid">
+                                                <table class="slds-table slds-table--striped slds-table_bordered" >
+                                                    <thead>
+                                                        <tr >
+                                                            <th scope="col"><span class="slds-truncate">User</span></th>
+                                                            <th scope="col"><span class="slds-truncate">Role</span></th>
+                                                            <th scope="col"><span class="slds-truncate">Signing Order</span></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody >
+                                                        <aura:iteration items="{!v.CongaCompWrapperListForUser}" var="acc" indexVar="index" >
+                                                            <tr>
+                                                                <td> 
+                                                                    <aura:if isTrue="{!acc.standardUser}">
+                                                                        <lightning:input disabled="true" type="text" name="sequence" value="{!acc.conName}"/>
+                                                                        <aura:set attribute="else">
+                                                                            <br/>
+                                                                            <c:LookupComp value ="{!acc.conId}" contactId="{!v.recordId}" objectName="User" fieldName="Name"  iconName="standard:contact" placeholder="Enter Value"/>
+                                                                        </aura:set>
+                                                                    </aura:if> 
+                                                                </td>
+                                                                <td>  
+                                                                    <lightning:select name="select" value="{!acc.type}">
+                                                                        <option >--None--</option>
+                                                                        <aura:iteration items="{!v.DocType}" var="doc" >
+                                                                            <option text="{!doc}"></option>
+                                                                        </aura:iteration>
+                                                                    </lightning:select>
+                                                                </td>
+                                                                <td>
+                                                                    <lightning:input type="number" name="sequence" value="{!acc.sequence}"/>
+                                                                </td>
+                                                                <td>
+                                                                    <br/>
+                                                                    <a onclick="{!c.removeRecord}" data-record="{!index}" style="margin-left: 2%;">
+                                                                        <lightning:icon iconName="utility:delete" size="medium" alternativeText="Delete"/>
+                                                                        <span class="slds-assistive-text">Delete</span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </aura:iteration>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <br/>
+                                            
+                                        </aura:set>
+                                    </lightning:accordionSection>
+                                    <lightning:accordionSection name="B" label="Select Contacts 🧑‍💻🧑‍💻">
+                                        
+                                        <br/>
+                                        <div style = "border-style: solid">
+                                            <table class="slds-table slds-table--striped slds-table_bordered" >
+                                                <thead>
+                                                    <tr >
+                                                        <th scope="col"><span class="slds-truncate">Select</span></th>
+                                                        <th scope="col"><span class="slds-truncate">Contact</span></th>
+                                                        <th scope="col"><span class="slds-truncate">Role</span></th>
+                                                        <th scope="col"><span class="slds-truncate">Signing Order</span></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody >
+                                                    <aura:iteration items="{!v.CongaCompWrapperList}" var="acc" indexVar="index" >
+                                                        <tr id ="{!acc.conId}"> 
+                                                            <td>
+                                                                <br/>
+                                                                <input type="checkbox" id="{!acc.conId}" onchange="{!c.onCheck}"/>
+                                                            </td>
+                                                            
+                                                            <td> 
+                                                                <lightning:input disabled="true" value="{!acc.conName }" />
+                                                            </td>
+                                                            
+                                                            <td>  
+                                                                <lightning:select name="select" value="{!acc.type}">
+                                                                    <option >--None--</option>
+                                                                    <aura:iteration items="{!v.DocType}" var="doc" >
+                                                                        <option text="{!doc}"></option>
+                                                                    </aura:iteration>
+                                                                </lightning:select>
+                                                            </td>
+                                                            
+                                                            <td>
+                                                                <lightning:input type="number" name="sequence" value="{!acc.sequence}"/>
+                                                            </td>
+                                                            
+                                                        </tr>
+                                                    </aura:iteration>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <br/>
+                                    </lightning:accordionSection>
+                                </lightning:accordion>    
+                            </div>
+                        </aura:if>
+                    </div>
+                </div>
+                
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <lightning:button variant="neutral" label="Cancel" title="Cancel" onclick="{! c.closeModel }"/>
+                        <lightning:button variant="brand" label="Submit" iconPosition="center" onclick="{!c.saveRecord}" />
+                    </div>
+                </footer>
+            </div>
+        </section>
+        
+    </div>
+</aura:component>
