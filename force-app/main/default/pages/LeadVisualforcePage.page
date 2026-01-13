@@ -1,0 +1,99 @@
+<apex:page controller="LeadVFController"
+           showHeader="true"
+           sidebar="false"
+           >
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+    <style>
+        body {
+            background-image: url('{!URLFOR($Resource.realestateleadform)}');
+            background-size: cover;
+            background-position: center center;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(1px);
+            max-width: 520px;
+            margin: 70px auto;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+		}
+         .hero-title {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1f2937; 
+            margin-bottom: 25px;
+		}
+
+    </style>
+
+    <apex:form >
+
+        <div class="form-container">
+
+            <apex:pageMessages />
+
+            <apex:outputPanel id="mainPanel">
+
+                <!-- STEP 1: EMAIL ONLY -->
+                <div class="hero-title">Let’s get started with your property requirements</div>
+
+                <apex:pageBlock title="Enter Your Email"
+                                rendered="{!showEmailOnly}">
+
+                    <apex:pageBlockSection columns="1">
+                        <apex:inputText value="{!enteredEmail}"
+                                        label="Email"
+                                        required="true"/>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton value="Continue"
+                                            action="{!checkEmail}"
+                                            rerender="mainPanel"/>
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+
+                <!-- STEP 2A: EXISTING USER (BASIC FIELDS) -->
+                <apex:pageBlock title="Your Details"
+                                rendered="{!showBasicFields}">
+
+                    <apex:pageBlockSection columns="1">
+                        <apex:inputField value="{!leadRec.FirstName}" required="true"/>
+                        <apex:inputField value="{!leadRec.LastName}" required="true"/>
+                        <apex:inputField value="{!leadRec.Phone}" required="true"/>
+                        <apex:inputField value="{!leadRec.City}" required="true"/>
+                        <apex:inputField value="{!leadRec.Project_Interest__c}" />
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton value="Save"
+                                            action="{!saveLead}" />
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+
+                <!-- STEP 2B: NEW USER (PROJECT / PROPERTY FIELDS) -->
+                <apex:pageBlock title="Tell Us What You're Looking For"
+                                rendered="{!showProjectFields}">
+
+                    <apex:pageBlockSection columns="1">
+                        <apex:inputField value="{!leadRec.Fax}" />
+                        <apex:inputField value="{!leadRec.AnnualRevenue}" />
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton value="Save"
+                                            action="{!saveLead}" />
+                    </apex:pageBlockButtons>
+                </apex:pageBlock>
+
+            </apex:outputPanel>
+
+        </div>
+
+    </apex:form>
+</apex:page>

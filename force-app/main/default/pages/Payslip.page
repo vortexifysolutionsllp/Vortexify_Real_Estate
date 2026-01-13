@@ -1,0 +1,106 @@
+<apex:page standardController="Salary__c" renderAs="pdf">
+    <table style="width: 100%; border: none; font-family: 'Arial', sans-serif; margin-bottom: 20px;">
+        <tr>
+            <td style="width: 50%; text-align: left; vertical-align: top;">
+                <img src="{!URLFOR($Resource.Vortexify_logo)}" style="width: 130px; height: auto;" />
+            </td>
+            <td style="width: 50%; text-align: right; vertical-align: top;">
+                <p style="margin: 0; font-size: 14px;">
+                    <strong style="font-size: 20px;">Vortexify Solutions LLP</strong><br/>
+                    #305, 3rd floor, B-158 B-block Sector 63<br/>
+                    Noida (U.P)
+                </p>
+            </td>
+        </tr>
+    </table>
+    
+    <div style="font-size:16px; margin-top:20px; margin-bottom:20px; text-decoration:underline; text-align:center;">
+        Payslip for the month of {!MONTH(TODAY())} {!YEAR(TODAY())}
+    </div>
+    
+    <table style="width:100%; margin-bottom:20px;border:1px solid black;">
+        <tr>
+            <th style=" padding:5px; text-align:left;">Name</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.Name}</td>
+            <th style=" padding:5px; text-align:left;">Employee ID</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.Employee_ID__c}</td>
+        </tr>
+        <tr>
+            <th style=" padding:5px; text-align:left;">Designation</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.Designation__c}</td>
+            <th style=" padding:5px; text-align:left;">PAN Number</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.PAN_Number__c}</td>
+        </tr>
+        <tr>
+            <th style=" padding:5px; text-align:left;">Joining Date</th>
+            <!--<td style=" padding:5px;">{!Salary__c.Contact__r.Joining_Date__c}</td>-->
+            <td style="padding:5px;">
+                <apex:outputText value="{0,date,dd'/'MM'/'yyyy}">
+                    <apex:param value="{!Salary__c.Contact__r.Joining_Date__c}" />
+                </apex:outputText>
+            </td>
+            <th style=" padding:5px; text-align:left;">Account Number</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.Account_Number__c}</td>
+        </tr>
+        <tr>
+            <th style=" padding:5px; text-align:left;">LOP</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.LOP__c}</td>
+            <th style=" padding:5px; text-align:left;">IFSC Code</th>
+            <td style=" padding:5px;">{!Salary__c.Contact__r.IFSC_Code__c}</td>
+        </tr>
+    </table>
+    
+    <table style="width:100%; margin-bottom:20px; border-collapse:collapse;">
+        <tr style ="">
+            <th colspan="2" style="padding:5px; text-align:left;border:1px solid black;">Earnings</th>
+            <th colspan="2" style="padding:5px; text-align:left;border:1px solid black;">Deductions</th>
+        </tr>
+        <tr>
+            <td style="padding:5px;">Basic<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.Basic__c}</td>
+            <td style="padding:5px;">Income Tax<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.Income_Tax__c}</td>
+        </tr>
+        <tr>
+            <td style="padding:5px;">HRA<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.HRA__c}</td>
+            <td style="padding:5px;">PF<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.PF__c}</td>
+        </tr>
+        <tr>
+            <td style="padding:5px;">Special Allowances<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.Special_Allowances__c}</td>
+        </tr>
+        <tr>
+            <td style="padding:5px;">Reimbursement<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.Reimbursement__c}</td>
+        </tr>
+        <tr>
+            <td style="padding:5px;">Other<small>(In Rupees)</small></td>
+            <td style="padding:5px;">{!Salary__c.Other__c}</td>
+            <td>&nbsp;</td> <!-- Empty cell to balance the table structure -->
+            <td>&nbsp;</td> <!-- Empty cell to balance the table structure -->
+        </tr>
+    </table>
+    
+    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+        <tr>
+            <th style="border:1px solid #000; padding:5px;">Total Earnings<small>(In Rupees)</small></th>
+            <td style="border:1px solid #000; padding:5px;">{!Salary__c.Total_Earnings__c}</td>
+        </tr>
+        <tr>
+            <th style="border:1px solid #000; padding:5px;">Total Deductions<small>(In Rupees)</small></th>
+            <td style="border:1px solid #000; padding:5px;">{!Salary__c.Total_Deductions__c}</td>
+        </tr>
+        <tr>
+            <th style="border:1px solid #000; padding:5px;">Net Pay<small>(In Rupees)</small></th>
+            <td style="border:1px solid #000; padding:5px;">{!Salary__c.Net_Pay__c}</td>
+        </tr>
+    </table>
+    
+    <div style="text-align:center; margin-top:30px; font-size:10px;">
+        This is a system-generated payslip and does not require any signatures.<br/>
+        Generated by Vortexify.<br/>
+        Visit: <a href="https://vortexifysync.com/">vortexifysync.com</a>
+    </div>
+</apex:page>
