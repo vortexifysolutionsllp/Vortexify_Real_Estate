@@ -28,6 +28,7 @@ public with sharing class CaptureVisitInfoController {
     }
 
     /* ================= FETCH ALL PROJECTS ================= */
+    //Test Aviral
     @AuraEnabled(cacheable=true)
     public static List<Project__c> getAllProjects() {
         return [
