@@ -99,8 +99,8 @@ public static Id saveLead(Lead leadRec, String locationValue, List<String> selec
          // 🔥 create combined text for Projects_Name__c field
        // String combinedNames = String.join(selectedProjectNames, '; ');
 
-        String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : '';
-        String leadLastName = leadRec.LastName!=null ? leadRec.LastName : '';
+        String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
+        String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
         String leadFullName = leadFirstName + leadLastName;
 
         List<Project_Interest__c> listPI = new List<Project_Interest__c>();
