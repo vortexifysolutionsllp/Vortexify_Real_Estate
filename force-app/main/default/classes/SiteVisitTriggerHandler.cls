@@ -78,13 +78,13 @@ public class SiteVisitTriggerHandler {
         }
     }*/
     
-     public static void updateLeadWhenComplete(List<Site_Visit__c> newVisits) {
+    public static void updateLeadWhenComplete(List<Site_Visit__c> newVisits) {
         
         Set<Id> leadIds = new Set<Id>();
         
         for (Site_Visit__c sv : newVisits) {
             if (
-                sv.Lead__c != null && sv.Visit_Status__c == 'Completed') {
+                sv.Lead__c != null && sv.Visit_Status__c == 'Completed' && sv.Feedback_Received__c ==false) {
                 leadIds.add(sv.Lead__c);
             }
         }
@@ -104,13 +104,16 @@ public class SiteVisitTriggerHandler {
     
 
    
- public static void updateLeadWhenFeedbackReceived(List<Site_Visit__c> newVisits) {
+    public static void updateLeadWhenFeedbackReceived(List<Site_Visit__c> newVisits, Map<Id, Site_Visit__c> oldMap) {
         
         Set<Id> leadIds = new Set<Id>();
         
         for (Site_Visit__c sv : newVisits) {
+
+            String newStatus = sv.Visit_Status__c;
+            String oldStatus = (oldMap!=null && oldMap.containsKey(sv.Id)) ? oldMap.get(sv.Id).Visit_Status__c : null;
             if (
-                sv.Lead__c != null && sv.Visit_Status__c == 'Completed' && sv.Feedback_Received__c == true) {
+                sv.Lead__c != null && (newStatus == 'Completed' && newStatus==oldStatus) && sv.Feedback_Received__c == true) {
                 leadIds.add(sv.Lead__c);
             }
         }
@@ -130,7 +133,7 @@ public class SiteVisitTriggerHandler {
     
     
      //Follow up task on site Visit 
-        public static void createFollowUpTasks(List<Site_Visit__c> newVisits,Map<Id, Site_Visit__c> oldMap) {
+    public static void createFollowUpTasks(List<Site_Visit__c> newVisits,Map<Id, Site_Visit__c> oldMap) {
 
         List<Task> tasksToInsert = new List<Task>();
 
@@ -192,7 +195,8 @@ public class SiteVisitTriggerHandler {
                    Visit_Time__c,
                    Project__r.Name,
                    Project__r.Location__c,
-                   Sales_Representative__r.Name
+                   Sales_Representative__r.Name,
+                   Sales_Representative__r.Phone
             FROM Site_Visit__c
             WHERE Id IN :siteVisits
         ];
@@ -216,7 +220,8 @@ public class SiteVisitTriggerHandler {
                     'Visit Date: ' + formattedDate + '\n' +
                     'Visit Time: ' + formattedTime + '\n' +
                     'Location: ' + visit.Project__r.Location__c + '\n' +
-                    'Sales Representative: ' + visit.Sales_Representative__r.Name + '\n\n' +
+                    'Sales Representative: ' + visit.Sales_Representative__r.Name + '\n' +
+                    'Contact Number: ' + visit.Sales_Representative__r.Phone + '\n\n' +
                     'We look forward to welcoming you.\n\n' +
                     'Warm Regards,\n' +
                     'Vortexify Solution LLP';
