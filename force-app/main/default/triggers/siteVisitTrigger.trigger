@@ -17,7 +17,7 @@ trigger siteVisitTrigger on Site_Visit__c (before insert,after insert,after upda
     }
     
       if (Trigger.isAfter && Trigger.isupdate) {
-          SiteVisitTriggerHandler.updateLeadWhenFeedbackReceived(Trigger.new);     
+          SiteVisitTriggerHandler.updateLeadWhenFeedbackReceived(Trigger.new, Trigger.oldMap);     
               SiteVisitTriggerHandler.updateLeadWhenComplete(Trigger.new);
           SiteVisitTriggerHandler.createFollowUpTasks(Trigger.new,Trigger.oldMap); 
 }

@@ -97,15 +97,20 @@ public static Id saveLead(Lead leadRec, String locationValue, List<String> selec
     // create project interest children
     if (selectedProjectNames != null && !selectedProjectNames.isEmpty()) {
          // 🔥 create combined text for Projects_Name__c field
-        String combinedNames = String.join(selectedProjectNames, '; ');
+       // String combinedNames = String.join(selectedProjectNames, '; ');
+
+        String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
+        String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
+        String leadFullName = leadFirstName + leadLastName;
 
         List<Project_Interest__c> listPI = new List<Project_Interest__c>();
 
         for (String projName : selectedProjectNames) {
 
             listPI.add(new Project_Interest__c(
+                Name = leadFullName + ' / ' + projName,
                 Lead__c = leadRec.Id,
-                Projects_Name__c = combinedNames,
+                Projects_Name__c = projName,
                 Location__c = locationValue
             ));
         }
