@@ -1,0 +1,39 @@
+<template>
+    <lightning-card title="Comission Policies">
+        <div class="container">
+            <div class="left-box">
+                <lightning-combobox label="Commission Type *" value={selectedCommissionType}  options={commissionOptions} onchange={handleCommissionTypeChange} placeholder="Select an Commission"></lightning-combobox>
+            </div>
+        </div>
+
+        <template if:true={showFixedCommission}>
+            <div>
+                <lightning-input placeholder="0.00" type="number" label="Amount" value={amount} onchange={handleAmountChange} ></lightning-input>
+                <lightning-input placeholder="0"  type="number" label="Percentage" value={percentage} onchange={handlePercentageChange}></lightning-input>
+                <lightning-input placeholder="0.00" type="Upper Cap Amount" label="Upper Cap Amount" value={upperCapAmount} onchange={handleUpperCapAmount}></lightning-input> 
+            </div>
+        </template>
+
+        <template if:true={showPercentageCommission}>
+            <div>
+                <lightning-input placeholder="0.00" type="number" label="Amount" value={amount} onchange={handleAmountChange}></lightning-input>
+                <lightning-input placeholder="0" type="number" label="Percentage" value={percentage} onchange={handlePercentageChange}></lightning-input>
+                <lightning-input placeholder="0.00" type="Upper Cap Amount" label="Upper Cap Amount" value={upperCapAmount} onchange={handleUpperCapAmount}></lightning-input> 
+            </div>
+        </template>
+
+        <template if:true={showRangeCommission}>
+            <div>
+                <lightning-input type="minimumAmount" label="Minumum Amount" value={minimumAmount} onchange={handleMinumumAmountChange}></lightning-input>
+                <lightning-input type="maximumAmount" label="Maximum Amount" value={maximumAmount} onchange={handleMaximumAmountChange}></lightning-input>
+                <lightning-combobox label="Commission Type *" value={selectedCommissionType}  options={commissionOptions} onchange={handleCommissionTypeChange} placeholder="Select an Commission"></lightning-combobox>
+                <lightning-input type="number" label="Amount" value={amount} onchange={handleAmountChange}></lightning-input>
+                <lightning-input type="number" label="Percentage" value={percentage} onchange={handlePercentageChange}></lightning-input>
+                <lightning-input type="Upper Cap Amount" label="Upper Cap Amount" value={upperCapAmount} onchange={handleUpperCapAmount}></lightning-input> 
+            </div>
+        </template>
+
+        
+        
+    </lightning-card>
+</template>
