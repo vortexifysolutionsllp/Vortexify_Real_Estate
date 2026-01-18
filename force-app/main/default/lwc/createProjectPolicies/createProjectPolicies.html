@@ -4,9 +4,9 @@
     <lightning-modal-body>
 
         <lightning-radio-group 
-            label="Select Policy Type" 
-            options={policyOptions} 
-            value={selectedPolicy} 
+            label="Select Policy Type"
+            options={policyOptions}
+            value={selectedPolicy}
             type="radio"
             onchange={handlePolicyChange}>
         </lightning-radio-group>
@@ -25,9 +25,12 @@
         <div class="slds-align_absolute-center">
 
             <template if:true={hasPolicy}>
-                <lightning-button label="Cancel"></lightning-button>
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}>
+                </lightning-button>
 
-                <lightning-button 
+                <lightning-button
                     variant="brand"
                     label={editLabel}
                     onclick={handleEditClick}>
@@ -35,8 +38,16 @@
             </template>
 
             <template if:false={hasPolicy}>
-                <lightning-button label="Cancel"></lightning-button>
-                <lightning-button variant="brand" label="Save"></lightning-button>
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}>
+                </lightning-button>
+
+                <lightning-button
+                    variant="brand"
+                    label="Save"
+                    onclick={handleEditClick}>
+                </lightning-button>
             </template>
 
         </div>

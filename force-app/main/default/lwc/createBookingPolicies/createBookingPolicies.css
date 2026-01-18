@@ -1,0 +1,18 @@
+.body {
+    padding: 12px;
+}
+
+.radio-card {
+    border: 1px solid #d8dde6;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f4f6f9;
+    cursor: pointer;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
