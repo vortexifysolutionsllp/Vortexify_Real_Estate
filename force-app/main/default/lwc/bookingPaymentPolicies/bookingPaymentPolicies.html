@@ -1,0 +1,61 @@
+<template>
+
+    <section class="box">
+        <h3 class="title">Project Details</h3>
+
+        <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input label="Project Name"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="No. of Towers"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input label="Project Location"></lightning-input>
+            </div>
+
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="No. of Units"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input label="Rera Number"></lightning-input>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h3 class="title">Booking Details</h3>
+
+        <div class="slds-grid slds-wrap slds-gutters">
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input label="Unit Number"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="Total Deal Cost"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="Unit Super Area"></lightning-input>
+            </div>
+
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="Unit Carpet Area"></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <lightning-input type="number" label="Price / Sq.ft"></lightning-input>
+            </div>
+        </div>
+    </section>
+
+    <section class="box">
+        <h3 class="title">Payment Plan</h3>
+
+        <div class="slds-col slds-size_1-of-3">
+            <lightning-combobox
+                label="Select Payment Plan *"
+                placeholder="Select a plan"
+                options={paymentPlanOptions}>
+            </lightning-combobox>
+        </div>
+    </section>
+
+</template>

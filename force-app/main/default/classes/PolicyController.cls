@@ -19,6 +19,15 @@ public with sharing class PolicyController {
             FROM Tower__c
             WHERE Project__c =: projectId
         ];
+        Integer unitCount = [
+            SELECT COUNT()
+            FROM Product2
+            WHERE Tower__c IN (
+        SELECT Id
+        FROM Tower__c
+         WHERE Project__c = :projectId)
+         ];
+
 
       
         List<Policy__c> policies = [
@@ -30,41 +39,46 @@ public with sharing class PolicyController {
         res.put('project', proj);
         res.put('towerCount', towerCount);
         res.put('policies', policies);
+        res.put('unitCount', unitCount);
+
 
         return res;
     }
-
     @AuraEnabled
-    public static void savePolicies(String policiesJson, Id projectId){
+public static void savePolicies(String policiesJson, Id projectId){
 
-        List<Object> policyList =
+    List<Object> policyList =
         (List<Object>)JSON.deserializeUntyped(policiesJson);
 
-        List<Policy__c> records = new List<Policy__c>();
+    List<Policy__c> records = new List<Policy__c>();
 
-        for(Object obj : policyList){
+    for(Object obj : policyList){
 
-            Map<String,Object> p = (Map<String,Object>)obj;
+        Map<String,Object> p = (Map<String,Object>)obj;
 
-            Policy__c rec = new Policy__c();
+        Policy__c rec = new Policy__c();
 
-            if(p.containsKey('id')){
-                rec.Id = (String)p.get('id');
+        // ✅ FIX: only assign real Salesforce Ids
+        if (p.containsKey('id') && p.get('id') != null) {
+            String incomingId = String.valueOf(p.get('id'));
+            if (incomingId.length() == 15 || incomingId.length() == 18) {
+                rec.Id = incomingId;
             }
-
-            rec.Name = (String)p.get('name');
-            rec.Abbreviation__c = (String)p.get('abbr');
-
-            if(p.get('cost') != null){
-                rec.Cost_Sqft__c = Decimal.valueOf(String.valueOf(p.get('cost')));
-            }
-            rec.Term__c = JSON.serialize(p.get('terms'));
-
-            rec.Applicable_Project__c = projectId;
-
-            records.add(rec);
         }
 
-        upsert records;
+        rec.Name = (String)p.get('name');
+        rec.Abbreviation__c = (String)p.get('abbr');
+
+        if (p.get('cost') != null) {
+            rec.Cost_Sqft__c = Decimal.valueOf(String.valueOf(p.get('cost')));
+        }
+
+        rec.Term__c = JSON.serialize(p.get('terms'));
+        rec.Applicable_Project__c = projectId;
+
+        records.add(rec);
     }
+
+    upsert records;
+}
 }

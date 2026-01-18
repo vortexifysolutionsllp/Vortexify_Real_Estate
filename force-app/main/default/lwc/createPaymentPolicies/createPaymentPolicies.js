@@ -36,7 +36,7 @@ export default class CreatePaymentPolicies extends LightningElement {
             location : data.project.Location__c,
             rera : data.project.RERA_Number__c,
             towers : data.towerCount,
-            units : data.project.Number_of_Units__c
+            units : data.unitCount
         };
 
         if(data.policies && data.policies.length){
@@ -88,9 +88,20 @@ export default class CreatePaymentPolicies extends LightningElement {
     }
 
     @api
-    getPolicies(){
-        return this.policies;
-    }
+getPolicies() {
+    return this.policies.map(p => ({
+        id: p.id,          // keep (needed for update)
+        name: p.name,
+        abbr: p.abbr,
+        cost: p.cost,
+        terms: p.terms.map(t => ({
+            termName: t.termName,
+            percent: t.percent,
+            paymentWithIn: t.paymentWithIn,
+            serial: t.serial
+        }))
+    }));
+}
 
     addPolicy() {
         let newId = this.policies.length + 1;
@@ -101,7 +112,7 @@ export default class CreatePaymentPolicies extends LightningElement {
             name: '', 
             abbr: '', 
             cost: '', 
-            isDisabled: true,
+            isDisabled: this.isViewMode,
             terms: []
         };
 
@@ -140,7 +151,7 @@ export default class CreatePaymentPolicies extends LightningElement {
             termName: '', 
             percent: '', 
             paymentWithIn: '', 
-            isDisabled: true 
+             isDisabled: this.isViewMode 
         });
 
         this.policies = temp;
