@@ -1,53 +1,48 @@
 <template>
-    <!-- MODAL HEADER -->
+    <!-- HEADER -->
     <lightning-modal-header label="Create Booking"></lightning-modal-header>
 
-    <!-- MODAL BODY -->
+    <!-- BODY -->
     <lightning-modal-body class="body">
 
-        <!-- RADIO SELECTION -->
-        <div class="radio-card" onclick={selectPayment}>
-            <lightning-input
-                type="radio"
-                name="policy"
-                label="Select Payment Plan"
-                checked={isPayment}>
-            </lightning-input>
+        <!-- RADIO SELECTION ROW -->
+        <div class="radio-row">
+            <div class="radio-card" onclick={selectPayment}>
+                <lightning-input
+                    type="radio"
+                    name="policy"
+                    label="Select Payment Plan"
+                    checked={isPayment}>
+                </lightning-input>
+            </div>
+
+            <div class="radio-card" onclick={selectCommission}>
+                <lightning-input
+                    type="radio"
+                    name="policy"
+                    label="Select Commission Policies"
+                    checked={isCommission}>
+                </lightning-input>
+            </div>
         </div>
 
-        <div class="radio-card" onclick={selectCommission}>
-            <lightning-input
-                type="radio"
-                name="policy"
-                label="Select Commission Policies"
-                checked={isCommission}>
-            </lightning-input>
-        </div>
-
-        <!-- PAYMENT CHILD -->
+        <!-- PAYMENT -->
         <template if:true={isPayment}>
             <c-booking-payment-policies></c-booking-payment-policies>
         </template>
 
-        <!-- COMMISSION CHILD -->
+        <!-- COMMISSION -->
         <template if:true={isCommission}>
             <c-booking-commission-policies></c-booking-commission-policies>
         </template>
 
     </lightning-modal-body>
 
-    <!-- MODAL FOOTER -->
+    <!-- FOOTER -->
     <lightning-modal-footer>
         <div class="footer">
-            <lightning-button
-                label="Cancel"
-                onclick={handleCancel}>
-            </lightning-button>
-
-            <lightning-button
-                variant="brand"
-                label="Save">
-            </lightning-button>
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button variant="brand" label="Save"></lightning-button>
         </div>
     </lightning-modal-footer>
 </template>
