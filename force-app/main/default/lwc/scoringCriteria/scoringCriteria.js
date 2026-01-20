@@ -5,6 +5,8 @@ import getFieldDataType from '@salesforce/apex/ScoringCriteriaControllerClass.ge
 import getPicklistValues from '@salesforce/apex/ScoringCriteriaControllerClass.getPicklistValues';
 import submitScoringData from '@salesforce/apex/ScoringCriteriaControllerClass.submitScoringData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import getExistingScoringData from '@salesforce/apex/ScoringCriteriaControllerClass.getExistingScoringData';
+
 
 export default class ScoringCriteria extends LightningElement {
 
@@ -159,6 +161,7 @@ export default class ScoringCriteria extends LightningElement {
             this.reindexConditionsForCriteria(0);
         }
         this.fetchFields();
+        this.loadExistingCriteria();
     }
 
     fetchFields() {
@@ -171,6 +174,144 @@ export default class ScoringCriteria extends LightningElement {
                 this.fieldOptions = [];
             });
     }
+
+    loadExistingCriteria() {
+    getExistingScoringData({ objectName: this.selectedObject })
+        .then(result => {
+
+            if (!result || result.length === 0) {
+                this.criteriaList = [];
+                this.handleAddCriteria();
+                return;
+            }
+
+            this.criteriaList = result.map((crit, critIndex) => ({
+                id: critIndex + 1,
+                serial: critIndex + 1,
+                isFirst: critIndex === 0,
+                isLast: critIndex === result.length - 1,
+
+                criteriaName: crit.criteriaName,
+                score: crit.score,
+                conditionCriteria: crit.conditionCriteria,
+                conditionLogic: crit.conditionLogic,
+                showConditionLogic: crit.conditionCriteria === 'Custom',
+
+                conditions: crit.conditions.map((cond, condIndex) => ({
+                    id: condIndex + 1,
+                    serial: cond.serial,
+                    field: cond.field,
+                    operator: cond.operator,
+                    value: cond.value,
+                    fromValue: '',
+                    toValue: '',
+                    operatorOptions: [],
+                    valueInputType: 'text',
+                    showRange: false,
+                    isPicklist: false,
+                    picklistOptions: []
+                }))
+            }));
+
+            this.criteriaList = [...this.criteriaList];
+
+            // THIS IS THE MISSING LINE
+            this.initializeLoadedConditions();
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
+
+            
+
+    initializeLoadedConditions() {
+
+    this.criteriaList.forEach((crit, critIndex) => {
+
+        crit.conditions.forEach((cond, condIndex) => {
+
+            // fetch datatype for field
+            getFieldDataType({
+                objectApiName: this.selectedObject,
+                fieldApiName: cond.field
+            })
+                .then(dataType => {
+
+                    cond.fieldDataType = dataType;
+
+                    // operator options
+                    cond.operatorOptions = this.OPERATOR_MAP[dataType] || [];
+                    this.criteriaList = [...this.criteriaList];
+
+                    // input type mapping
+                    if (dataType === 'DATE') {
+                        cond.valueInputType = 'date';
+                    } else if (dataType === 'DATETIME') {
+                        cond.valueInputType = 'datetime-local';
+                    } else if (
+                        dataType === 'INTEGER' ||
+                        dataType === 'DOUBLE' ||
+                        dataType === 'CURRENCY' ||
+                        dataType === 'PERCENT'
+                    ) {
+                        cond.valueInputType = 'number';
+                    } else if (dataType === 'EMAIL') {
+                        cond.valueInputType = 'email';
+                    } else if (dataType === 'BOOLEAN') {
+                        cond.valueInputType = 'checkbox';
+                    } else {
+                        cond.valueInputType = 'text';
+                    }
+
+                    // reset flags
+                    cond.showRange = false;
+                    cond.isPicklist = false;
+                    cond.picklistOptions = [];
+
+                    // BETWEEN handling (Date / Datetime)
+                    if (
+                        cond.operator &&
+                        cond.operator.toLowerCase() === 'between' &&
+                        (dataType === 'DATE' || dataType === 'DATETIME')
+                    ) {
+                        cond.showRange = true;
+
+                        if (cond.value && cond.value.includes(' AND ')) {
+                            const parts = cond.value.split(' AND ');
+                            cond.fromValue = parts[0];
+                            cond.toValue = parts[1];
+                        }
+                    }
+
+                    // PICKLIST handling
+                    if (dataType === 'PICKLIST' || dataType === 'MULTIPICKLIST') {
+                        cond.isPicklist = true;
+
+                        getPicklistValues({
+                            objectApiName: this.selectedObject,
+                            fieldApiName: cond.field
+                        })
+                            .then(values => {
+                                cond.picklistOptions = values;
+                                this.criteriaList = [...this.criteriaList];
+                            })
+                            .catch(err => {
+                                console.error(err);
+                            });
+                    }
+
+                    // 🔥 force UI refresh so operator & value show
+                    this.criteriaList = [...this.criteriaList];
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        });
+    });
+}
+
+
 
 
     handleAddCriteria() {

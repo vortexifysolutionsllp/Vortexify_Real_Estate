@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Score__c</fullName>
+    <label>Total Score</label>
+    <summarizedField>Scoring_Criteria__c.Score_to_be_Awarded__c</summarizedField>
+    <summaryForeignKey>Scoring_Criteria__c.Scoring_rule__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

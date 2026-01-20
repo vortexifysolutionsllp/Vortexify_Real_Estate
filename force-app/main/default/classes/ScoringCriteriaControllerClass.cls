@@ -225,6 +225,68 @@ public with sharing class ScoringCriteriaControllerClass {
         }
     }
 
+    @AuraEnabled
+        public static List<ExistingScoringWrapper> getExistingScoringData(String objectName) {
+
+        List<ExistingScoringWrapper> response = new List<ExistingScoringWrapper>();
+
+    Scoring_Rule__c rule = [
+        SELECT Id
+        FROM Scoring_Rule__c
+        WHERE Object__c = :objectName
+        LIMIT 1
+    ];
+
+    if (rule == null) return response;
+
+    List<Scoring_Criteria__c> criteriaList = [
+        SELECT Id, Name, Score_to_be_Awarded__c,
+               Condition_Criteria__c, Condition_Logic__c
+        FROM Scoring_Criteria__c
+        WHERE Scoring_Rule__c = :rule.Id
+        ORDER BY CreatedDate
+    ];
+
+    Map<Id, List<Scoring_Condition__c>> conditionMap = new Map<Id, List<Scoring_Condition__c>>();
+
+    for (Scoring_Condition__c c : [
+        SELECT Scoring_Criteria__c, Field__c, Operator__c, Value__c, Index__c
+        FROM Scoring_Condition__c
+        WHERE Scoring_Criteria__c IN :criteriaList
+        ORDER BY Index__c
+    ]) {
+        if (!conditionMap.containsKey(c.Scoring_Criteria__c)) {
+    conditionMap.put(c.Scoring_Criteria__c, new List<Scoring_Condition__c>());
+}
+conditionMap.get(c.Scoring_Criteria__c).add(c);
+
+    }
+
+    for (Scoring_Criteria__c sc : criteriaList) {
+        ExistingScoringWrapper wrap = new ExistingScoringWrapper();
+        wrap.criteriaName = sc.Name;
+       wrap.score = sc.Score_to_be_Awarded__c != null ? sc.Score_to_be_Awarded__c.intValue() : null;
+
+        wrap.conditionCriteria = sc.Condition_Criteria__c;
+        wrap.conditionLogic = sc.Condition_Logic__c;
+        wrap.conditions = new List<ExistingConditionWrapper>();
+
+        for (Scoring_Condition__c cond : conditionMap.get(sc.Id)) {
+            ExistingConditionWrapper cw = new ExistingConditionWrapper();
+            cw.field = cond.Field__c;
+            cw.operator = cond.Operator__c;
+            cw.value = cond.Value__c;
+            cw.serial = Integer.valueOf(cond.Index__c);
+            wrap.conditions.add(cw);
+        }
+
+        response.add(wrap);
+    }
+
+    return response;
+}
+
+
     public class CriteriaWrapper {
         @AuraEnabled public String criteriaName {get;set;}
         @AuraEnabled public Integer score {get;set;}
@@ -240,6 +302,21 @@ public with sharing class ScoringCriteriaControllerClass {
         @AuraEnabled public String fromValue {get;set;}
         @AuraEnabled public String toValue {get;set;}
         @AuraEnabled public String serial {get;set;}
+    }
+
+    public class ExistingScoringWrapper {
+        @AuraEnabled public String criteriaName;
+        @AuraEnabled public Integer score;
+        @AuraEnabled public String conditionCriteria;
+        @AuraEnabled public String conditionLogic;
+        @AuraEnabled public List<ExistingConditionWrapper> conditions;
+    }
+
+    public class ExistingConditionWrapper {
+        @AuraEnabled public String field;
+        @AuraEnabled public String operator;
+        @AuraEnabled public String value;
+        @AuraEnabled public Integer serial;
     }
 
 }
