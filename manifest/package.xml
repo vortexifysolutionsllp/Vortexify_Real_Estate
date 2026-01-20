@@ -1,46 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
 	<types>
-		<members>ScoringCriteriaControllerClass</members>
-		<members>ScoringCriteriaEngine</members>
-		<members>ScoringTriggerGuard</members>
-		<members>ScoringTriggerHandler</members>
+		<members>ObjectScoreIndicatorController</members>
 		<name>ApexClass</name>
 	</types>
 	<types>
-		<members>ScoringCriteriaTrigger</members>
-		<name>ApexTrigger</name>
-	</types>
-	<types>
-		
-		<members>Scoring_Condition__c.Field__c</members>
-		<members>Scoring_Condition__c.Index__c</members>
-		<members>Scoring_Condition__c.Object__c</members>
-		<members>Scoring_Condition__c.Operator__c</members>
-		<members>Scoring_Condition__c.Scoring_Criteria__c</members>
-		<members>Scoring_Condition__c.Value__c</members>
-		<members>Scoring_Criteria__c.Condition_Criteria__c</members>
-		<members>Scoring_Criteria__c.Condition_Logic__c</members>
-		<members>Scoring_Criteria__c.Object__c</members>
-		<members>Scoring_Criteria__c.Score_to_be_Awarded__c</members>
-		<members>Scoring_Criteria__c.Scoring_rule__c</members>
-		<members>Scoring_rule__c.Active__c</members>
-		<members>Scoring_rule__c.Object__c</members>
-		<members>Scoring_rule__c.Total_Score__c</members>
-		<name>CustomField</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomMetadata</name>
-	</types>
-	<types>
-		<members>Scoring_Condition__c</members>
-		<members>Scoring_Criteria__c</members>
-		<members>Scoring_rule__c</members>
-		<name>CustomObject</name>
-	</types>
-	<types>
-		<members>scoringCriteria</members>
+		<members>objectScoreIndicator</members>
 		<name>LightningComponentBundle</name>
 	</types>
 	<version>66.0</version>

@@ -157,6 +157,11 @@ public with sharing class ScoringCriteriaControllerClass {
 
         System.debug('criteriaList-->'+criteriaList);
         for (CriteriaWrapper crit : criteriaList) {
+
+            // Skip existing criteria completely
+            if (crit.isExisting == true) {
+               continue;
+            } 
             System.debug('crit-->'+crit);
             String key =
                 crit.score + '|' +
@@ -292,6 +297,7 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
         @AuraEnabled public Integer score {get;set;}
         @AuraEnabled public String conditionCriteria {get;set;}
         @AuraEnabled public String conditionLogic {get;set;}
+        @AuraEnabled public Boolean isExisting  {get;set;}
         @AuraEnabled public List<ConditionWrapper> conditions {get;set;}
     }
 
