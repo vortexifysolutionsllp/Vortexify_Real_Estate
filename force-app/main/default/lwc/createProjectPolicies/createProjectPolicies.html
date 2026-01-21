@@ -1,27 +1,55 @@
 <template>
     <lightning-modal-header label="Create Policies"></lightning-modal-header>
+
     <lightning-modal-body>
-        <lightning-radio-group label="Select Policy Type" options={policyOptions} value={selectedPolicy} type="radio"
+
+        <lightning-radio-group 
+            label="Select Policy Type"
+            options={policyOptions}
+            value={selectedPolicy}
+            type="radio"
             onchange={handlePolicyChange}>
         </lightning-radio-group>
+
         <template if:true={showPayment}>
-            <c-create-payment-policies></c-create-payment-policies>
+            <c-create-payment-policies record-id={recordId}></c-create-payment-policies>
         </template>
+
         <template if:true={showCommission}>
             <c-create-commission-policies></c-create-commission-policies>
         </template>
+
     </lightning-modal-body>
+
     <lightning-modal-footer>
         <div class="slds-align_absolute-center">
+
             <template if:true={hasPolicy}>
-                <lightning-button label="Cancel"></lightning-button>
-                <lightning-button variant="brand " label="Edit"></lightning-button>
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}>
+                </lightning-button>
+
+                <lightning-button
+                    variant="brand"
+                    label={editLabel}
+                    onclick={handleEditClick}>
+                </lightning-button>
             </template>
 
             <template if:false={hasPolicy}>
-                <lightning-button label="Cancel"></lightning-button>
-                <lightning-button variant="brand" label="Save"></lightning-button>
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}>
+                </lightning-button>
+
+                <lightning-button
+                    variant="brand"
+                    label="Save"
+                    onclick={handleEditClick}>
+                </lightning-button>
             </template>
+
         </div>
     </lightning-modal-footer>
 </template>
