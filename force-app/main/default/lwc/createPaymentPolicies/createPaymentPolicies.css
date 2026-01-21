@@ -29,3 +29,7 @@
 .icon-gap {
     margin-right: 12px;
 }
+.construction-checkbox label {
+    font-size: 0.95rem;
+    font-weight: 600;
+}

@@ -1,17 +1,11 @@
-import { LightningElement, api, track, wire } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import savePaymentPolicy from '@salesforce/apex/BookingController.savePaymentPolicy';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 //import saveDealCostToSalesPrice from '@salesforce/apex/PolicyController.saveDealCostToSalesPrice';
 
 
-
 export default class CreateBookingPolicies extends LightningElement {
-    project;
-    tower;
-    towerCount = 0;
-    unitCount = 0;
-    projectId;
 
     @api recordId; // Opportunity Id from Quick Action
     @track selected = 'payment';
@@ -37,85 +31,45 @@ export default class CreateBookingPolicies extends LightningElement {
     }
 
     handleSave() {
-        // ================= PAYMENT =================
-        if (this.isPayment) {
-            const paymentChild =
-                this.template.querySelector('c-booking-payment-policies');
+        const child = this.template.querySelector('c-booking-payment-policies');
 
-            if (!paymentChild || !paymentChild.selectedPaymentPolicy) {
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Missing Payment Plan',
-                        message: 'Please select a Payment Plan before saving.',
-                        variant: 'warning'
-                    })
-                );
-                return;
-            }
-
-            savePaymentPolicy({
-                bookingId: this.recordId,
-                paymentPolicyId: paymentChild.selectedPaymentPolicy,
-                totalDealCost: paymentChild.dealCost
-            })
-                .then(() => {
-                    this.showSuccessAndClose('Payment Policy saved successfully');
+        if (!child || !child.selectedPaymentPolicy) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Missing Payment Plan',
+                    message: 'Please select a Payment Plan before saving.',
+                    variant: 'warning'
                 })
-                .catch(error => {
-                    console.error('Error saving Payment Policy', error);
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error',
-                            message: 'Something went wrong while saving.',
-                            variant: 'error'
-                        })
-                    );
-                });
-
+            );
+            return;
         }
 
-        // ================= COMMISSION =================
-        if (this.isCommission) {
-            const commissionChild =
-                this.template.querySelector('c-booking-commission-policies');
+        const dealCost = child.dealCost;
 
-            if (!commissionChild || !commissionChild.selectedPolicyId) {
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Missing Commission Policy',
-                        message: 'Please select a Commission Policy before saving.',
-                        variant: 'warning'
-                    })
-                );
-                return;
-            }
-
-            commissionChild.handleSave(); // delegate save to child
+        savePaymentPolicy({
+            bookingId: this.recordId,
+            paymentPolicyId: child.selectedPaymentPolicy,
+            totalDealCost: dealCost
+        })
+        .then(() => {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Payment Policy has been saved successfully.',
+                    variant: 'success'
+                })
+            );
             this.dispatchEvent(new CloseActionScreenEvent());
-        }
-
-        
+        })
+        .catch(error => {
+            console.error('Error saving Payment Policy', error);
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Something went wrong while saving.',
+                    variant: 'error'
+                })
+            );
+        });
     }
-    showSuccessAndClose(message) {
-    this.dispatchEvent(
-        new ShowToastEvent({
-            title: 'Success',
-            message,
-            variant: 'success'
-        })
-    );
-    this.dispatchEvent(new CloseActionScreenEvent());
-}
-
-showError(message = 'Something went wrong while saving.') {
-    this.dispatchEvent(
-        new ShowToastEvent({
-            title: 'Error',
-            message,
-            variant: 'error'
-        })
-    );
-}
-
-
 }
