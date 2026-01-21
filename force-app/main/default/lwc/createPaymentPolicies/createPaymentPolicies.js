@@ -130,7 +130,15 @@ export default class CreatePaymentPolicies extends LightningElement {
         this.policies = [...this.policies];
     }
 
+    handleTermChange(event) {
+        let index = event.currentTarget.dataset.index;
+        let termIndex = event.currentTarget.dataset.termIndex;
+        let field = event.currentTarget.dataset.field;
+        
+        this.policies[index].terms[termIndex][field] = event.target.value;
+        this.policies = [...this.policies];
     // ========= SAVE VALIDATION =========
+    }
 
     @api
     getPolicies() {

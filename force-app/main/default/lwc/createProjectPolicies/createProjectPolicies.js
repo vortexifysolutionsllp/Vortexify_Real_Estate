@@ -44,14 +44,37 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
             return;
         }
 
-        fetchPolicyData({ projectId: this.recordId })
+          fetchPolicyData({ projectId: this.recordId })
             .then(res => {
+                let hasAnyPolicyData = false;
+
+                if (res && res.policies && res.policies.length > 0) {
+                    hasAnyPolicyData = true;
+                }
+
+                if (hasAnyPolicyData) {
+                    this.hasPolicy = true;
+                    this.editMode = false;        // start in read-only
+                    this.editLabel = 'Edit';     // pencil will enable editing
+                } else {
+                    this.hasPolicy = false;
+                    this.editMode = true;        // editable by default
+                    this.editLabel = 'Save';    // directly saving
+                }
 
                 let tryFindChild = () => {
                     let child = this.template.querySelector('c-create-payment-policies');
                     if (child) {
                         console.log('child found', child);
                         child.loadData(res);
+                        if (this.editMode) {
+                            // First time → fields editable
+                            child.toggleEditMode(true);
+                        } else {
+                            // Existing data → fields locked
+                            child.toggleEditMode(false);
+                        }
+
                     } else {
                         console.log('child not found');
                         // wait and try again
