@@ -8,5 +8,13 @@
 		<members>objectScoreIndicator</members>
 		<name>LightningComponentBundle</name>
 	</types>
+	<types>
+        <members>*</members>
+        <name>StaticResource</name>
+    </types>
+	<types>
+		<members>*</members>
+		<name>PermissionSet</name>
+	</types>
 	<version>66.0</version>
 </Package>
