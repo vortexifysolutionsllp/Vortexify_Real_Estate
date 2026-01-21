@@ -112,7 +112,8 @@ getPolicies() {
             name: '', 
             abbr: '', 
             cost: '', 
-            isDisabled: this.isViewMode,
+          //  isDisabled: this.isViewMode,
+             isDisabled: false,
             terms: []
         };
 
@@ -151,9 +152,10 @@ getPolicies() {
             termName: '', 
             percent: '', 
             paymentWithIn: '', 
-             isDisabled: this.isViewMode 
+           //  isDisabled: this.isViewMode 
+           isDisabled: false
         });
-
+        temp[index].isDisabled = false;
         this.policies = temp;
     }
 
@@ -184,7 +186,7 @@ getPolicies() {
         let index = event.currentTarget.dataset.index;
         let termIndex = event.currentTarget.dataset.termIndex;
         let field = event.currentTarget.dataset.field;
-
+        
         this.policies[index].terms[termIndex][field] = event.target.value;
         this.policies = [...this.policies];
     }
