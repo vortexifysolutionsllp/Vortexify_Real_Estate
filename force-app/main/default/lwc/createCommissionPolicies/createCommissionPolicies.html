@@ -1,97 +1,100 @@
 <template>
 
-    <!-- Project Details (Added) -->
-    <lightning-card title="Project Details">
-        <div class="slds-grid slds-wrap slds-p-around_medium">
-            <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input class="slds-m-bottom_small" label="Project Name" disabled>
-                </lightning-input>
+    <!-- ================= Project Details ================= -->
+    <section class="box slds-p-around_medium">
+        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
+            Project Details
+        </h3>
 
-                <lightning-input class="slds-m-bottom_small" label="Project Location" disabled>
-                </lightning-input>
+        <div class="grid-5">
+            <lightning-input label="Project Name"
+                             value={project.Name}
+                             disabled>
+            </lightning-input>
+            
+            <lightning-input type="number"
+                             label="No. of Towers"
+                             value={towerCount}
+                             disabled>
+            </lightning-input>
 
-                <lightning-input class="slds-m-bottom_small" label="Rera Number" disabled>
-                </lightning-input>
-            </div>
+            <lightning-input label="Project Location"
+                             value={project.Location__c}
+                             disabled>
+            </lightning-input>
 
-            <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input class="slds-m-bottom_small" label="No of Towers" disabled>
-                </lightning-input>
+            <lightning-input type="number"
+                             label="No. of Units"
+                             value={unitCount}
+                             disabled>
+            </lightning-input>
 
-                <lightning-input class="slds-m-bottom_small" label="No of Units" disabled>
-                </lightning-input>
-            </div>
+            <lightning-input label="Rera Number"
+                             value={project.RERA_Number__c}
+                             disabled>
+            </lightning-input>
         </div>
-    </lightning-card>
+    </section>
 
-    <!-- EXISTING COMMISSION UI (No Change) -->
-    <lightning-card title="Comission Policies">
-        <div class="container">
-            <div class="left-box">
-                <lightning-combobox label="Commission Type *" value={selectedCommissionType} options={commissionOptions}
-                    onchange={handleCommissionTypeChange} placeholder="Select an Commission">
-                </lightning-combobox>
-            </div>
+    <!-- ================= Booking Details =================
+    <section class="box slds-p-around_medium slds-m-top_medium">
+        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
+            Booking Details
+        </h3>
+
+        <div class="grid-5">
+            <lightning-input
+                type="number"
+                label="Unit Number"
+                placeholder="Enter unit number"
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Total Deal Cost"
+                placeholder="0.00"
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Unit Super Area"
+                placeholder="0.00"
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Unit Carpet Area"
+                placeholder="0.00"
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Price / Sq.ft."
+                placeholder="0.00"
+                required>
+            </lightning-input>
         </div>
+    </section> -->
 
-        <template if:true={showFixedCommission}>
-            <div>
-                <lightning-input placeholder="0.00" type="number" label="Amount" value={amount}
-                    onchange={handleAmountChange}>
-                </lightning-input>
+    <!-- ================= Commission Policy ================= -->
+    <section class="box slds-p-around_medium slds-m-top_medium">
+        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
+            Commission Policy
+        </h3>
 
-                <lightning-input placeholder="0" type="number" label="Percentage" value={percentage}
-                    onchange={handlePercentageChange}>
-                </lightning-input>
+        <lightning-combobox
+            label="Select Commission Policy"
+            placeholder="Select a policy"
+            options={policyOptions}
+            value={selectedPolicyId}
+            onchange={handlePolicyChange}
+            required>
+        </lightning-combobox>
 
-                <lightning-input placeholder="0.00" type="Upper Cap Amount" label="Upper Cap Amount"
-                    value={upperCapAmount} onchange={handleUpperCapAmount}>
-                </lightning-input>
-            </div>
-        </template>
-
-        <template if:true={showPercentageCommission}>
-            <div>
-                <lightning-input placeholder="0.00" type="number" label="Amount" value={amount}
-                    onchange={handleAmountChange}>
-                </lightning-input>
-
-                <lightning-input placeholder="0" type="number" label="Percentage" value={percentage}
-                    onchange={handlePercentageChange}>
-                </lightning-input>
-
-                <lightning-input placeholder="0.00" type="Upper Cap Amount" label="Upper Cap Amount"
-                    value={upperCapAmount} onchange={handleUpperCapAmount}>
-                </lightning-input>
-            </div>
-        </template>
-
-        <template if:true={showRangeCommission}>
-            <div>
-                <lightning-input type="minimumAmount" label="Minumum Amount" value={minimumAmount}
-                    onchange={handleMinumumAmountChange}>
-                </lightning-input>
-
-                <lightning-input type="maximumAmount" label="Maximum Amount" value={maximumAmount}
-                    onchange={handleMaximumAmountChange}>
-                </lightning-input>
-
-                <lightning-combobox label="Commission Type *" value={selectedCommissionType} options={commissionOptions}
-                    onchange={handleCommissionTypeChange} placeholder="Select an Commission">
-                </lightning-combobox>
-
-                <lightning-input type="number" label="Amount" value={amount} onchange={handleAmountChange}>
-                </lightning-input>
-
-                <lightning-input type="number" label="Percentage" value={percentage} onchange={handlePercentageChange}>
-                </lightning-input>
-
-                <lightning-input type="Upper Cap Amount" label="Upper Cap Amount" value={upperCapAmount}
-                    onchange={handleUpperCapAmount}>
-                </lightning-input>
-            </div>
-        </template>
-
-    </lightning-card>
+    </section>
 
 </template>
