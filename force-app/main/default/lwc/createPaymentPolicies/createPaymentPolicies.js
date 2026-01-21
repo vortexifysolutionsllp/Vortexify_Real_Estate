@@ -1,6 +1,11 @@
 import { LightningElement, track, api } from 'lwc';
 
 export default class CreatePaymentPolicies extends LightningElement {
+    //parent_data = this.recordId;
+
+    @track isViewMode = true;
+
+    @track project = {};
 
     @track project = {};
     @track policies = [];
