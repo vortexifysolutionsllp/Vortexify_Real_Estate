@@ -18,7 +18,7 @@ export default class CreateProjectPolicies extends LightningElement {
     editMode = false;
     editLabel = 'Edit';
 
-    //_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
@@ -26,10 +26,17 @@ export default class CreateProjectPolicies extends LightningElement {
     ];
 
     renderedCallback() {
-        // if (this._loaded) return;
-        this._loaded = true;
+
+    if (this._loaded) return;   // guard
+
+    this._loaded = true;
+
+    // wait for child to render
+    setTimeout(() => {
         this.loadData();
-    }
+    }, 0);
+}
+
 
     loadData() {
         if (!this.recordId) {
@@ -108,47 +115,69 @@ export default class CreateProjectPolicies extends LightningElement {
     }
 
     handleEditClick() {
-        let child = this.template.querySelector('c-create-payment-policies');
 
-        if (!child) {
-            console.error('Child component not found');
-            return;
+    let child = this.template.querySelector('c-create-payment-policies');
+    if (!child) return;
+
+    // 💾 SAVE
+    if (this.editMode) {
+
+        let data;
+
+        try {
+            data = child.getPolicies(); // throws error
+        } catch (e) {
+
+            // ✅ SHOW TOAST (NO MODAL CLOSE)
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Validation Error',
+                    message: e.message,
+                    variant: 'error',
+                    mode: 'sticky' // 👈 IMPORTANT for quick action
+                })
+            );
+            return; // ⛔ STOP HERE
         }
 
-        // 💾 SAVE
-        if (this.editMode) {
-            let data = child.getPolicies();
+        savePolicies({
+            policiesJson: JSON.stringify(data),
+            projectId: this.recordId
+        })
+        .then(() => {
 
-            savePolicies({
-                policiesJson: JSON.stringify(data),
-                projectId: this.recordId
-            })
-            .then(() => {
-                this.showToast(
-                    'Success',
-                    'Policies saved successfully',
-                    'success'
-                );
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Policies saved successfully',
+                    variant: 'success'
+                })
+            );
 
-                // ✅ CLOSE QUICK ACTION MODAL
-                this.dispatchEvent(new CloseActionScreenEvent());
-            })
-            .catch(err => {
-                console.error('savePolicies error', err);
-                this.showToast(
-                    'Error',
-                    err?.body?.message || 'Failed to save policies',
-                    'error'
-                );
-            });
-        } 
-        // ✏️ EDIT MODE
-        else {
-            this.editMode = true;
-            this.editLabel = 'Save';
-            child.toggleEditMode(true);
-        }
+            // ✅ CLOSE ONLY AFTER SUCCESS
+            this.dispatchEvent(new CloseActionScreenEvent());
+        })
+        .catch(err => {
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: err?.body?.message || 'Failed to save policies',
+                    variant: 'error',
+                    mode: 'sticky'
+                })
+            );
+        });
+    } 
+    // ✏️ EDIT
+    else {
+        this.editMode = true;
+        this.editLabel = 'Save';
+        child.toggleEditMode(true);
     }
+}
+
+   
 
     showToast(title, message, variant) {
         this.dispatchEvent(

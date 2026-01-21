@@ -1,210 +1,191 @@
 <template>
 
-    <!-- PROJECT DETAILS -->
+    <!-- PROJECT DETAILS CARD -->
     <lightning-card title="Project Details">
         <div class="slds-grid slds-wrap slds-p-around_medium">
 
+            <!-- Left Column -->
             <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input label="Project Name" value={project.name} disabled={isViewMode}></lightning-input>
-                <lightning-input label="Project Location" value={project.location} disabled={isViewMode}></lightning-input>
-                <lightning-input label="Rera Number" value={project.rera} disabled={isViewMode}></lightning-input>
+                <lightning-input label="Project Name" value={project.Name}  disabled={projectDisabled}></lightning-input>
+                <lightning-input label="Project Location" value={project.Location__c}  disabled={projectDisabled}></lightning-input>
+                <lightning-input label="Rera Number" value={project.RERA_Number__c}  disabled={projectDisabled}></lightning-input>
             </div>
 
+            <!-- Right Column -->
             <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input label="No of Towers" value={project.towers} disabled={isViewMode}></lightning-input>
-                <lightning-input label="No of Units" value={project.units} disabled={isViewMode}></lightning-input>
+                <lightning-input type="number" label="No of Towers" value={project.towers}  disabled={projectDisabled}></lightning-input>
+                <lightning-input type="number" label="No of Units" value={project.units}  disabled={projectDisabled}></lightning-input>
             </div>
 
         </div>
     </lightning-card>
 
-    <!-- ADD POLICY -->
+    <!-- ADD POLICY BUTTON -->
     <div class="slds-m-top_medium">
         <lightning-button
             variant="brand"
             label="Add Payment Policy"
-            onclick={addPolicy}>
+            onclick={handleAddPolicy}>
         </lightning-button>
     </div>
 
-    <!-- POLICY LOOP -->
+    <!-- POLICIES LOOP -->
     <template for:each={policies} for:item="policy" for:index="index">
 
-        <div key={policy.id} class="policy-box slds-m-top_medium">
+        <div key={policy.id} class="slds-box slds-m-top_medium">
 
-            <!-- POLICY FIELDS -->
-            <div class="slds-grid slds-wrap slds-gutters">
+            <!-- POLICY ROW -->
+            <div class="slds-grid slds-wrap slds-gutters slds-align_absolute-center">
 
-                <!-- POLICY S.NO -->
-                <div class="slds-col slds-size_1-of-5">
+                <!-- S.NO -->
+                <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                     <label class="slds-form-element__label">S.No</label>
-                    <div class="slds-form-element__control sno">
-                        {policy.serial}
-                    </div>
+                    <div class="slds-form-element__control">{policy.serial}</div>
                 </div>
 
-                <div class="slds-col slds-size_1-of-5">
+                <!-- POLICY NAME -->
+                <div class="slds-col slds-size_3-of-12">
                     <lightning-input
                         label="Policy Name"
                         value={policy.name}
                         data-index={index}
-                        data-field="name"
-                        onchange={handlePolicyChange}
+                        onchange={handleNameChange}
                         disabled={policy.isDisabled}>
                     </lightning-input>
                 </div>
 
-                <div class="slds-col slds-size_1-of-5">
+                <!-- ABBREVIATION -->
+                <div class="slds-col slds-size_2-of-12">
                     <lightning-input
                         label="Policy Abbreviation"
                         value={policy.abbr}
                         data-index={index}
-                        data-field="abbr"
-                        onchange={handlePolicyChange}
+                        onchange={handleAbbrChange}
                         disabled={policy.isDisabled}>
                     </lightning-input>
                 </div>
 
-                <div class="slds-col slds-size_1-of-5">
+                <!-- COST -->
+                <div class="slds-col slds-size_2-of-12">
                     <lightning-input
+                        type="number"
                         label="Cost / Sqft"
                         value={policy.cost}
                         data-index={index}
-                        data-field="cost"
-                        onchange={handlePolicyChange}
+                        onchange={handleCostChange}
                         disabled={policy.isDisabled}>
                     </lightning-input>
                 </div>
 
-                <!-- POLICY ACTION -->
-                <div class="slds-col slds-size_1-of-5 slds-m-top_large">
+                <!-- CONSTRUCTION LINKED -->
+                <div class="slds-col slds-size_2-of-12 slds-p-top_large">
+                    <lightning-input
+                        type="checkbox"
+                        label="Construction Linked"
+                        checked={policy.isConstructionLinked}
+                        data-index={index}
+                        onchange={handleConstructionLinkedChange}
+                        disabled={policy.isDisabled}>
+                    </lightning-input>
+                </div>
 
-                    <template if:true={policy.isDisabled}>
-                        <lightning-button-icon
-                            icon-name="utility:edit"
-                            variant="bare"
-                            data-index={index}
-                            onclick={editPolicy}>
-                        </lightning-button-icon>
-                    </template>
-
-                    <template if:false={policy.isDisabled}>
-                        <lightning-button-icon
-                            icon-name="utility:save"
-                            variant="bare"
-                            data-index={index}
-                            onclick={savePolicy}>
-                        </lightning-button-icon>
-                    </template>
+                <!-- ACTIONS -->
+                <div class="slds-col slds-size_2-of-12 slds-m-top_large slds-text-align_center">
+                    <lightning-button-icon
+                        icon-name="utility:edit"
+                        variant="bare"
+                        data-index={index}
+                        onclick={handleEditPolicy}>
+                    </lightning-button-icon>
 
                     <lightning-button-icon
                         icon-name="utility:delete"
                         variant="bare"
                         data-index={index}
-                        onclick={deletePolicy}>
+                        onclick={handleDeletePolicy}>
                     </lightning-button-icon>
-
                 </div>
 
             </div>
 
-            <!-- TERMS -->
-            <div class="term slds-m-top_medium">
+            <!-- TERMS SECTION -->
+            <div class="slds-m-top_medium slds-p-left_medium">
 
-                <!-- TERMS LOOP -->
-                <template for:each={policy.terms} for:item="term" for:index="termIndex">
+                <template for:each={policy.terms} for:item="term" for:index="tIndex">
 
-                    <div key={term.id} class="slds-grid slds-wrap slds-gutters term-box">
+                    <div key={term.id} class="slds-grid slds-wrap slds-gutters slds-m-bottom_x-small">
 
                         <!-- TERM S.NO -->
-                        <div class="slds-col slds-size_1-of-5">
+                        <div class="slds-col slds-size_1-of-12 slds-text-align_center">
                             <label class="slds-form-element__label">S.No</label>
-                            <div class="slds-form-element__control sno">
-                                {term.serial}
-                            </div>
+                            <div class="slds-form-element__control">{term.serial}</div>
                         </div>
 
                         <!-- TERM NAME -->
-                        <div class="slds-col slds-size_1-of-5">
+                        <div class="slds-col slds-size_3-of-12">
                             <lightning-input
                                 label="Term Name"
                                 value={term.termName}
-                                data-index={index}
-                                data-term-index={termIndex}
-                                data-field="termName"
-                                onchange={handleTermChange}
+                                data-pindex={index}
+                                data-tindex={tIndex}
+                                onchange={handleTermNameChange}
                                 disabled={term.isDisabled}>
                             </lightning-input>
                         </div>
 
                         <!-- PERCENTAGE -->
-                        <div class="slds-col slds-size_1-of-5">
+                        <div class="slds-col slds-size_2-of-12">
                             <lightning-input
+                                type="number"
                                 label="Percentage"
                                 value={term.percent}
-                                data-index={index}
-                                data-term-index={termIndex}
-                                data-field="percent"
-                                onchange={handleTermChange}
+                                data-pindex={index}
+                                data-tindex={tIndex}
+                                onchange={handleTermPercentChange}
                                 disabled={term.isDisabled}>
                             </lightning-input>
                         </div>
 
                         <!-- PAYMENT WITHIN -->
-                        <div class="slds-col slds-size_1-of-5">
+                        <div class="slds-col slds-size_3-of-12">
                             <lightning-input
+                                type="number"
                                 label="Payment Within"
-                                value={term.paymentWithIn}
-                                data-index={index}
-                                data-term-index={termIndex}
-                                data-field="paymentWithIn"
-                                onchange={handleTermChange}
+                                value={term.paymentWithin}
+                                data-pindex={index}
+                                data-tindex={tIndex}
+                                onchange={handleTermPaymentChange}
                                 disabled={term.isDisabled}>
                             </lightning-input>
                         </div>
 
-                        <!-- TERM ACTION -->
-                        <div class="slds-col slds-size_1-of-5 slds-m-top_large">
-
-                            <template if:true={term.isDisabled}>
-                                <lightning-button-icon
-                                    icon-name="utility:edit"
-                                    variant="bare"
-                                    data-index={index}
-                                    data-term-index={termIndex}
-                                    onclick={handleEdit}>
-                                </lightning-button-icon>
-                            </template>
-
-                            <template if:false={term.isDisabled}>
-                                <lightning-button-icon
-                                    icon-name="utility:save"
-                                    variant="bare"
-                                    data-index={index}
-                                    data-term-index={termIndex}
-                                    onclick={handleSave}>
-                                </lightning-button-icon>
-                            </template>
+                        <!-- TERM ACTIONS -->
+                        <div class="slds-col slds-size_3-of-12 slds-m-top_large slds-text-align_center">
+                            <lightning-button-icon
+                                icon-name="utility:edit"
+                                data-pindex={index}
+                                data-tindex={tIndex}
+                                onclick={handleEditTerm}>
+                            </lightning-button-icon>
 
                             <lightning-button-icon
                                 icon-name="utility:delete"
-                                variant="bare"
-                                data-index={index}
-                                data-term-index={termIndex}
-                                onclick={deleteTerm}>
+                                data-pindex={index}
+                                data-tindex={tIndex}
+                                onclick={handleDeleteTerm}>
                             </lightning-button-icon>
-
                         </div>
 
                     </div>
 
                 </template>
 
+                <!-- ADD TERM BUTTON -->
                 <lightning-button
                     class="slds-m-top_small"
                     label="Add Term"
                     data-index={index}
-                    onclick={addTerm}>
+                    onclick={handleAddTerm}>
                 </lightning-button>
 
             </div>

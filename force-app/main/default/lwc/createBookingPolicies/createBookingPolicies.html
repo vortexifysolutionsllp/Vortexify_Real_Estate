@@ -1,48 +1,32 @@
 <template>
-    <!-- HEADER -->
     <lightning-modal-header label="Create Booking"></lightning-modal-header>
 
-    <!-- BODY -->
     <lightning-modal-body class="body">
 
-        <!-- RADIO SELECTION ROW -->
         <div class="radio-row">
             <div class="radio-card" onclick={selectPayment}>
-                <lightning-input
-                    type="radio"
-                    name="policy"
-                    label="Select Payment Plan"
-                    checked={isPayment}>
-                </lightning-input>
+                <lightning-input type="radio" name="policy" label="Select Payment Plan" checked={isPayment}></lightning-input>
             </div>
 
             <div class="radio-card" onclick={selectCommission}>
-                <lightning-input
-                    type="radio"
-                    name="policy"
-                    label="Select Commission Policies"
-                    checked={isCommission}>
-                </lightning-input>
+                <lightning-input type="radio" name="policy" label="Select Commission Policies" checked={isCommission}></lightning-input>
             </div>
         </div>
 
-        <!-- PAYMENT -->
         <template if:true={isPayment}>
-            <c-booking-payment-policies></c-booking-payment-policies>
+            <c-booking-payment-policies record-id={recordId}></c-booking-payment-policies>
         </template>
 
-        <!-- COMMISSION -->
         <template if:true={isCommission}>
             <c-booking-commission-policies></c-booking-commission-policies>
         </template>
 
     </lightning-modal-body>
 
-    <!-- FOOTER -->
     <lightning-modal-footer>
         <div class="footer">
             <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
-            <lightning-button variant="brand" label="Save"></lightning-button>
+            <lightning-button variant="brand" label="Save" onclick={handleSave}></lightning-button>
         </div>
     </lightning-modal-footer>
 </template>
