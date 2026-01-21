@@ -22,14 +22,14 @@
                     <div class="criteria-row">
                         <div>{crit.serial}</div>
 
-                        <lightning-input placeholder="Enter Criteria Name" name="criteriaName" data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
-                        <lightning-input type="number" placeholder="Score" name="score" data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
+                        <lightning-input placeholder="Enter Criteria Name" name="criteriaName" value={crit.criteriaName} data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
+                        <lightning-input type="number" placeholder="Score" name="score" value={crit.score} data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
                         <lightning-combobox value={crit.conditionCriteria} options={conditionCriteriaOptions}
                             data-index={critIndex} onchange={handleConditionCriteriaChange}>
                         </lightning-combobox>
 
                         <template if:true={crit.showConditionLogic}>
-                            <lightning-input placeholder="Enter Condition Logic" name="conditionLogic" data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
+                            <lightning-input placeholder="Enter Condition Logic" name="conditionLogic" value={crit.conditionLogic} data-index={critIndex} onchange={handleCriteriaInput}></lightning-input>
                         </template>
 
                         <template if:false={crit.isFirst}>
@@ -57,7 +57,7 @@
                                     data-cond-index={condIndex} onchange={handleConditionInputChange}>
                                 </lightning-combobox>
 
-                                <lightning-combobox name="operator" data-crit-index={critIndex} value={cond.operator} options={cond.operatorOptions}
+                                <lightning-combobox name="operator" value={cond.operator} data-crit-index={critIndex} options={cond.operatorOptions}
                                     data-cond-index={condIndex} onchange={handleConditionInputChange}>
                                 </lightning-combobox>
 
@@ -71,11 +71,11 @@
                                 <!-- BETWEEN RANGE -->
                                 <template if:true={cond.showRange}>
                                     <div class="range-inputs">
-                                        <lightning-input label="From" type={cond.valueInputType} name="fromValue" data-crit-index={critIndex}
+                                        <lightning-input label="From" type={cond.valueInputType} name="fromValue" value={cond.fromValue} data-crit-index={critIndex}
                                             data-cond-index={condIndex} onchange={handleConditionInputChange}>
                                         </lightning-input>
                                 
-                                        <lightning-input label="To" type={cond.valueInputType} name="toValue" data-crit-index={critIndex}
+                                        <lightning-input label="To" type={cond.valueInputType} name="toValue" value={cond.toValue} data-crit-index={critIndex}
                                             data-cond-index={condIndex} onchange={handleConditionInputChange}>
                                         </lightning-input>
                                     </div>
@@ -84,7 +84,7 @@
                                 <!-- DEFAULT INPUT -->
                                 <template if:false={cond.isPicklist}>
                                     <template if:false={cond.showRange}>
-                                        <lightning-input name="value" type={cond.valueInputType} data-crit-index={critIndex} data-cond-index={condIndex}
+                                        <lightning-input name="value" value={cond.value} type={cond.valueInputType} data-crit-index={critIndex} data-cond-index={condIndex}
                                             onchange={handleConditionInputChange}>
                                         </lightning-input>
                                     </template>

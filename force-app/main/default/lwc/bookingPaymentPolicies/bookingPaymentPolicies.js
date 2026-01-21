@@ -123,5 +123,5 @@ get dealCost(){
                 console.error('Error fetching cost per sqft', error);
             });
     }
-    // 🔹 Expose total deal cost to parent
+   
 }

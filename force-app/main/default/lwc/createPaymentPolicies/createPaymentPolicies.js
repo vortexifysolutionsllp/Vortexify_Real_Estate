@@ -7,176 +7,131 @@ export default class CreatePaymentPolicies extends LightningElement {
 
     @track project = {};
 
-    @track policies = [
-        {
-            id: 1,
-            serial: 1,
-            name: '',
-            abbr: '',
-            cost: '',
-            isDisabled: true,
-            terms: [
-                {
-                    id: 1,
-                    serial: 1,
-                    termName: '',
-                    percent: '',
-                    paymentWithIn: '',
-                    isDisabled: true
-                }
-            ]
-        }
-    ];
+    @track project = {};
+    @track policies = [];
+    projectDisabled = true;
+
+
     @api
     loadData(data){
-        console.log('CHILD RECEIVED DATA = ', JSON.stringify(data));
-
         this.project = {
-            name : data.project.Name,
-            location : data.project.Location__c,
-            rera : data.project.RERA_Number__c,
-            towers : data.towerCount,
-            units : data.unitCount
+            Name : data.project.Name,
+            Location__c : data.project.Location__c,
+            RERA_Number__c : data.project.RERA_Number__c,
+            towers: data.towerCount,
+            units: data.unitCount
         };
 
         if(data.policies && data.policies.length){
-
-            this.policies = data.policies.map((p,i)=>{
-
-                let terms = [];
-
-                if(p.Term__c){
-                    terms = JSON.parse(p.Term__c).map((t,idx)=>({
-                        id: Date.now()+idx,
-                        serial: idx+1,
-                        termName: t.termName,
-                        percent: t.percent,
-                        paymentWithIn: t.paymentWithIn,
-                        isDisabled: true
-                    }));
-                }
-
-                return{
-                    id: p.Id,
-                    serial: i+1,
-                    name: p.Name,
-                    abbr: p.Abbreviation__c,
-                    cost: p.Cost_Sqft__c,
-                    isDisabled: true,
-                    terms: terms
-                }
-            });
+            this.policies = data.policies.map((p,i)=>({
+                id: p.Id,
+                serial: i+1,
+                name: p.Name,
+                abbr: p.Abbreviation__c,
+                cost: p.Cost_Sqft__c,
+                isConstructionLinked: p.Construction_Linked__c || false,
+                isDisabled: true,
+                terms: p.Term__c ? JSON.parse(p.Term__c).map((t,ti)=>({
+                    id: Date.now()+ti,
+                    serial: ti+1,
+                    termName: t.termName,
+                    percent: t.percent,
+                    paymentWithin: t.paymentWithIn,
+                    isDisabled: true
+                })) : []
+            }));
         }
     }
 
+    // ⭐ ADD THIS
     @api
-    toggleEditMode(isEdit) {
+    toggleEditMode(flag) {
 
-        this.isViewMode = !isEdit;
-
-        let temp = JSON.parse(JSON.stringify(this.policies));
-
-        temp.forEach(policy => {
-            policy.isDisabled = !isEdit;
-
-            policy.terms.forEach(term => {
-                term.isDisabled = !isEdit;
-            });
+        this.projectDisabled = !flag;
+        this.policies = this.policies.map(p => {
+            return {
+                ...p,
+                isDisabled: !flag,
+                terms: p.terms.map(t => ({
+                    ...t,
+                    isDisabled: !flag
+                }))
+            };
         });
-
-        this.policies = temp;
     }
 
-    @api
-getPolicies() {
-    return this.policies.map(p => ({
-        id: p.id,          // keep (needed for update)
-        name: p.name,
-        abbr: p.abbr,
-        cost: p.cost,
-        terms: p.terms.map(t => ({
-            termName: t.termName,
-            percent: t.percent,
-            paymentWithIn: t.paymentWithIn,
-            serial: t.serial
-        }))
-    }));
-}
+    // ========= POLICY HANDLERS =========
 
-    addPolicy() {
-        let newId = this.policies.length + 1;
-
-        let newPolicy = { 
-            id: newId, 
-            serial: newId, 
-            name: '', 
-            abbr: '', 
-            cost: '', 
-            isDisabled: this.isViewMode,
+    handleAddPolicy() {
+        this.policies = [...this.policies, {
+            id: Date.now(),
+            serial: this.policies.length + 1,
+            name: '',
+            abbr: '',
+            cost: '',
+            isConstructionLinked: false,
+            isDisabled: false,
             terms: []
-        };
-
-        this.policies = [...this.policies, newPolicy];
+        }];
     }
 
-    deletePolicy(event) {
-        let index = event.currentTarget.dataset.index;
-        this.policies.splice(index, 1);
-
-        this.policies = this.policies.map((p, i) => ({
-            ...p,
-            serial: i + 1
-        }));
-    }
-
-    editPolicy(event) {
+    handleEditPolicy(event) {
         let index = event.currentTarget.dataset.index;
         this.policies[index].isDisabled = false;
+        this.policies[index].terms.forEach(t => t.isDisabled = false);
         this.policies = [...this.policies];
     }
 
-    savePolicy(event) {
+    handleDeletePolicy(event) {
         let index = event.currentTarget.dataset.index;
-        this.policies[index].isDisabled = true;
-        this.policies = [...this.policies];
+        this.policies.splice(index,1);
+        this.reindex();
     }
 
-    addTerm(event) {
-        let index = event.currentTarget.dataset.index;
-        let temp = JSON.parse(JSON.stringify(this.policies));
+    // ========= TERM HANDLERS =========
 
-        temp[index].terms.push({ 
-            id: Date.now(), 
-            serial: temp[index].terms.length + 1, 
-            termName: '', 
-            percent: '', 
-            paymentWithIn: '', 
-             isDisabled: this.isViewMode 
+    handleAddTerm(event){
+        let index = event.currentTarget.dataset.index;
+        this.policies[index].terms.push({
+            id: Date.now(),
+            serial: this.policies[index].terms.length + 1,
+            termName:'',
+            percent:'',
+            paymentWithin:'',
+            isDisabled:false
         });
-
-        this.policies = temp;
+        this.policies = [...this.policies];
     }
 
-    deleteTerm(event) {
-        let policyIndex = event.currentTarget.dataset.index;
-        let termIndex = event.currentTarget.dataset.termIndex;
-
-        let temp = JSON.parse(JSON.stringify(this.policies));
-        temp[policyIndex].terms.splice(termIndex, 1);
-
-        temp[policyIndex].terms = temp[policyIndex].terms.map((t, i) => ({
-            ...t,
-            serial: i + 1
-        }));
-
-        this.policies = temp;
+    handleEditTerm(event){
+        let p = event.currentTarget.dataset.pindex;
+        let t = event.currentTarget.dataset.tindex;
+        this.policies[p].terms[t].isDisabled = false;
+        this.policies = [...this.policies];
     }
 
-    handlePolicyChange(event) {
-        let index = event.currentTarget.dataset.index;
-        let field = event.currentTarget.dataset.field;
+    handleDeleteTerm(event){
+        let p = event.currentTarget.dataset.pindex;
+        let t = event.currentTarget.dataset.tindex;
+        this.policies[p].terms.splice(t,1);
+        this.reindexTerms(p);
+    }
 
-        this.policies[index][field] = event.target.value;
+    // ========= FIELD UPDATES =========
+
+    handleNameChange(e){ this.policies[e.target.dataset.index].name = e.target.value; this.policies=[...this.policies]; }
+    handleAbbrChange(e){ this.policies[e.target.dataset.index].abbr = e.target.value; this.policies=[...this.policies]; }
+    handleCostChange(e){ this.policies[e.target.dataset.index].cost = e.target.value; this.policies=[...this.policies]; }
+
+    handleTermNameChange(e){ this.policies[e.target.dataset.pindex].terms[e.target.dataset.tindex].termName = e.target.value; this.policies=[...this.policies]; }
+    handleTermPercentChange(e){ this.policies[e.target.dataset.pindex].terms[e.target.dataset.tindex].percent = e.target.value; this.policies=[...this.policies]; }
+    handleTermPaymentChange(e){ this.policies[e.target.dataset.pindex].terms[e.target.dataset.tindex].paymentWithin = e.target.value; this.policies=[...this.policies]; }
+
+    // ========= SINGLE CHECKBOX =========
+
+    handleConstructionLinkedChange(event){
+        let index = event.target.dataset.index;
+        this.policies.forEach((p,i)=> p.isConstructionLinked = (i == index));
         this.policies = [...this.policies];
     }
 
@@ -184,24 +139,38 @@ getPolicies() {
         let index = event.currentTarget.dataset.index;
         let termIndex = event.currentTarget.dataset.termIndex;
         let field = event.currentTarget.dataset.field;
-
+        
         this.policies[index].terms[termIndex][field] = event.target.value;
         this.policies = [...this.policies];
+    // ========= SAVE VALIDATION =========
     }
 
-    handleEdit(event) {
-        let pIndex = event.currentTarget.dataset.index;
-        let tIndex = event.currentTarget.dataset.termIndex;
+    @api
+    getPolicies() {
+        let names = this.policies.map(p => p.name?.toLowerCase());
+        let set = new Set(names);
+        if(names.length !== set.size){
+            throw new Error('Duplicate policy names are not allowed.');
+        }
 
-        this.policies[pIndex].terms[tIndex].isDisabled = false;
-        this.policies = [...this.policies];
+        return this.policies.map(p => ({
+            id: p.id,
+            name: p.name,
+            abbr: p.abbr,
+            cost: p.cost,
+            isConstructionLinked: p.isConstructionLinked,
+            terms: p.terms
+        }));
     }
 
-    handleSave(event) {
-        let pIndex = event.currentTarget.dataset.index;
-        let tIndex = event.currentTarget.dataset.termIndex;
+    // ========= UTILS =========
 
-        this.policies[pIndex].terms[tIndex].isDisabled = true;
-        this.policies = [...this.policies];
+    reindex(){
+        this.policies = this.policies.map((p,i)=>({...p, serial:i+1}));
+    }
+
+    reindexTerms(pIndex){
+        this.policies[pIndex].terms = this.policies[pIndex].terms.map((t,i)=>({...t, serial:i+1}));
+        this.policies=[...this.policies];
     }
 }

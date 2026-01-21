@@ -101,16 +101,21 @@ public static Id saveLead(Lead leadRec, String locationValue, List<String> selec
 
         String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
         String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
-        String leadFullName = leadFirstName + leadLastName;
+        String leadFullName = leadFirstName + ' ' + leadLastName;
 
         List<Project_Interest__c> listPI = new List<Project_Interest__c>();
+        List<Project__c> selectedProjectList = [SELECT Id, Name FROM Project__c WHERE Id IN: selectedProjectNames];
+        Map<Id,String> projectNameById = new Map<Id,String>();
+        for(Project__c prjRec : selectedProjectList){
+            projectNameById.put(prjRec.Id, prjRec.Name);
+        }
 
         for (String projName : selectedProjectNames) {
-
+			String projectName = projectNameById.containsKey(projName) ? projectNameById.get(projName) : 'Project Interest';
             listPI.add(new Project_Interest__c(
-                Name = leadFullName + ' / ' + projName,
+                Name = leadFullName + ' - ' + projectName,
                 Lead__c = leadRec.Id,
-                Projects_Name__c = projName,
+                Project__c = projName,
                 Location__c = locationValue
             ));
         }
