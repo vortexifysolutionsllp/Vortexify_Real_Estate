@@ -9,7 +9,7 @@ public class ConstructionUpdateQueueable implements Queueable {
     public void execute(QueueableContext qc) {
 
         System.debug('Queueable context: ' + qc);
-        List<Construction_Update__c> updates = [SELECT Id, Is_Payment_Triggered__c, Project__c, Policy__c FROM Construction_Update__c WHERE Id IN :cuIds];
+        List<Construction_Update__c> updates = [SELECT Id, Name, Is_Payment_Triggered__c, Project__c, Policy__c FROM Construction_Update__c WHERE Id IN :cuIds];
         System.debug('Updates: ' + updates);
 
         if (!updates.isEmpty()) {

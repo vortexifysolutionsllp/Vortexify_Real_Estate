@@ -6,7 +6,9 @@ public class ConstructionPolicyUtil {
         public Integer paymentWithinDays = 0;
     }
 
-    public static TermCheckResult checkAnyPercent(String termJson) {
+    public static TermCheckResult checkAnyPercent(String termJson, Construction_Update__c cu ) {
+
+        System.debug('Current Construction Update:' + cu);
 
         TermCheckResult result = new TermCheckResult();
 
@@ -19,8 +21,11 @@ public class ConstructionPolicyUtil {
 
         for (PolicyTermWrapper term : terms) {
             System.debug('term percentage:'+term.percent);
+            System.debug('term name:' +term.termName);
+            System.debug('construction update name:'+ cu.Name);
 
-            if (!String.isBlank(term.percent)) {
+            // 'Construction Update' record name should matches with any 'Term' record name.
+            if (term.termName == cu.Name && !String.isBlank(term.percent)) {
 
                 Decimal pct = Decimal.valueOf(term.percent);
                 System.debug('pct: ' + pct);

@@ -12,7 +12,7 @@ public class ConstructionUpdateBatch implements Database.Batchable<Construction_
     }
 
     public void execute( Database.BatchableContext bc, List<Construction_Update__c> scope ) {
-
+        List<Construction_Update__c> updatesToMarkTriggered = new List<Construction_Update__c>();
         Set<Id> projectIds = new Set<Id>();
         Set<Id> policyIds  = new Set<Id>();
 
@@ -30,15 +30,20 @@ public class ConstructionUpdateBatch implements Database.Batchable<Construction_
 
         System.debug('Policy Map:'+ policyMap);
 
-        List<Opportunity> bookings = [SELECT Id, Owner.Email, Project__c, Amount FROM Opportunity WHERE Project__c IN :projectIds ];
+        List<Opportunity> bookings = [SELECT Id, Owner.Email, Owner.Name, Project__c, Payment_Policy__c, Commission_Policy__c, Amount FROM Opportunity WHERE Project__c IN :projectIds AND (Payment_Policy__c IN :policyIds OR Commission_Policy__c IN :policyIds) ];
         System.debug('Bookings: ' + bookings);
 
         for (Construction_Update__c cu : scope) {
 
             Policy__c pol = policyMap.get(cu.Policy__c);
             if (pol == null) continue;
+            ConstructionPolicyUtil.TermCheckResult termResult = ConstructionPolicyUtil.checkAnyPercent(pol.Term__c, cu);
+            // Decide payment trigger ONCE per Construction Update
+            Boolean shouldTriggerPayment = !cu.Is_Payment_Triggered__c && termResult.hasPercent && termResult.percent > 0;
+            if (shouldTriggerPayment) {
+                updatesToMarkTriggered.add(new Construction_Update__c( Id = cu.Id, Is_Payment_Triggered__c = true));
+            }
 
-            ConstructionPolicyUtil.TermCheckResult termResult = ConstructionPolicyUtil.checkAnyPercent(pol.Term__c);
 
             System.debug(' TERM CHECK RESULT');
             System.debug('Has Percent      : ' + termResult.hasPercent);
@@ -47,23 +52,28 @@ public class ConstructionUpdateBatch implements Database.Batchable<Construction_
             System.debug('Policy Id        : ' + pol.Id);
 
             for (Opportunity b : bookings) {
-
                 if (b.Project__c != cu.Project__c) continue;
-
-                if (cu.Is_Payment_Triggered__c) {
-                    System.debug(('Email sent to 1: ' + b.Owner.Email));
-                    ConstructionEmailService.sendConstructionUpdate(b, cu);
-
-                } else if (termResult.hasPercent) {
-                    System.debug(('Email sent to 2: ' + b.Owner.Email));
-                    ConstructionEmailService.sendConstructionUpdate( b, cu, termResult.paymentWithinDays);
-
+                Boolean policyMatch = b.Payment_Policy__c == cu.Policy__c;
+                if (!policyMatch) continue;
+                
+                if (shouldTriggerPayment) {
+                    Decimal payableAmount;
+                    if (b.Amount != null && termResult.percent != null) {
+                        payableAmount = (b.Amount * termResult.percent) / 100;
+                    }
+                    System.debug('Demand Letter Email sent to: ' + b.Owner.Email);
+                    ConstructionEmailService.sendUpdateWithDemandLetter(b, cu, termResult.percent, payableAmount, termResult.paymentWithinDays);
                 } else {
-                    System.debug(('Email sent to 3: ' + b.Owner.Email));
-                    ConstructionEmailService.sendUpdateWithDemandLetter(b, cu);
+                    System.debug('Normal Update Email sent to: ' + b.Owner.Email);
+                    ConstructionEmailService.sendConstructionUpdate(b, cu);
                 }
             }
         }
+
+        if (!updatesToMarkTriggered.isEmpty()) {
+            update updatesToMarkTriggered;
+        }
+
     }
 
     public void finish(Database.BatchableContext bc) {}
