@@ -140,6 +140,5 @@ export default class BookingCommissionPolicies extends LightningElement {
         .finally(() => {
             this.isLoading = false;
         });
-}
-
+    }
 }
