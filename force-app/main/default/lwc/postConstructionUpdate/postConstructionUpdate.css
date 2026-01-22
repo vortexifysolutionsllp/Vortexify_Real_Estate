@@ -1,0 +1,91 @@
+.vortex-wrapper {
+    background: linear-gradient(135deg, #eef7ff, #ffffff);
+    border-radius: 16px;
+    padding: 24px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Header */
+.vortex-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0b5cab;
+}
+
+.vortex-header p {
+    color: #6b7280;
+    margin-top: 4px;
+    margin-bottom: 24px;
+}
+
+/* Sections */
+.vortex-section {
+    margin-bottom: 24px;
+}
+
+.vortex-label {
+    display: block;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+/* Inputs */
+.vortex-input input {
+    border-radius: 10px !important;
+    height: 44px;
+    font-size: 14px;
+}
+
+/* Dropdown */
+.vortex-dropdown {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    margin-top: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.vortex-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.vortex-error {
+    color: #c23934;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+
+.vortex-option:hover {
+    background: #eef7ff;
+}
+
+/* Pills */
+.vortex-pills {
+    margin-top: 10px;
+}
+
+/* Selected policy */
+.vortex-selected {
+    margin-top: 8px;
+    color: #0b5cab;
+}
+
+/* Upload */
+.vortex-upload {
+    border: 2px dashed #93c5fd;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f8fbff;
+}
+
+/* Footer */
+.vortex-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
