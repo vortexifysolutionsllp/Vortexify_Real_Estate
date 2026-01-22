@@ -19,6 +19,8 @@ export default class CreateProjectPolicies extends LightningElement {
     editLabel = 'Edit';
 
 _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+_cachedPolicyData = null; // 🆕 store last loaded policy data
+
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
@@ -46,7 +48,7 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
         fetchPolicyData({ projectId: this.recordId })
             .then(res => {
-
+                this._cachedPolicyData = res;
                 let tryFindChild = () => {
                     let child = this.template.querySelector('c-create-payment-policies');
                     if (child) {
@@ -84,6 +86,12 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
             this.showPayment = false;
             this.showCommission = true;
         }
+         setTimeout(() => {
+        let child = this.template.querySelector('c-create-payment-policies');
+        if (child && this._cachedPolicyData) {
+            child.loadData(this._cachedPolicyData);
+        }
+    }, 0);
     }
 
     // ❌ CANCEL → CLOSE QUICK ACTION MODAL
@@ -119,7 +127,27 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
             policiesJson: JSON.stringify(data),
             projectId: this.recordId
         })
-        .then(() => {
+                        .then(() => {
+                return fetchPolicyData({ projectId: this.recordId });
+
+            })
+            .then(res => {
+                this._cachedPolicyData = res;
+                let child = this.template.querySelector('c-create-payment-policies');
+                if (child) {
+                    child.loadData(res);
+                }
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Policies saved successfully',
+                        variant: 'success'
+                    })
+                );
+                this.dispatchEvent(new CloseActionScreenEvent());
+            })
+
+       /* .then(() => {
 
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -131,7 +159,7 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
             // ✅ CLOSE ONLY AFTER SUCCESS
             this.dispatchEvent(new CloseActionScreenEvent());
-        })
+        })*/
         .catch(err => {
 
             this.dispatchEvent(
