@@ -18,7 +18,9 @@ export default class CreateProjectPolicies extends LightningElement {
     editMode = false;
     editLabel = 'Edit';
 
-    //_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+_cachedPolicyData = null; // 🆕 store last loaded policy data
+
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
@@ -26,10 +28,17 @@ export default class CreateProjectPolicies extends LightningElement {
     ];
 
     renderedCallback() {
-        // if (this._loaded) return;
-        this._loaded = true;
+
+    if (this._loaded) return;   // guard
+
+    this._loaded = true;
+
+    // wait for child to render
+    setTimeout(() => {
         this.loadData();
-    }
+    }, 0);
+}
+
 
     loadData() {
         if (!this.recordId) {
@@ -39,7 +48,7 @@ export default class CreateProjectPolicies extends LightningElement {
 
         fetchPolicyData({ projectId: this.recordId })
             .then(res => {
-
+                this._cachedPolicyData = res;
                 let tryFindChild = () => {
                     let child = this.template.querySelector('c-create-payment-policies');
                     if (child) {
@@ -77,6 +86,12 @@ export default class CreateProjectPolicies extends LightningElement {
             this.showPayment = false;
             this.showCommission = true;
         }
+         setTimeout(() => {
+        let child = this.template.querySelector('c-create-payment-policies');
+        if (child && this._cachedPolicyData) {
+            child.loadData(this._cachedPolicyData);
+        }
+    }, 0);
     }
 
     // ❌ CANCEL → CLOSE QUICK ACTION MODAL
@@ -84,48 +99,83 @@ export default class CreateProjectPolicies extends LightningElement {
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
-    handleEditClick() {
-        let child = this.template.querySelector('c-create-payment-policies');
+       handleEditClick() {
 
-        if (!child) {
-            console.error('Child component not found');
-            return;
+        let child = this.template.querySelector('c-create-payment-policies');
+        if (!child) return;
+
+        let data;
+
+        try {
+            // 🔍 SAME VALIDATION LOGIC
+            data = child.getPolicies(); // throws error if validation fails
+        } catch (e) {
+
+            // ✅ SHOW TOAST (NO MODAL CLOSE)
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Validation Error',
+                    message: e.message,
+                    variant: 'error',
+                    mode: 'sticky' // 👈 IMPORTANT for quick action
+                })
+            );
+            return; // ⛔ STOP HERE
         }
 
-        // 💾 SAVE
-        if (this.editMode) {
-            let data = child.getPolicies();
+        savePolicies({
+            policiesJson: JSON.stringify(data),
+            projectId: this.recordId
+        })
+                        .then(() => {
+                return fetchPolicyData({ projectId: this.recordId });
 
-            savePolicies({
-                policiesJson: JSON.stringify(data),
-                projectId: this.recordId
             })
-            .then(() => {
-                this.showToast(
-                    'Success',
-                    'Policies saved successfully',
-                    'success'
+            .then(res => {
+                this._cachedPolicyData = res;
+                let child = this.template.querySelector('c-create-payment-policies');
+                if (child) {
+                    child.loadData(res);
+                }
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Policies saved successfully',
+                        variant: 'success'
+                    })
                 );
-
-                // ✅ CLOSE QUICK ACTION MODAL
                 this.dispatchEvent(new CloseActionScreenEvent());
             })
-            .catch(err => {
-                console.error('savePolicies error', err);
-                this.showToast(
-                    'Error',
-                    err?.body?.message || 'Failed to save policies',
-                    'error'
-                );
-            });
-        } 
-        // ✏️ EDIT MODE
-        else {
-            this.editMode = true;
-            this.editLabel = 'Save';
-            child.toggleEditMode(true);
-        }
-    }
+
+       /* .then(() => {
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Policies saved successfully',
+                    variant: 'success'
+                })
+            );
+
+            // ✅ CLOSE ONLY AFTER SUCCESS
+            this.dispatchEvent(new CloseActionScreenEvent());
+        })*/
+        .catch(err => {
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: err?.body?.message || 'Failed to save policies',
+                    variant: 'error',
+                    mode: 'sticky'
+                })
+            );
+        });
+    } 
+    // ✏️ EDIT
+
+
+   
 
     showToast(title, message, variant) {
         this.dispatchEvent(
