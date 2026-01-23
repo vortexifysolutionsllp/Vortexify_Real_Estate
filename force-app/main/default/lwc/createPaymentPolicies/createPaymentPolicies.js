@@ -5,6 +5,8 @@ export default class CreatePaymentPolicies extends LightningElement {
     @track project = {};
     @track policies = [];
     projectDisabled = true;
+    @track deletedPolicyIds = [];
+
 
   @api
 loadData(data){
@@ -51,7 +53,7 @@ loadData(data){
                     serial: ti+1,
                     termName: t.termName,
                     percent: t.percent,
-                    paymentWithin: t.paymentWithIn,
+                   paymentWithin: t.paymentWithin ?? t.paymentWithIn,
                     isDisabled: true
                 }))
             };
@@ -129,10 +131,24 @@ loadData(data){
         this.policies = [...this.policies];
     }
     handleDeletePolicy(event) {
-        let index = Number(event.currentTarget.dataset.index);  // 🔴 FINAL FIX
+        /*let index = Number(event.currentTarget.dataset.index);  // 🔴 FINAL FIX
         this.policies.splice(index, 1);
         this.reindex();
-        this.policies = [...this.policies];
+        this.policies = [...this.policies];*/
+        let index = Number(event.currentTarget.dataset.index);  // 🔴 FINAL FIX
+
+    let deleted = this.policies[index];
+
+    // ⭐ TRACK ONLY REAL SALESFORCE IDS
+    if (deleted.id && (String(deleted.id).length === 15 || String(deleted.id).length === 18)) {
+        this.deletedPolicyIds.push(deleted.id);
+    }
+
+    this.policies.splice(index, 1);
+    this.reindex();
+    this.policies = [...this.policies];
+
+
     }
 
 
@@ -189,7 +205,7 @@ loadData(data){
 
             @api
         getPolicies() {
-            let names = this.policies.map(p => p.name?.toLowerCase());
+           /* let names = this.policies.map(p => p.name?.toLowerCase());
             let set = new Set(names);
             if(names.length !== set.size){
                 throw new Error('Duplicate policy names are not allowed.');
@@ -211,7 +227,34 @@ loadData(data){
                     isConstructionLinked: p.isConstructionLinked,
                     terms: p.terms
                 };
-            });
+            });*/
+             let names = this.policies.map(p => p.name?.toLowerCase());
+    let set = new Set(names);
+    if(names.length !== set.size){
+        throw new Error('Duplicate policy names are not allowed.');
+    }
+
+    return {
+        policies: this.policies.map(p => {
+            let finalId = null;
+
+            // ⭐ ONLY SEND REAL SALESFORCE IDS
+            if (p.id && (String(p.id).length === 15 || String(p.id).length === 18)) {
+                finalId = p.id;
+            }
+
+            return {
+                id: finalId,
+                name: p.name,
+                abbr: p.abbr,
+                cost: p.cost,
+                isConstructionLinked: p.isConstructionLinked,
+                terms: p.terms
+            };
+        }),
+        deletedPolicyIds: this.deletedPolicyIds
+    };
+
         }
 
 
