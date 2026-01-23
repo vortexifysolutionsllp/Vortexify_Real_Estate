@@ -70,7 +70,7 @@ public class ConstructionEmailService {
         String deadlineText = '';
         if (paymentWithinDays != null && paymentWithinDays > 0) {
             deadlineText =
-                '<p><strong>Payment Timeline:</strong><br/>' +
+                '<p><strong>Payment Timeline:</strong>' +
                 'Payment to be completed within ' +
                 paymentWithinDays + ' days from this notification.</p>';
         }
