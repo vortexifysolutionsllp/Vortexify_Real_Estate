@@ -1,34 +1,59 @@
 import { LightningElement, api, wire } from 'lwc';
 import getTowers from '@salesforce/apex/PostConstructionUpdateController.getTowers';
+import getConstructionPolicy from '@salesforce/apex/PostConstructionUpdateController.getConstructionPolicy';
+import getUsedMilestoneTermIds from '@salesforce/apex/PostConstructionUpdateController.getUsedMilestoneTermIds';
+
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
 import CONSTRUCTION_UPDATE_OBJECT from '@salesforce/schema/Construction_update__c';
 import CONSTRUCTION_STAGE_FIELD from '@salesforce/schema/Construction_update__c.ConstructionStage__c';
+import createConstructionUpdate from '@salesforce/apex/PostConstructionUpdateController.createConstructionUpdate';
+
 
 export default class PostConstructionUpdate extends LightningElement {
 
     @api recordId;
 
-    // Towers
+    /* ========================
+       Towers
+       ======================== */
     towers = [];
     searchTowers = [];
     selectedTowers = [];
     showDropdown = false;
     towerError = '';
 
-    // Picklist
+    /* ========================
+       Construction Stage
+       ======================== */
     constructionStage;
     constructionStageOptions = [];
     recordTypeId;
 
-    // File Upload
+    /* ========================
+       Policy & Milestones
+       ======================== */
+    policyId;
+    milestoneOptions = [];
+    selectedMilestone;
+    selectedMilestoneName;
+    milestoneError = '';
+
+    usedMilestoneTermIds = new Set(); // ⭐ NEW
+
+    /* ========================
+       File Upload
+       ======================== */
     acceptedFormats = ['.jpg', '.jpeg', '.png'];
     uploadedFiles = [];
     uploadedFileIds = [];
     uploadError = '';
 
+    /* ========================
+       Lifecycle
+       ======================== */
     connectedCallback() {
         this._outsideClickHandler = this.handleOutsideClick.bind(this);
         document.addEventListener('click', this._outsideClickHandler);
@@ -39,15 +64,12 @@ export default class PostConstructionUpdate extends LightningElement {
     }
 
     /* ========================
-       LDS – Object & Picklist
+       Object & Picklist
        ======================== */
-
     @wire(getObjectInfo, { objectApiName: CONSTRUCTION_UPDATE_OBJECT })
-    objectInfo({ data, error }) {
+    objectInfo({ data }) {
         if (data) {
             this.recordTypeId = data.defaultRecordTypeId;
-        } else if (error) {
-            console.error(error);
         }
     }
 
@@ -55,14 +77,12 @@ export default class PostConstructionUpdate extends LightningElement {
         recordTypeId: '$recordTypeId',
         fieldApiName: CONSTRUCTION_STAGE_FIELD
     })
-    wiredConstructionStages({ data, error }) {
+    wiredConstructionStages({ data }) {
         if (data) {
             this.constructionStageOptions = data.values.map(item => ({
                 label: item.label,
                 value: item.value
             }));
-        } else if (error) {
-            console.error(error);
         }
     }
 
@@ -73,13 +93,10 @@ export default class PostConstructionUpdate extends LightningElement {
     /* ========================
        Towers Logic
        ======================== */
-
     @wire(getTowers, { projectId: '$recordId' })
-    wiredTowers({ data, error }) {
+    wiredTowers({ data }) {
         if (data) {
             this.towers = data;
-        } else {
-            console.error(error);
         }
     }
 
@@ -92,10 +109,7 @@ export default class PostConstructionUpdate extends LightningElement {
         );
 
         if (availableTowers.length) {
-            this.searchTowers = [
-                { Id: 'ALL', Name: 'All' },
-                ...availableTowers
-            ];
+            this.searchTowers = [{ Id: 'ALL', Name: 'All' }, ...availableTowers];
             this.showDropdown = true;
         }
     }
@@ -122,10 +136,7 @@ export default class PostConstructionUpdate extends LightningElement {
                 label: t.Name
             }));
         } else {
-            this.selectedTowers = [
-                ...this.selectedTowers,
-                { id, label: name }
-            ];
+            this.selectedTowers = [...this.selectedTowers, { id, label: name }];
         }
 
         this.towerError = '';
@@ -159,47 +170,118 @@ export default class PostConstructionUpdate extends LightningElement {
     }
 
     /* ========================
-       File Upload
+       Used Milestones (NEW)
        ======================== */
 
-    handleUploadFinished(event) {
-
-        if (!this.validateTowers()) {
-            return;
+    @wire(getUsedMilestoneTermIds, { projectId: '$recordId' })
+    wiredUsedMilestones({ data }) {
+        if (data) {
+            this.usedMilestoneTermIds = new Set(data);
         }
+    }
 
+
+
+    /* ========================
+       Policy & Milestones Logic
+       ======================== */
+    @wire(getConstructionPolicy, { projectId: '$recordId' })
+    wiredPolicy({ data }) {
+        if (data && data.Term__c) {
+            this.policyId = data.Id;
+
+            const terms = JSON.parse(data.Term__c);
+            terms.sort((a, b) => a.serial - b.serial);
+
+            this.milestoneOptions = terms.map(term => ({
+                label: term.termName,
+                value: String(term.id),
+                disabled: this.usedMilestoneTermIds.has(String(term.id)) // ⭐ KEY
+            }));
+        }
+    }
+
+    handleMilestoneChange(event) {
+        this.selectedMilestone = event.detail.value;
+
+        const selected = this.milestoneOptions.find(
+            opt => opt.value === this.selectedMilestone
+        );
+
+        this.selectedMilestoneName = selected?.label;
+        this.milestoneError = '';
+    }
+
+    /* ========================
+       File Upload
+       ======================== */
+    handleUploadFinished(event) {
         const newFiles = event.detail.files;
-        const totalFiles = this.uploadedFiles.length + newFiles.length;
 
-        this.uploadError = '';
-
-        if (totalFiles > 5) {
+        if (this.uploadedFiles.length + newFiles.length > 5) {
             this.uploadError = 'You can upload a maximum of 5 images only.';
             return;
         }
 
-        const mappedFiles = newFiles.map(file => ({
-            id: file.documentId,
-            name: file.name
+        this.uploadError = '';
+
+        const mappedFiles = newFiles.map(f => ({
+            id: f.documentId,
+            name: f.name
         }));
 
         this.uploadedFiles = [...this.uploadedFiles, ...mappedFiles];
         this.uploadedFileIds = this.uploadedFiles.map(f => f.id);
-
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Images uploaded successfully',
-                variant: 'success'
-            })
-        );
     }
 
     /* ========================
        Footer
        ======================== */
-
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
+    }
+
+    async handleSave() {
+        let isValid = true;
+
+        if (!this.validateTowers()) isValid = false;
+
+        if (!this.selectedMilestone) {
+            this.milestoneError = 'Please select a milestone.';
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        try {
+            await createConstructionUpdate({
+                projectId: this.recordId,
+                policyId: this.policyId,
+                milestoneName: this.selectedMilestoneName,
+                termId: this.selectedMilestone,
+                constructionStage: this.constructionStage, // ✅ FIXED
+                towerIds: this.selectedTowers.map(t => t.id),
+                fileIds: this.uploadedFileIds
+            });
+
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Construction Update created successfully',
+                    variant: 'success'
+                })
+            );
+
+            this.dispatchEvent(new CloseActionScreenEvent());
+
+        } catch (error) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: error.body?.message || 'Duplicate milestone detected',
+                    variant: 'error'
+                })
+            );
+        }
     }
 }

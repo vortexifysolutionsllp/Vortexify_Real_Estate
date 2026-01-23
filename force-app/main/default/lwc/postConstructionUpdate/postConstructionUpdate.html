@@ -1,3 +1,4 @@
+
 <template>
     <div class="vortex-wrapper">
 
@@ -7,138 +8,128 @@
             <p>Upload construction progress details</p>
         </div>
 
-        <div class="slds-grid slds-wrap slds-gutters">
+        <!-- MAIN GRID -->
+        <div class="slds-grid slds-wrap slds-gutters vortex-grid">
 
-            <!-- LEFT COLUMN -->
+            <!-- ROW 1 -->
+            <!-- 1️⃣ Select Towers (Required | Multi) -->
             <div class="slds-col slds-size_1-of-2">
-
-                <!-- TOWER LOOKUP -->
-                <div class="vortex-section tower-wrapper">
+                <div class="vortex-section vortex-card tower-wrapper">
 
                     <label class="vortex-label">
                         Select Towers <span class="slds-required">*</span>
                     </label>
 
-                    <lightning-input
-                        data-input="tower"
-                        variant="label-hidden"
-                        placeholder="Search Towers..."
-                        onclick={handleTowerClick}
-                        onkeyup={handleTowers}
-                        class="vortex-input">
-                    </lightning-input>
+                    <!-- FIELD ROW (MATCHES PICKLIST HEIGHT) -->
+                    <div class="vortex-field vortex-field-fixed">
+                        <lightning-input data-input="tower" variant="label-hidden" placeholder="Search Towers"
+                            onclick={handleTowerClick} onkeyup={handleTowers} class="vortex-input">
+                        </lightning-input>
 
-                    <template if:true={showDropdown}>
-                        <div class="vortex-dropdown">
-                            <template for:each={searchTowers} for:item="tower">
-                                <div
-                                    key={tower.Id}
-                                    class="vortex-option"
-                                    data-id={tower.Id}
-                                    data-name={tower.Name}
-                                    onclick={handleSelect}>
-                                    {tower.Name}
-                                </div>
-                            </template>
-                        </div>
+                        <template if:true={showDropdown}>
+                            <div class="vortex-dropdown">
+                                <template for:each={searchTowers} for:item="tower">
+                                    <div key={tower.Id} class="vortex-option" data-id={tower.Id} data-name={tower.Name}
+                                        onclick={handleSelect}>
+                                        {tower.Name}
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Pills BELOW input (does not affect spacing) -->
+                    <template if:true={selectedTowers.length}>
+                        <lightning-pill-container items={selectedTowers} onitemremove={handleRemove}
+                            class="vortex-pills">
+                        </lightning-pill-container>
                     </template>
 
-                    <lightning-pill-container
-                        items={selectedTowers}
-                        onitemremove={handleRemove}
-                        class="vortex-pills">
-                    </lightning-pill-container>
-
-                    <!-- Tower required error -->
                     <template if:true={towerError}>
                         <p class="vortex-error">{towerError}</p>
                     </template>
-
                 </div>
-
-                <!-- FILE UPLOAD -->
-                <div class="vortex-section">
-                    <label class="vortex-label">
-                        Upload Construction Images
-                    </label>
-
-                    <lightning-file-upload
-                        label=""
-                        name="imageUploader"
-                        record-id={recordId}
-                        accept={acceptedFormats}
-                        multiple
-                        max-file-size="3145728"
-                        onuploadfinished={handleUploadFinished}>
-                    </lightning-file-upload>
-
-                    <!-- Upload error -->
-                    <template if:true={uploadError}>
-                        <p class="vortex-error">
-                            {uploadError}
-                        </p>
-                    </template>
-                </div>
-
-                <!-- Uploaded files -->
-                <template if:true={uploadedFiles.length}>
-                    <div class="vortex-uploaded">
-                        <p class="vortex-upload-success">
-                            Uploaded Images
-                        </p>
-
-                        <template for:each={uploadedFiles} for:item="file">
-                            <lightning-pill
-                                key={file.id}
-                                label={file.name}
-                                class="vortex-pill">
-                            </lightning-pill>
-                        </template>
-                    </div>
-                </template>
-
-                
-
             </div>
 
-            <!-- RIGHT COLUMN -->
+            <!-- 2️⃣ Select Milestone (Required | Single) -->
             <div class="slds-col slds-size_1-of-2">
+                <div class="vortex-section vortex-card">
 
-                <!-- CONSTRUCTION STAGE PICKLIST -->
-                <div class="vortex-section">
+                    <label class="vortex-label">
+                        Select Milestone <span class="slds-required">*</span>
+                    </label>
+
+                    <div class="vortex-field vortex-field-fixed">
+                        <lightning-combobox value={selectedMilestone} options={milestoneOptions}
+                            placeholder="Select Milestone" onchange={handleMilestoneChange} class="vortex-combobox">
+                        </lightning-combobox>
+                    </div>
+
+                    <template if:true={milestoneError}>
+                        <p class="vortex-error">{milestoneError}</p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ROW 2 -->
+            <!-- 3️⃣ Construction Stage (Optional) -->
+            <div class="slds-col slds-size_1-of-2">
+                <div class="vortex-section vortex-card">
+
                     <label class="vortex-label">
                         Construction Stage
                     </label>
 
-                    <lightning-combobox
-                        name="constructionStage"
-                        value={constructionStage}
-                        options={constructionStageOptions}
-                        placeholder="Select Construction Stage"
-                        onchange={handleStageChange}>
-                    </lightning-combobox>
+                    <div class="vortex-field vortex-field-fixed">
+                        <lightning-combobox value={constructionStage} options={constructionStageOptions}
+                            placeholder="Select Construction Stage" onchange={handleStageChange}
+                            class="vortex-combobox">
+                        </lightning-combobox>
+                    </div>
                 </div>
-
-                
-
-                
-
             </div>
+
+            <!-- 4️⃣ Upload Images -->
+            <!-- 4️⃣ Upload Images -->
+            <div class="slds-col slds-size_1-of-2">
+                <div class="vortex-section vortex-card">
+
+                    <label class="vortex-label">
+                        Upload Construction Images
+                    </label>
+
+                    <div class="vortex-field vortex-upload">
+                        <lightning-file-upload record-id={recordId} accept={acceptedFormats} multiple
+                            onuploadfinished={handleUploadFinished}>
+                        </lightning-file-upload>
+                    </div>
+
+                    <!-- Uploaded file names -->
+                    <template if:true={uploadedFiles.length}>
+                        <ul class="vortex-file-list">
+                            <template for:each={uploadedFiles} for:item="file">
+                                <li key={file.id} class="vortex-file-item">
+                                    {file.name}
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+
+                    <template if:true={uploadError}>
+                        <p class="vortex-error">{uploadError}</p>
+                    </template>
+                </div>
+            </div>
+
+
         </div>
 
         <!-- FOOTER -->
         <div class="vortex-footer">
-            <lightning-button
-                variant="neutral"
-                label="Cancel"
-                onclick={handleCancel}>
+            <lightning-button variant="neutral" label="Cancel" onclick={handleCancel}>
             </lightning-button>
 
-            <lightning-button
-                variant="neutral"
-                label="Save"
-                class="slds-m-left_small"
-                onclick={handleSave}>
+            <lightning-button variant="brand" label="Save" class="slds-m-left_small" onclick={handleSave}>
             </lightning-button>
         </div>
 
