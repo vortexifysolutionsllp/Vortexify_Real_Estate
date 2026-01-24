@@ -1,0 +1,47 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 0;
+}
+
+.progress-svg {
+    width: 300px;
+}
+
+.bg-arc {
+    fill: none;
+    stroke: #ecebea;
+    stroke-width: 14;
+}
+
+.progress-arc {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease;
+}
+
+.score-text {
+    font-size: 28px;
+    font-weight: 700;
+    fill: #2e2e2e;
+}
+
+.percent-text {
+    font-size: 14px;
+    fill: #6b6d70;
+}
+
+.scale-text {
+    font-size: 13px;
+    fill: #6b6d70;
+    font-weight: 600;
+}
+
+.details-link {
+    font-family: Arial, sans-serif;
+    font-size: 8px; 
+    fill: blue; 
+    cursor: pointer;
+}

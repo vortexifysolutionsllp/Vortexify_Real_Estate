@@ -1,0 +1,35 @@
+.term{
+    margin-left: 20px;
+}
+
+/* TERM ROW LOOKS LIKE POLICY ROW */
+.term-box{
+    border:1px solid #d8dde6;
+    padding:12px;
+    border-radius:6px;
+    margin-bottom:12px;
+    background:#ffffff;
+}
+
+.sno{
+    display:flex;
+    align-items:center;
+    font-weight:600;
+    height:32px;
+}
+
+.policy-box{
+    border:1px solid #d8dde6;
+    padding:15px;
+    margin-top:15px;
+    border-radius:6px;
+    background:#ffffff;
+}
+
+.icon-gap {
+    margin-right: 12px;
+}
+.construction-checkbox label {
+    font-size: 0.95rem;
+    font-weight: 600;
+}

@@ -1,0 +1,132 @@
+.container {
+    padding: 12px;
+}
+
+.left-box {
+    width: 300px;
+}
+
+.criteria-section {
+    margin-top: 20px;
+    border: 1px solid #d8dde6;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.criteria-header {
+    display: grid;
+    grid-template-columns: 60px 1.5fr 1fr 1.5fr 2fr;
+    padding: 10px;
+    font-weight: 600;
+    background-color: #f3f2f2;
+    border-bottom: 1px solid #d8dde6;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 60px 1.5fr 1fr 1.5fr 2fr;
+    gap: 10px;
+    padding: 12px;
+    align-items: center;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+
+
+.condition-box {
+    padding: 14px;
+    background: #fafaf9;
+    border-top: 1px solid #d8dde6;
+    margin-left: 40px;
+    border-left: 3px solid #d8dde6;
+}
+
+
+.condition-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr 1fr 40px;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: end;
+}
+
+.condition-serial {
+    font-weight: 600;
+    padding-top: 22px;
+}
+
+
+.condition-row lightning-button-icon {
+    margin-top: 22px;
+}
+
+.condition-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr 1fr 40px;
+    font-weight: 600;
+    padding: 8px 0;
+    border-bottom: 1px solid #d8dde6;
+    margin-bottom: 12px;
+}
+
+
+.add-btn {
+    margin-top: 10px;
+}
+
+.submit-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.criteria-actions {
+    text-align: left;
+}
+
+.condition-actions {
+    text-align: right;
+}
+
+.criteria-header {
+    display: grid;
+    grid-template-columns: 60px 1.5fr 1fr 1.5fr 2fr 40px;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 60px 1.5fr 1fr 1.5fr 2fr 40px;
+    gap: 10px;
+}
+
+
+
+lightning-input,
+lightning-combobox {
+    width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+
+    .criteria-header,
+    .criteria-row {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+    }
+
+    .condition-row {
+        grid-template-columns: 1fr;
+    }
+
+    .left-box {
+        width: 100%;
+    }
+}
