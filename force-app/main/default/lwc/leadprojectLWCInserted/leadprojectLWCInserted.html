@@ -1,0 +1,103 @@
+<template>
+    <div class="bg"></div>
+
+    <div class="form-container">
+
+        <div class="hero-title">
+            Let’s get started with your property requirements
+        </div>
+
+        <!-- STEP 1 EMAIL -->
+        <template if:true={showEmailOnly}>
+            <lightning-card title="Enter Your Email">
+
+                <lightning-input
+                    type="email"
+                    label="Email"
+                    value={enteredEmail}
+                    onchange={handleEmailChange}
+                    required>
+                </lightning-input>
+
+                <div class="button-area">
+                    <lightning-button
+                        label="Continue"
+                        variant="brand"
+                        onclick={handleCheckEmail}>
+                    </lightning-button>
+                </div>
+            </lightning-card>
+        </template>
+
+        <!-- STEP 2A BASIC FIELDS (EMAIL NOT EXISTS) -->
+        <template if:true={showBasicFields}>
+            <lightning-card title="Your Details">
+
+                <lightning-input label="First Name" value={leadRec.FirstName}
+                    onchange={handleChange} data-field="FirstName" required></lightning-input>
+
+                <lightning-input label="Last Name" value={leadRec.LastName}
+                    onchange={handleChange} data-field="LastName" required></lightning-input>
+
+                <lightning-input label="Phone" value={leadRec.Phone}
+                    onchange={handleChange} data-field="Phone" required></lightning-input>
+
+               <!--  <lightning-input label="City" value={leadRec.City}
+                    onchange={handleChange} data-field="City" required></lightning-input> -->
+
+                    <lightning-combobox label="Location" value={location} options={locationOptions} onchange={handleLocationChange}
+                        required>
+                    </lightning-combobox>
+
+                <!-- MULTISELECT PICKLIST -->
+             <!--   <lightning-dual-listbox
+                    name="projectInterest"
+                    label="Project Interest"
+                    source-label="Available"
+                    selected-label="Selected"
+                    options={projectOptions}
+                    value={projectInterestSelected}
+                    onchange={handleProjectInterestChange}>
+                </lightning-dual-listbox> -->
+
+                <lightning-dual-listbox name="projects" label="Project" source-label="Available" selected-label="Selected"
+                    field-level-help="Select your projects" options={projectOptions} value={selectedProjects}
+                    onchange={handleProjectChange}>
+                </lightning-dual-listbox>
+
+                <div class="button-area">
+                    <lightning-button label="Save" variant="brand" onclick={handleSave}></lightning-button>
+                </div>
+
+            </lightning-card>
+        </template>
+
+        <!-- STEP 2B PROJECT FIELDS (EMAIL EXISTS) -->
+        <template if:true={showProjectFields}>
+            <lightning-card title="Tell Us What You're Looking For">
+
+                <lightning-input label="Fax"
+                    value={leadRec.Fax}
+                    onchange={handleChange}
+                    data-field="Fax">
+                </lightning-input>
+
+                <lightning-input label="Annual Revenue"
+                    value={leadRec.AnnualRevenue}
+                    type="number"
+                    onchange={handleChange}
+                    data-field="AnnualRevenue">
+                </lightning-input>
+
+                <div class="slds-var-m-top_medium button-area">
+                    <!-- Back button -->
+                    <lightning-button label="Back" onclick={handleBack} class="slds-var-m-right_x-small"></lightning-button>
+                    <!-- Save button -->
+                    <lightning-button label="Save" variant="brand" onclick={handleSave}></lightning-button>
+                </div>
+
+            </lightning-card>
+        </template>
+
+    </div>
+</template>

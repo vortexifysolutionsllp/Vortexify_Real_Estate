@@ -1,0 +1,62 @@
+<template>
+    <lightning-card title="Capture Visit Information">
+
+        <!-- Validation message when site visit is already completed -->
+        <template if:true={isCompleted}>
+            <div class="slds-text-color_error slds-p-around_medium">
+                {validationMessage}
+            </div>
+        </template>
+
+        <div class="slds-p-around_medium">
+
+            <lightning-input
+                type="number"
+                label="Budget"
+                value={budget}
+                disabled={isCompleted}
+                data-field="Budget__c"
+                onchange={handleInputChange}>
+            </lightning-input>
+
+            <lightning-dual-listbox
+                label="Project Interest"
+                source-label="Available"
+                selected-label="Selected"
+                options={projectInterestOptions}
+                value={projectInterestValues}
+                disabled={isCompleted}
+                onchange={handleProjectInterestChange}>
+            </lightning-dual-listbox>
+
+            <lightning-combobox
+                label="Buying Timeline"
+                value={buyingTimeline}
+                options={buyingTimelineOptions}
+                disabled={isCompleted}
+                onchange={handleBuyingTimelineChange}>
+            </lightning-combobox>
+
+            <lightning-textarea
+                label="Description"
+                value={description}
+                disabled={isCompleted}
+                data-field="Description"
+                onchange={handleInputChange}>
+            </lightning-textarea>
+
+        </div>
+
+        <div class="slds-modal__footer slds-align_absolute-center">
+            <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+            <lightning-button
+                label="Save"
+                variant="brand"
+                class="slds-m-left_small"
+                disabled={isCompleted}
+                onclick={handleSave}>
+            </lightning-button>
+        </div>
+
+    </lightning-card>
+</template>
