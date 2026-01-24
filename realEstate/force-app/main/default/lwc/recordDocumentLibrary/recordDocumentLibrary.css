@@ -1,0 +1,130 @@
+/* ===============================
+   DOCUMENT LIBRARY CONTAINER
+================================ */
+.document-library {
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+/* ===============================
+   HEADER
+================================ */
+.header-actions lightning-button {
+    margin-left: 8px;
+}
+
+/* ===============================
+   FOLDER ROW
+================================ */
+.folder-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 6px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.folder-row:hover {
+    background: #f9fafb;
+}
+
+.folder-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.folder-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2e2e2e;
+}
+
+/* ===============================
+   FILE CONTAINER
+================================ */
+.file-container {
+    margin-left: 32px;
+    background: #fafafa;
+    border-left: 2px solid #0176d3;
+}
+
+/* ===============================
+   FILE ROW
+================================ */
+.file-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.file-row:last-child {
+    border-bottom: none;
+}
+
+.file-left {
+    display: flex;
+    align-items: center;
+}
+
+.file-name {
+    font-size: 13px;
+    color: #1b5fad;
+    cursor: pointer;
+}
+
+.file-name:hover {
+    text-decoration: underline;
+}
+
+/* ===============================
+   FILE ACTIONS
+================================ */
+.file-actions lightning-button-icon {
+    margin-left: 6px;
+}
+
+/* ===============================
+   EMPTY STATE
+================================ */
+.empty-files {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* ===============================
+   UPLOAD MODAL
+================================ */
+.upload-zone {
+    border: 2px dashed #0176d3;
+    background: #eef4ff;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+}
+
+.upload-text {
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+.upload-subtext {
+    color: #6b6b6b;
+    font-size: 12px;
+}
+
+.custom-file-input {
+    margin-top: 12px;
+    position: relative;
+}
+
+.custom-label {
+    background: #0176d3;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
