@@ -35,7 +35,14 @@ public with sharing class BookingTriggerHandler {
         }
         if(eligibleOpps.isEmpty()) return;
 
+        Set<Id> oppIds = new Set<Id>();
+        for(Opportunity opp: eligibleOpps){
+            oppIds.add(opp.Id);
+        }
+
         Map<Id, Policy__c> policyMap = new Map<Id, Policy__c>([SELECT Id, Term__c, Construction_Linked__c FROM Policy__c WHERE Id IN :policyIds]);
+        List<Payment_Schedule__c> oldPaymentSchedule = [SELECT Id, Is_Active__c FROM Payment_Schedule__c WHERE Opportunity__c IN :oppIds AND Is_Active__c = true];
+
         List<Payment_Schedule__c> schedulesToInsert = new List<Payment_Schedule__c>();
 
         for(Opportunity opp : eligibleOpps){
@@ -62,13 +69,24 @@ public with sharing class BookingTriggerHandler {
                 }
                 
                 Decimal amount = opp.Amount != null ? (opp.Amount * pct) / 100 : 0;
-                schedulesToInsert.add(new Payment_Schedule__c(Name = term.termName + ' - ' + Date.today(),Opportunity__c = opp.Id, MilestoneName__c = term.termName,DuePercentage__c = pct,DueAmount__c = amount,Due_Date__c = Date.today().addDays(days),PaymentStatus__c = 'Pending',Is_Active__c = false,Is_Construction_Linked__c = false));
+                if(pct>0){
+                    schedulesToInsert.add(new Payment_Schedule__c(Name = term.termName + ' - ' + Date.today(),Opportunity__c = opp.Id, MilestoneName__c = term.termName,DuePercentage__c = pct,DueAmount__c = amount,Due_Date__c = Date.today().addDays(days),PaymentStatus__c = 'Pending',Is_Active__c = true,Is_Construction_Linked__c = false));
+                }
             }
 
         }
 
-        if(!schedulesToInsert.isEmpty()){
+
+        for(Payment_Schedule__c oldPaySc: oldPaymentSchedule){
+            oldPaySc.Is_Active__c = false;
+        }
+
+        if(schedulesToInsert.size()>0){
             insert schedulesToInsert;
+        }
+
+        if(oldPaymentSchedule.size()>0){
+            update oldPaymentSchedule;
         }
     }
 }
