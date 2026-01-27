@@ -13,6 +13,7 @@ public class ConstructionUpdateBatch implements Database.Batchable<Construction_
 
     public void execute( Database.BatchableContext bc, List<Construction_Update__c> scope ) {
         List<Construction_Update__c> updatesToMarkTriggered = new List<Construction_Update__c>();
+        List<Payment_Schedule__c> paymentScheduleToInsert = new List<Payment_Schedule__c>();
         Set<Id> projectIds = new Set<Id>();
         Set<Id> policyIds  = new Set<Id>();
 
@@ -63,13 +64,21 @@ public class ConstructionUpdateBatch implements Database.Batchable<Construction_
                     }
                     System.debug('Demand Letter Email sent to: ' + b.Owner.Email);
                     ConstructionEmailService.sendUpdateWithDemandLetter(b, cu, termResult.percent, payableAmount, termResult.paymentWithinDays);
+
+                    Date dueDate = Date.today()+termResult.paymentWithinDays;
+                    Payment_Schedule__c ps = new Payment_Schedule__c(Name = cu.Name + ' - ' + dueDate.format(), Due_Date__c = dueDate, DueAmount__c = payableAmount, MilestoneName__c = cu.Name, DuePercentage__c = termResult.percent, PaymentStatus__c = 'Pending', Opportunity__c = b.Id, Is_Construction_Linked__c = true, Is_Active__c = true);
+                    System.debug('Payment Schedule:'+ps);
+                    paymentScheduleToInsert.add(ps);
+                
                 } else {
                     System.debug('Normal Update Email sent to: ' + b.Owner.Email);
                     ConstructionEmailService.sendConstructionUpdate(b, cu);
                 }
             }
         }
-
+        if(!paymentScheduleToInsert.isEmpty()){
+            insert paymentScheduleToInsert;
+        }
         if (!updatesToMarkTriggered.isEmpty()) {
             update updatesToMarkTriggered;
         }
