@@ -18,8 +18,8 @@ export default class CreateProjectPolicies extends LightningElement {
     editMode = false;
     editLabel = 'Edit';
 
-_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
-_cachedPolicyData = null; // 🆕 store last loaded policy data
+    _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+    _cachedPolicyData = null; // 🆕 store last loaded policy data
 
 
     policyOptions = [
@@ -29,15 +29,15 @@ _cachedPolicyData = null; // 🆕 store last loaded policy data
 
     renderedCallback() {
 
-    if (this._loaded) return;   // guard
+        if (this._loaded) return;   // guard
 
-    this._loaded = true;
+        this._loaded = true;
 
-    // wait for child to render
-    setTimeout(() => {
-        this.loadData();
-    }, 0);
-}
+        // wait for child to render
+        setTimeout(() => {
+            this.loadData();
+        }, 0);
+    }
 
 
     loadData() {
@@ -86,12 +86,13 @@ _cachedPolicyData = null; // 🆕 store last loaded policy data
             this.showPayment = false;
             this.showCommission = true;
         }
-         setTimeout(() => {
-        let child = this.template.querySelector('c-create-payment-policies');
-        if (child && this._cachedPolicyData) {
-            child.loadData(this._cachedPolicyData);
-        }
-    }, 0);
+
+        setTimeout(() => {
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child && this._cachedPolicyData) {
+                child.loadData(this._cachedPolicyData);
+            }
+        }, 0);
     }
 
     // ❌ CANCEL → CLOSE QUICK ACTION MODAL
@@ -99,7 +100,7 @@ _cachedPolicyData = null; // 🆕 store last loaded policy data
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
-       handleEditClick() {
+    handleEditClick() {
 
         let child = this.template.querySelector('c-create-payment-policies');
         if (!child) return;
@@ -124,30 +125,31 @@ _cachedPolicyData = null; // 🆕 store last loaded policy data
         }
 
         savePolicies({
-            policiesJson: JSON.stringify(data),
+            policiesJson: JSON.stringify(data.policies),
+            deletedPolicyIds: data.deletedPolicyIds,
             projectId: this.recordId
         })
-                        .then(() => {
-                return fetchPolicyData({ projectId: this.recordId });
+        .then(() => {
+            return fetchPolicyData({ projectId: this.recordId });
 
-            })
-            .then(res => {
-                this._cachedPolicyData = res;
-                let child = this.template.querySelector('c-create-payment-policies');
-                if (child) {
-                    child.loadData(res);
-                }
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Success',
-                        message: 'Policies saved successfully',
-                        variant: 'success'
-                    })
-                );
-                this.dispatchEvent(new CloseActionScreenEvent());
-            })
+        })
+        .then(res => {
+            this._cachedPolicyData = res;
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child) {
+                child.loadData(res);
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Policies saved successfully',
+                    variant: 'success'
+                })
+            );
+            this.dispatchEvent(new CloseActionScreenEvent());
+        })
 
-       /* .then(() => {
+        /* .then(() => {
 
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -174,8 +176,6 @@ _cachedPolicyData = null; // 🆕 store last loaded policy data
     } 
     // ✏️ EDIT
 
-
-   
 
     showToast(title, message, variant) {
         this.dispatchEvent(
