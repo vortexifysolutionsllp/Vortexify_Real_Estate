@@ -1,4 +1,4 @@
-@isTest
+@isTest //
 public with sharing class PaymentReminderBatchTest {
     @testSetup
     static void createTestDta(){
