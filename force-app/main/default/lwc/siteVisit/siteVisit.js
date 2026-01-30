@@ -4,28 +4,33 @@ import getProjects from '@salesforce/apex/SiteVisitController.getProjects';
 import getTowersByProject from '@salesforce/apex/SiteVisitController.getTowersByProject';
 import createSiteVisit from '@salesforce/apex/SiteVisitController.createSiteVisit';
 import getSiteVisits from '@salesforce/apex/SiteVisitController.getSiteVisits';
+import deleteSiteVisit from '@salesforce/apex/SiteVisitController.deleteSiteVisit';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SiteVisitForm extends LightningElement {
 
     @api recordId;
+
     today = new Date().toISOString().split('T')[0];
 
     rows = [];
     projectOptions = [];
 
-    // 🔹 original picklist (UNCHANGED)
+    
+    isLoading = false;
+
     visitTypeOptions = [
         { label: 'First Visit', value: 'First Visit' },
         { label: 'Revisit', value: 'Revisit' },
         { label: 'Virtual Visit', value: 'Virtual Visit' }
     ];
 
-    // ✅ projectId → First Visit exists
     projectFirstVisitMap = {};
 
+   
     connectedCallback() {
+
         getProjects().then(data => {
             this.projectOptions = data.map(p => ({
                 label: p.Name,
@@ -39,7 +44,7 @@ export default class SiteVisitForm extends LightningElement {
         ])
         .then(([lead, visits]) => {
 
-            // ✅ build First Visit map (DO NOT REMOVE)
+            
             visits.forEach(v => {
                 if (v.Project__c && v.VisitType__c === 'First Visit') {
                     this.projectFirstVisitMap[v.Project__c] = true;
@@ -63,12 +68,11 @@ export default class SiteVisitForm extends LightningElement {
                     isTowerDisabled: !v.Project__c,
                     salesRepId: v.Sales_Representative__c,
                     isFirst: index === 0,
-
-                    // 🔹 keep row-level options
                     visitTypeOptions: this.visitTypeOptions
                 }));
             }
 
+            
             rows.push({
                 id: Date.now(),
                 customerName: lead.Name,
@@ -90,6 +94,7 @@ export default class SiteVisitForm extends LightningElement {
         });
     }
 
+    
     formatTime(milliseconds) {
         if (!milliseconds) return '';
         const totalSeconds = Math.floor(milliseconds / 1000);
@@ -98,6 +103,7 @@ export default class SiteVisitForm extends LightningElement {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
 
+    
     addRow() {
         const leadRow = this.rows[0];
         this.rows = [...this.rows, {
@@ -118,13 +124,44 @@ export default class SiteVisitForm extends LightningElement {
         }];
     }
 
+   
+    removeRow(event) {
+
+        const index = Number(event.currentTarget.dataset.index);
+
+        if (this.rows.length === 1) return;
+
+        const row = this.rows[index];
+
+        if (typeof row.id === 'string') {
+
+            deleteSiteVisit({ visitId: row.id })
+                .then(() => {
+                    this.rows.splice(index, 1);
+                    this.rows = [...this.rows];
+
+                    this.showToast('Deleted','Site Visit deleted','success');
+                })
+                .catch(error => {
+                    this.showError(error.body?.message);
+                });
+
+        } else {
+            this.rows.splice(index, 1);
+            this.rows = [...this.rows];
+        }
+    }
+
+    
     handleRowChange(event) {
         const { index, field } = event.target.dataset;
         this.rows[index][field] = event.target.value;
         this.rows = [...this.rows];
     }
 
+    
     handleProjectChange(event) {
+
         const index = event.target.dataset.index;
         const projectId = event.target.value;
 
@@ -135,8 +172,8 @@ export default class SiteVisitForm extends LightningElement {
 
         const hasFirstVisit = this.projectFirstVisitMap[projectId] === true;
 
-        // ✅ disable visit types (UI level)
         this.rows[index].visitTypeOptions = this.visitTypeOptions.map(opt => {
+
             if (!hasFirstVisit && opt.value === 'Revisit') {
                 return { ...opt, disabled: true };
             }
@@ -146,7 +183,6 @@ export default class SiteVisitForm extends LightningElement {
             return { ...opt, disabled: false };
         });
 
-        // ✅ auto-select
         this.rows[index].visitType = hasFirstVisit ? 'Revisit' : 'First Visit';
 
         getTowersByProject({ projectId })
@@ -160,24 +196,27 @@ export default class SiteVisitForm extends LightningElement {
             });
     }
 
+    
     handleSalesRepChange(event) {
         const index = event.target.dataset.index;
         this.rows[index].salesRepId = event.detail.recordId;
         this.rows = [...this.rows];
     }
 
+    
     closeQuickAction() {
         this.dispatchEvent(new CustomEvent('closeaction'));
     }
 
-    // 🔒 FINAL + SAFE VALIDATION
+    
     handleSubmit() {
+
+        this.isLoading = true; 
 
         const newRows = this.rows.filter(row => typeof row.id === 'number');
 
         for (let row of newRows) {
 
-            // 🔹 EXISTING REQUIRED FIELD VALIDATION (UNCHANGED)
             if (
                 !row.visitDate ||
                 !row.visitTime ||
@@ -185,24 +224,28 @@ export default class SiteVisitForm extends LightningElement {
                 !row.projectId ||
                 !row.salesRepId
             ) {
+                this.isLoading = false;
                 this.showError('Please fill all the fields.');
                 return;
             }
 
-            // 🔴 NEW VISIT TYPE VALIDATION (PROJECT-WISE)
+            if (row.visitDate < this.today) {
+                this.isLoading = false;
+                this.showError('Past date site visit is not allowed.');
+                return;
+            }
+
             const hasFirstVisit = this.projectFirstVisitMap[row.projectId] === true;
 
             if (!hasFirstVisit && row.visitType === 'Revisit') {
-                this.showError(
-                    'Revisit is not allowed. Please create First Visit first.'
-                );
+                this.isLoading = false;
+                this.showError('Revisit not allowed. Create First Visit first.');
                 return;
             }
 
             if (hasFirstVisit && row.visitType === 'First Visit') {
-                this.showError(
-                    'First Visit already exists for this Project. Please select Revisit.'
-                );
+                this.isLoading = false;
+                this.showError('First Visit already exists. Select Revisit.');
                 return;
             }
         }
@@ -222,6 +265,7 @@ export default class SiteVisitForm extends LightningElement {
             towerId: row.towerId
         })
         .then(() => {
+
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Success',
@@ -229,23 +273,29 @@ export default class SiteVisitForm extends LightningElement {
                     variant: 'success'
                 })
             );
-            this.closeQuickAction();
+
+            this.closeQuickAction(); 
         })
         .catch(error => {
             this.showError(error.body?.message || 'Something went wrong');
+        })
+        .finally(()=>{
+            this.isLoading = false; 
         });
     }
 
-    showError(message) {
+   
+    showToast(title,message,variant){
         this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Validation Error',
-                message,
-                variant: 'error'
-            })
+            new ShowToastEvent({title,message,variant})
         );
     }
 
+    showError(message) {
+        this.showToast('Validation Error',message,'error');
+    }
+
+    
     handleCancel() {
         this.closeQuickAction();
     }
