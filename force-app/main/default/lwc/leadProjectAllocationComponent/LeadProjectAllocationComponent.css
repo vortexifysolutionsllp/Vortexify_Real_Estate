@@ -1,0 +1,26 @@
+.bg {
+    background-image: url(/resource/realestateleadform);
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+
+.form-container {
+    padding: 20px;
+    margin: 0 auto;
+}
+
+
+.hero-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.button-area {
+    gap: 14px;
+}
+

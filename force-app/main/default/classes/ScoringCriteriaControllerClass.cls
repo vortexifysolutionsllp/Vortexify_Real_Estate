@@ -114,7 +114,37 @@ public with sharing class ScoringCriteriaControllerClass {
     }
 
     @AuraEnabled
-    public static void submitScoringData(String objectName, List<CriteriaWrapper> criteriaList) {
+    public static void submitScoringData(String objectName, List<CriteriaWrapper> criteriaList, List<Id> deletedCriteriaIds, List<Id> deletedConditionIds) {
+
+        // Delect Condition
+        if (deletedConditionIds != null && !deletedConditionIds.isEmpty()) {
+
+            List<Scoring_Condition__c> condsToDelete = [
+                SELECT Id
+                FROM Scoring_Condition__c
+                WHERE Id IN :deletedConditionIds
+            ];
+
+            if (!condsToDelete.isEmpty()) {
+                delete condsToDelete;
+            }
+        }
+
+        // Delect Criteria after Condition
+        if (deletedCriteriaIds != null && !deletedCriteriaIds.isEmpty()) {
+
+            List<Scoring_Criteria__c> critToDelete = [
+                SELECT Id
+                FROM Scoring_Criteria__c
+                WHERE Id IN :deletedCriteriaIds
+            ];
+
+            if (!critToDelete.isEmpty()) {
+                delete critToDelete;
+            }
+        }
+
+
         if (String.isBlank(objectName) || criteriaList == null || criteriaList.isEmpty()) {
             throw new AuraHandledException('Invalid scoring data received.');
         }
@@ -158,10 +188,59 @@ public with sharing class ScoringCriteriaControllerClass {
         System.debug('criteriaList-->'+criteriaList);
         for (CriteriaWrapper crit : criteriaList) {
 
-            // Skip existing criteria completely
+            // Update Existing Scoring Criteria
             if (crit.isExisting == true) {
-               continue;
-            } 
+
+                // Find existing criteria record
+                Scoring_Criteria__c existingCrit = [
+                    SELECT Id
+                    FROM Scoring_Criteria__c
+                    WHERE Id = :crit.criteriaId
+                    LIMIT 1
+                ];
+
+                existingCrit.Name = crit.criteriaName;
+                existingCrit.Score_to_be_Awarded__c = crit.score;
+                existingCrit.Condition_Criteria__c = crit.conditionCriteria;
+                existingCrit.Condition_Logic__c = crit.conditionLogic;
+
+                update existingCrit;
+
+                // ✅ Update Conditions also
+                List<Scoring_Condition__c> condUpdates = new List<Scoring_Condition__c>();
+
+                for (ConditionWrapper cond : crit.conditions) {
+
+                    String finalValue = '';
+
+                    if (String.isNotBlank(cond.fromValue) && String.isNotBlank(cond.toValue)) {
+                        finalValue = cond.fromValue + ' AND ' + cond.toValue;
+                    } else {
+                        finalValue = cond.value;
+                    }
+
+                    Scoring_Condition__c existingCond = [
+                        SELECT Id
+                        FROM Scoring_Condition__c
+                        WHERE Id = :cond.conditionId
+                        LIMIT 1
+                    ];
+
+                    existingCond.Field__c = cond.field;
+                    existingCond.Operator__c = cond.operator;
+                    existingCond.Value__c = finalValue;
+                    existingCond.Index__c = cond.serial;
+
+                    condUpdates.add(existingCond);
+                }
+
+                if (!condUpdates.isEmpty()) {
+                    update condUpdates;
+                }
+
+                continue; // Existing handled
+            }
+
             System.debug('crit-->'+crit);
             String key =
                 crit.score + '|' +
@@ -269,8 +348,9 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
 
     for (Scoring_Criteria__c sc : criteriaList) {
         ExistingScoringWrapper wrap = new ExistingScoringWrapper();
+        wrap.criteriaId = sc.Id;
         wrap.criteriaName = sc.Name;
-       wrap.score = sc.Score_to_be_Awarded__c != null ? sc.Score_to_be_Awarded__c.intValue() : null;
+        wrap.score = sc.Score_to_be_Awarded__c != null ? sc.Score_to_be_Awarded__c.intValue() : null;
 
         wrap.conditionCriteria = sc.Condition_Criteria__c;
         wrap.conditionLogic = sc.Condition_Logic__c;
@@ -278,6 +358,7 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
 
         for (Scoring_Condition__c cond : conditionMap.get(sc.Id)) {
             ExistingConditionWrapper cw = new ExistingConditionWrapper();
+            cw.conditionId = cond.Id;
             cw.field = cond.Field__c;
             cw.operator = cond.Operator__c;
             cw.value = cond.Value__c;
@@ -293,6 +374,7 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
 
 
     public class CriteriaWrapper {
+        @AuraEnabled public Id criteriaId {get;set;}
         @AuraEnabled public String criteriaName {get;set;}
         @AuraEnabled public Integer score {get;set;}
         @AuraEnabled public String conditionCriteria {get;set;}
@@ -302,6 +384,7 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
     }
 
     public class ConditionWrapper {
+        @AuraEnabled public Id conditionId {get;set;}
         @AuraEnabled public String field {get;set;}
         @AuraEnabled public String operator {get;set;}
         @AuraEnabled public String value {get;set;}
@@ -311,6 +394,7 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
     }
 
     public class ExistingScoringWrapper {
+        @AuraEnabled public Id criteriaId;
         @AuraEnabled public String criteriaName;
         @AuraEnabled public Integer score;
         @AuraEnabled public String conditionCriteria;
@@ -319,10 +403,10 @@ conditionMap.get(c.Scoring_Criteria__c).add(c);
     }
 
     public class ExistingConditionWrapper {
+        @AuraEnabled public Id conditionId;
         @AuraEnabled public String field;
         @AuraEnabled public String operator;
         @AuraEnabled public String value;
         @AuraEnabled public Integer serial;
     }
-
 }

@@ -19,6 +19,8 @@ export default class ScoringCriteria extends LightningElement {
     @track fieldOptions = [];
     @track selectedOperator;
     @track operatorOptions = [];
+    @track deletedCriteriaIds = [];
+    @track deletedConditionIds = [];
 
     conditionCriteriaOptions = [
         { label: 'ALL', value: 'ALL' },
@@ -187,6 +189,7 @@ export default class ScoringCriteria extends LightningElement {
 
                 this.criteriaList = result.map((crit, critIndex) => ({
                     id: critIndex + 1,
+                    recordId: crit.criteriaId,
                     serial: critIndex + 1,
                     isFirst: critIndex === 0,
 
@@ -200,6 +203,7 @@ export default class ScoringCriteria extends LightningElement {
 
                     conditions: crit.conditions.map((cond, condIndex) => ({
                         id: condIndex + 1,
+                        recordId: cond.conditionId,
                         serial: cond.serial,
                         field: cond.field,
                         operator: cond.operator,
@@ -312,10 +316,7 @@ export default class ScoringCriteria extends LightningElement {
             });
         });
     }
-
-
-
-
+    
     handleAddCriteria() {
         const next = this.criteriaList.length + 1;
         // First mark all existing as NOT last
@@ -341,6 +342,12 @@ export default class ScoringCriteria extends LightningElement {
 
     handleDeleteCriteria(event) {
         const index = event.target.dataset.index;
+        const crit = this.criteriaList[index];
+
+        // If existing record, store Id for deletion
+        if (crit.isExisting && crit.recordId) {
+            this.deletedCriteriaIds.push(crit.recordId);
+        }
 
         this.criteriaList.splice(index, 1);
 
@@ -382,30 +389,7 @@ export default class ScoringCriteria extends LightningElement {
 
         this.criteriaList = [...this.criteriaList];
     }
-
-    // handleAddCondition(event) {
-    //     const critIndex = event.target.dataset.index;
-    //     const conditions = this.criteriaList[critIndex].conditions;
-
-    //     const next = conditions.length + 1;
-    //     conditions.push({
-    //         id: next,
-    //         serial: `${next}`,
-    //         field: '',
-    //         operator: '',
-    //         value: '',
-    //         fromValue: '',
-    //         toValue: '',
-    //         operatorOptions: [],
-    //         valueInputType: 'text',
-    //         showRange: false,
-    //         isPicklist: false,
-    //         picklistOptions: []
-    //     });
-
-    //     this.criteriaList = [...this.criteriaList];
-    // }
-
+    
     handleAddCondition(event) {
         const critIndex = event.target.dataset.index;
 
@@ -427,19 +411,16 @@ export default class ScoringCriteria extends LightningElement {
         this.reindexConditionsForCriteria(critIndex);
         this.criteriaList = [...this.criteriaList];
     }
-
-
-    // handleDeleteCondition(event) {
-    //     const critIndex = event.target.dataset.critIndex;
-    //     const condIndex = event.target.dataset.condIndex;
-
-    //     this.criteriaList[critIndex].conditions.splice(condIndex, 1);
-    //     this.criteriaList = [...this.criteriaList];
-    // }
-
+    
     handleDeleteCondition(event) {
         const critIndex = event.target.dataset.critIndex;
         const condIndex = event.target.dataset.condIndex;
+        
+        const cond = this.criteriaList[critIndex].conditions[condIndex];
+        // If existing condition, store Id for deletion
+        if (cond.recordId) {
+            this.deletedConditionIds.push(cond.recordId);
+        }
 
         this.criteriaList[critIndex].conditions.splice(condIndex, 1);
 
@@ -589,12 +570,14 @@ export default class ScoringCriteria extends LightningElement {
         }
 
         const payload = this.criteriaList.map(crit => ({
+            criteriaId: crit.recordId,
+            isExisting: crit.isExisting,
             criteriaName: crit.criteriaName,
             score: crit.score,
             conditionCriteria: crit.conditionCriteria,
             conditionLogic: crit.showConditionLogic ? crit.conditionLogic : '',
-            isExisting: crit.isExisting,
             conditions: (crit.conditions || []).map(cond => ({
+                conditionId: cond.recordId,
                 field: cond.field,
                 operator: cond.operator,
                 value: cond.value,
@@ -606,7 +589,9 @@ export default class ScoringCriteria extends LightningElement {
 
         submitScoringData({
             objectName: this.selectedObject,
-            criteriaList: payload
+            criteriaList: payload,
+            deletedCriteriaIds: this.deletedCriteriaIds,
+            deletedConditionIds: this.deletedConditionIds
         })
             .then(() => {
                 this.dispatchEvent(
