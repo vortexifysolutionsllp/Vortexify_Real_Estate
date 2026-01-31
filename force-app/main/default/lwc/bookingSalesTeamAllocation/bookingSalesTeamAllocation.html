@@ -1,0 +1,81 @@
+<template>
+    <lightning-card
+        icon-name="standard:account"
+        variant="brand"
+        title="Sales Team Allocation"
+        class="slds-p-around_medium">
+
+        <div class="slds-p-horizontal_medium">
+
+            <template for:each={rows} for:item="row" for:index="index">
+                <lightning-layout
+                    key={row.id}
+                    vertical-align="end"
+                    class="slds-m-bottom_medium slds-box slds-theme_default">
+ 
+                        <lightning-layout-item size="5" padding="around-small">
+                            <lightning-record-picker
+                                label="Sales Team Member"
+                                placeholder="Search User"
+                                object-api-name="User"
+                                value={row.userId}
+                                data-index={index}
+                                onchange={handleRecordChange}>
+                            </lightning-record-picker>
+                        </lightning-layout-item>
+
+                    <lightning-layout-item size="3" padding="around-small">
+                        <lightning-input
+                            type="number"
+                            label="Commission Allocation%"
+                            placeholder="Enter percent"
+                            value={row.percent}
+                            data-index={index}
+                            onchange={handlePercentChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item
+                        size="2"
+                        class="slds-align_absolute-center slds-p-around_small">
+                        <lightning-button
+                            icon-name="utility:add"
+                            variant="brand"
+                            title="Add Row"
+                            onclick={addRow}>
+                        </lightning-button>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item
+                        size="2"
+                        class="slds-align_absolute-center slds-p-around_small">
+                        <lightning-button
+                            icon-name="utility:delete"
+                            variant="destructive"
+                            title="Delete Row"
+                            data-index={index}
+                            onclick={removeRow}>
+                        </lightning-button>
+                    </lightning-layout-item>
+
+                </lightning-layout>
+            </template>
+
+            <div class="slds-align_absolute-center slds-m-top_large">
+                <lightning-button
+                    variant="brand"
+                    label="Save"
+                    class="slds-m-right_small"
+                    onclick={handleSaveClick}>
+                </lightning-button>
+
+                <lightning-button
+                    variant="neutral"
+                    label="Cancel"
+                    onclick={handleCancelClick}>
+                </lightning-button>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

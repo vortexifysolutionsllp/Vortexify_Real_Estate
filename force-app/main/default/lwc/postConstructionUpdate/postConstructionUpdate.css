@@ -1,0 +1,173 @@
+/* ================================
+   Wrapper
+================================ */
+.vortex-wrapper {
+    background: linear-gradient(135deg, #eef7ff, #ffffff);
+    border-radius: 16px;
+    padding: 24px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* ================================
+   Header
+================================ */
+.vortex-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0b5cab;
+}
+
+.vortex-header p {
+    color: #6b7280;
+    margin-top: 4px;
+    margin-bottom: 24px;
+}
+
+/* ================================
+   Grid
+================================ */
+.vortex-grid {
+    row-gap: 18px;
+}
+
+/* ================================
+   Card Sections
+================================ */
+.vortex-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 12px; /* smaller padding */
+    min-height: 110px; /* reduced from 220px */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* slightly smaller shadow */
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.vortex-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ================================
+   Labels
+================================ */
+.vortex-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+/* ================================
+   Field Wrapper
+================================ */
+.vortex-field {
+    position: relative;
+    margin-top: 0;
+}
+
+/* ================================
+   Inputs & Picklists
+================================ */
+.vortex-input input,
+.vortex-combobox .slds-input {
+    height: 44px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ================================
+   Unified Focus Style
+================================ */
+.vortex-input input:focus,
+.vortex-combobox .slds-input:focus,
+.vortex-combobox .slds-input.slds-has-focus {
+    outline: none;
+    border-color: #1b96ff !important;
+    box-shadow: 0 0 0 3px rgba(27, 150, 255, 0.25) !important;
+}
+
+/* ================================
+   Custom Tower Dropdown
+================================ */
+.vortex-dropdown {
+    position: absolute;
+    width: 100%;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    padding: 6px;
+}
+
+.vortex-option {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.vortex-option:hover {
+    background: #eef7ff;
+}
+
+/* ================================
+   Pills
+================================ */
+.vortex-pills {
+    margin-top: 10px;
+}
+
+/* ================================
+   File Upload
+================================ */
+.vortex-upload {
+    margin-top: 0;
+}
+
+.vortex-upload lightning-file-upload {
+    margin-top: 4px;
+}
+
+/* ================================
+   Uploaded File List
+================================ */
+.vortex-file-list {
+    margin-top: 10px;
+    padding-left: 0;
+    list-style: none;
+}
+
+.vortex-file-item {
+    font-size: 13px;
+    color: #1f2937;
+    padding: 4px 0;
+}
+
+/* ================================
+   Errors
+================================ */
+.vortex-error {
+    color: #c23934;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* ================================
+   Footer
+================================ */
+.vortex-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 28px;
+}
