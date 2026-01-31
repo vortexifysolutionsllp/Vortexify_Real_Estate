@@ -27,6 +27,57 @@ export default class CreateProjectPolicies extends LightningElement {
         { label: 'Commission', value: 'Commission' }
     ];
 
+    // get showPayment() {
+    //     return this.selectedPolicy === 'Payment';
+    // }
+
+    // get showCommission() {
+    //     return this.selectedPolicy === 'Commission';
+    // }
+
+    selectPayment() {
+        this.selectedPolicy = 'Payment';
+        this.showPayment = true;
+        this.showCommission = false;
+        setTimeout(() => {
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child && this._cachedPolicyData) {
+                child.loadData(this._cachedPolicyData);
+            }
+        }, 0);
+    }
+
+    selectCommission() {
+        this.selectedPolicy = 'Commission';
+        this.showPayment = false;
+        this.showCommission = true;
+        // setTimeout(() => {
+        //     let child = this.template.querySelector('c-create-payment-policies');
+        //     if (child && this._cachedPolicyData) {
+        //         child.loadData(this._cachedPolicyData);
+        //     }
+        // }, 0);
+    }
+
+    // handlePolicyChange(event) {
+    //     this.selectedPolicy = event.detail.value;
+
+    //     if (this.selectedPolicy === 'Payment') {
+    //         this.showPayment = true;
+    //         this.showCommission = false;
+    //     } else {
+    //         this.showPayment = false;
+    //         this.showCommission = true;
+    //     }
+
+    //     setTimeout(() => {
+    //         let child = this.template.querySelector('c-create-payment-policies');
+    //         if (child && this._cachedPolicyData) {
+    //             child.loadData(this._cachedPolicyData);
+    //         }
+    //     }, 0);
+    // }
+
     renderedCallback() {
 
         if (this._loaded) return;   // guard
@@ -76,24 +127,24 @@ export default class CreateProjectPolicies extends LightningElement {
             });
     }
 
-    handlePolicyChange(event) {
-        this.selectedPolicy = event.detail.value;
+    // handlePolicyChange(event) {
+    //     this.selectedPolicy = event.detail.value;
 
-        if (this.selectedPolicy === 'Payment') {
-            this.showPayment = true;
-            this.showCommission = false;
-        } else {
-            this.showPayment = false;
-            this.showCommission = true;
-        }
+    //     if (this.selectedPolicy === 'Payment') {
+    //         this.showPayment = true;
+    //         this.showCommission = false;
+    //     } else {
+    //         this.showPayment = false;
+    //         this.showCommission = true;
+    //     }
 
-        setTimeout(() => {
-            let child = this.template.querySelector('c-create-payment-policies');
-            if (child && this._cachedPolicyData) {
-                child.loadData(this._cachedPolicyData);
-            }
-        }, 0);
-    }
+    //     setTimeout(() => {
+    //         let child = this.template.querySelector('c-create-payment-policies');
+    //         if (child && this._cachedPolicyData) {
+    //             child.loadData(this._cachedPolicyData);
+    //         }
+    //     }, 0);
+    // }
 
     // ❌ CANCEL → CLOSE QUICK ACTION MODAL
     handleCancel() {
