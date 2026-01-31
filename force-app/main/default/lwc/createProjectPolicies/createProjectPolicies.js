@@ -27,14 +27,6 @@ export default class CreateProjectPolicies extends LightningElement {
         { label: 'Commission', value: 'Commission' }
     ];
 
-    // get showPayment() {
-    //     return this.selectedPolicy === 'Payment';
-    // }
-
-    // get showCommission() {
-    //     return this.selectedPolicy === 'Commission';
-    // }
-
     selectPayment() {
         this.selectedPolicy = 'Payment';
         this.showPayment = true;
@@ -51,32 +43,7 @@ export default class CreateProjectPolicies extends LightningElement {
         this.selectedPolicy = 'Commission';
         this.showPayment = false;
         this.showCommission = true;
-        // setTimeout(() => {
-        //     let child = this.template.querySelector('c-create-payment-policies');
-        //     if (child && this._cachedPolicyData) {
-        //         child.loadData(this._cachedPolicyData);
-        //     }
-        // }, 0);
     }
-
-    // handlePolicyChange(event) {
-    //     this.selectedPolicy = event.detail.value;
-
-    //     if (this.selectedPolicy === 'Payment') {
-    //         this.showPayment = true;
-    //         this.showCommission = false;
-    //     } else {
-    //         this.showPayment = false;
-    //         this.showCommission = true;
-    //     }
-
-    //     setTimeout(() => {
-    //         let child = this.template.querySelector('c-create-payment-policies');
-    //         if (child && this._cachedPolicyData) {
-    //             child.loadData(this._cachedPolicyData);
-    //         }
-    //     }, 0);
-    // }
 
     renderedCallback() {
 
@@ -169,7 +136,6 @@ export default class CreateProjectPolicies extends LightningElement {
                     title: 'Validation Error',
                     message: e.message,
                     variant: 'error',
-                    mode: 'sticky' // 👈 IMPORTANT for quick action
                 })
             );
             return; // ⛔ STOP HERE
@@ -220,7 +186,6 @@ export default class CreateProjectPolicies extends LightningElement {
                     title: 'Error',
                     message: err?.body?.message || 'Failed to save policies',
                     variant: 'error',
-                    mode: 'sticky'
                 })
             );
         });
