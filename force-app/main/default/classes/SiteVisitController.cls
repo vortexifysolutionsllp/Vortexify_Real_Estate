@@ -29,7 +29,7 @@ public with sharing class SiteVisitController {
         ];
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Site_Visit__c> getSiteVisits(Id leadId) {
         return [
             SELECT Id,
@@ -79,6 +79,8 @@ public with sharing class SiteVisitController {
         Id projectId,
         Id towerId
     ) {
+
+        System.debug('leadId-------->>>'+leadId);
         Site_Visit__c visit = new Site_Visit__c();
         visit.CustomerName__c = customerName;
         visit.VisitDate__c = visitDate;
@@ -103,4 +105,11 @@ public with sharing class SiteVisitController {
 
         insert visit;
     }
+
+
+    @AuraEnabled
+public static void deleteSiteVisit(Id visitId) {
+    delete [SELECT Id FROM Site_Visit__c WHERE Id = :visitId];
+}
+
 }

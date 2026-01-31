@@ -6,9 +6,12 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { refreshApex } from '@salesforce/apex';
 
+
 export default class SalesTeamAllocation extends LightningElement {
     @api recordId;
     @track rows = [];
+    @track isLoading = false; 
+
     deletedIds = [];
     wiredResult;
 
@@ -24,16 +27,14 @@ export default class SalesTeamAllocation extends LightningElement {
         this.wiredResult = result;
         const { data, error } = result;
 
-        if (data && data.length > 0) {
+        if (data) {
             this.rows = data.map(rec => ({
                 id: rec.Id,
                 userId: rec.User__c,
                 percent: rec.Commission_Allocation__c
             }));
-            this.addBlankRow();
-            this.deletedIds = [];
-        } else if (data && data.length === 0) {
-            this.rows = [];
+
+            if (this.rows.length === 0) this.rows = [];
             this.addBlankRow();
             this.deletedIds = [];
         } else if (error) {
@@ -62,12 +63,10 @@ export default class SalesTeamAllocation extends LightningElement {
         this.rows = [...this.rows];
     }
 
-    // ✅ DUPLICATE USER VALIDATION ADDED HERE
     handleRecordChange(event) {
         const index = Number(event.target.dataset.index);
         const selectedUserId = event.detail.recordId;
 
-        // Check duplicate
         const isDuplicate = this.rows.some((row, i) => {
             return i !== index && row.userId === selectedUserId;
         });
@@ -81,7 +80,6 @@ export default class SalesTeamAllocation extends LightningElement {
 
         event.target.setCustomValidity('');
         event.target.reportValidity();
-
         this.rows[index].userId = selectedUserId;
     }
 
@@ -92,7 +90,6 @@ export default class SalesTeamAllocation extends LightningElement {
         if (enteredValue < 0) {
             event.target.setCustomValidity('Percentage cannot be negative');
             event.target.reportValidity();
-            event.target.value = this.rows[index].percent;
             return;
         }
 
@@ -108,7 +105,6 @@ export default class SalesTeamAllocation extends LightningElement {
         if (enteredValue > remaining) {
             event.target.setCustomValidity(`Value cannot exceed ${remaining}%`);
             event.target.reportValidity();
-            event.target.value = this.rows[index].percent;
             return;
         }
 
@@ -116,13 +112,13 @@ export default class SalesTeamAllocation extends LightningElement {
         this.rows[index].percent = enteredValue;
     }
 
+    
     handleSaveClick() {
         let totalPercent = 0;
         const recordsToSave = [];
 
         for (let row of this.rows) {
             const isEmpty = !row.userId && (row.percent === null || row.percent === '');
-
             if (isEmpty) continue;
 
             if (!row.userId || row.percent === null || row.percent === '') {
@@ -159,6 +155,9 @@ export default class SalesTeamAllocation extends LightningElement {
             return;
         }
 
+        
+        this.isLoading = true;
+
         Promise.resolve()
             .then(() => {
                 if (this.deletedIds.length > 0) {
@@ -172,11 +171,17 @@ export default class SalesTeamAllocation extends LightningElement {
             })
             .then(() => refreshApex(this.wiredResult))
             .then(() => {
+
+                 
                 this.showToast('Success', 'Records saved successfully', 'success');
                 this.closeModal();
             })
             .catch(error => {
                 this.showToast('Error', error.body.message, 'error');
+            })
+            .finally(() => {
+                
+                this.isLoading = false;
             });
     }
 
