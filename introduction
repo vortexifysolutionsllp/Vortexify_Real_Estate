@@ -1,0 +1,6 @@
+Salesforce Real Estate CRM – Technical Repository
+This repository contains the complete Salesforce codebase for the Real Estate CRM solution, built using Apex, Lightning Web Components (LWC), Flows, and Metadata configurations. 
+It implements core real estate domain logic such as lead capture and assignment, project and unit inventory management, opportunity-to-booking conversion, broker/channel partner commission calculation, and post-sales processes.
+
+The solution follows Salesforce best practices including trigger frameworks, bulk-safe Apex, reusable service layers, 
+configuration-driven Flows, and modular LWCs, ensuring scalability, maintainability, and smooth deployments across environments.

@@ -41,76 +41,91 @@ public with sharing class PolicyController {
     }
     
     @AuraEnabled
-public static void savePolicies(String policiesJson, Id projectId){
+    public static void savePolicies(
+        String policiesJson,
+        List<Id> deletedPolicyIds, // ⭐ ADDED (NO EXISTING PARAM REMOVED)
+        Id projectId
+    ){
 
-    List<Object> policyList = (List<Object>)JSON.deserializeUntyped(policiesJson);
+        List<Object> policyList = (List<Object>)JSON.deserializeUntyped(policiesJson);
 
-    // ⭐ ADD THIS
-    Map<Id, Policy__c> uniqueMap = new Map<Id, Policy__c>();
-    List<Policy__c> records = new List<Policy__c>();
+        // ⭐ ADD THIS
+        Map<Id, Policy__c> uniqueMap = new Map<Id, Policy__c>();
+        List<Policy__c> records = new List<Policy__c>();
 
-    Set<Id> incomingIds = new Set<Id>();
+        Set<Id> incomingIds = new Set<Id>();
 
-    for(Object obj : policyList){
-        Map<String,Object> p = (Map<String,Object>)obj;
+        for(Object obj : policyList){
+            Map<String,Object> p = (Map<String,Object>)obj;
 
-        Policy__c rec = new Policy__c();
-        Id finalId;
+            Policy__c rec = new Policy__c();
+            Id finalId;
 
-        if (p.containsKey('id') && p.get('id') != null) {
-            String incomingId = String.valueOf(p.get('id'));
-            if (incomingId.length() == 15 || incomingId.length() == 18) {
-                finalId = (Id)incomingId;
-                rec.Id = finalId;
-                incomingIds.add(finalId);
+            if (p.containsKey('id') && p.get('id') != null) {
+                String incomingId = String.valueOf(p.get('id'));
+                if (incomingId.length() == 15 || incomingId.length() == 18) {
+                    finalId = (Id)incomingId;
+                    rec.Id = finalId;
+                    incomingIds.add(finalId);
+                }
+            }
+
+            rec.Name = (String)p.get('name');
+            rec.Abbreviation__c = (String)p.get('abbr');
+
+            if (p.get('cost') != null) {
+                rec.Cost_Sqft__c = Decimal.valueOf(String.valueOf(p.get('cost')));
+            }
+
+            rec.Term__c = JSON.serialize(p.get('terms'));
+
+            if(p.containsKey('isConstructionLinked')){
+                rec.Construction_Linked__c = (Boolean)p.get('isConstructionLinked');
+            }
+
+            rec.Applicable_Project__c = projectId;
+            rec.Type__c = 'Payment Policy';
+
+            // ⭐ PREVENT DUPLICATE
+            if(finalId != null){
+                uniqueMap.put(finalId, rec);
+            } else {
+                records.add(rec); // new record
             }
         }
 
-        rec.Name = (String)p.get('name');
-        rec.Abbreviation__c = (String)p.get('abbr');
+        // ⭐ ADD MAP VALUES
+        records.addAll(uniqueMap.values());
 
-        if (p.get('cost') != null) {
-            rec.Cost_Sqft__c = Decimal.valueOf(String.valueOf(p.get('cost')));
+        // =====================================================
+        // ⭐ EXPLICIT DELETE FOR UI-REMOVED POLICIES (ADDED)
+        // =====================================================
+        if(deletedPolicyIds != null && !deletedPolicyIds.isEmpty()){
+            delete [
+                SELECT Id 
+                FROM Policy__c 
+                WHERE Id IN :deletedPolicyIds
+            ];
         }
 
-        rec.Term__c = JSON.serialize(p.get('terms'));
+        List<Policy__c> existing = [
+            SELECT Id 
+            FROM Policy__c 
+            WHERE Applicable_Project__c = :projectId
+        ];
 
-        if(p.containsKey('isConstructionLinked')){
-            rec.Construction_Linked__c = (Boolean)p.get('isConstructionLinked');
+        List<Policy__c> toDelete = new List<Policy__c>();
+
+        for(Policy__c oldRec : existing){
+            if(!incomingIds.contains(oldRec.Id)){
+                toDelete.add(oldRec);
+            }
         }
 
-        rec.Applicable_Project__c = projectId;
-        rec.Type__c = 'Payment';
-
-        // ⭐ PREVENT DUPLICATE
-        if(finalId != null){
-            uniqueMap.put(finalId, rec);
-        } else {
-            records.add(rec); // new record
+        if(!toDelete.isEmpty()){
+            delete toDelete;
         }
+
+        upsert records;
     }
-
-    // ⭐ ADD MAP VALUES
-    records.addAll(uniqueMap.values());
-
-    List<Policy__c> existing = [
-        SELECT Id 
-        FROM Policy__c 
-        WHERE Applicable_Project__c = :projectId
-    ];
-
-    List<Policy__c> toDelete = new List<Policy__c>();
-
-    for(Policy__c oldRec : existing){
-        if(!incomingIds.contains(oldRec.Id)){
-            toDelete.add(oldRec);
-        }
-    }
-
-    if(!toDelete.isEmpty()){
-        delete toDelete;
-    }
-
-    upsert records;
-}
 }
