@@ -18,24 +18,77 @@ export default class CreateProjectPolicies extends LightningElement {
     editMode = false;
     editLabel = 'Edit';
 
-_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+    _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+    _cachedPolicyData = null; // 🆕 store last loaded policy data
+
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
         { label: 'Commission', value: 'Commission' }
     ];
 
+    // get showPayment() {
+    //     return this.selectedPolicy === 'Payment';
+    // }
+
+    // get showCommission() {
+    //     return this.selectedPolicy === 'Commission';
+    // }
+
+    selectPayment() {
+        this.selectedPolicy = 'Payment';
+        this.showPayment = true;
+        this.showCommission = false;
+        setTimeout(() => {
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child && this._cachedPolicyData) {
+                child.loadData(this._cachedPolicyData);
+            }
+        }, 0);
+    }
+
+    selectCommission() {
+        this.selectedPolicy = 'Commission';
+        this.showPayment = false;
+        this.showCommission = true;
+        // setTimeout(() => {
+        //     let child = this.template.querySelector('c-create-payment-policies');
+        //     if (child && this._cachedPolicyData) {
+        //         child.loadData(this._cachedPolicyData);
+        //     }
+        // }, 0);
+    }
+
+    // handlePolicyChange(event) {
+    //     this.selectedPolicy = event.detail.value;
+
+    //     if (this.selectedPolicy === 'Payment') {
+    //         this.showPayment = true;
+    //         this.showCommission = false;
+    //     } else {
+    //         this.showPayment = false;
+    //         this.showCommission = true;
+    //     }
+
+    //     setTimeout(() => {
+    //         let child = this.template.querySelector('c-create-payment-policies');
+    //         if (child && this._cachedPolicyData) {
+    //             child.loadData(this._cachedPolicyData);
+    //         }
+    //     }, 0);
+    // }
+
     renderedCallback() {
 
-    if (this._loaded) return;   // guard
+        if (this._loaded) return;   // guard
 
-    this._loaded = true;
+        this._loaded = true;
 
-    // wait for child to render
-    setTimeout(() => {
-        this.loadData();
-    }, 0);
-}
+        // wait for child to render
+        setTimeout(() => {
+            this.loadData();
+        }, 0);
+    }
 
 
     loadData() {
@@ -46,7 +99,7 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
         fetchPolicyData({ projectId: this.recordId })
             .then(res => {
-
+                this._cachedPolicyData = res;
                 let tryFindChild = () => {
                     let child = this.template.querySelector('c-create-payment-policies');
                     if (child) {
@@ -74,24 +127,31 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
             });
     }
 
-    handlePolicyChange(event) {
-        this.selectedPolicy = event.detail.value;
+    // handlePolicyChange(event) {
+    //     this.selectedPolicy = event.detail.value;
 
-        if (this.selectedPolicy === 'Payment') {
-            this.showPayment = true;
-            this.showCommission = false;
-        } else {
-            this.showPayment = false;
-            this.showCommission = true;
-        }
-    }
+    //     if (this.selectedPolicy === 'Payment') {
+    //         this.showPayment = true;
+    //         this.showCommission = false;
+    //     } else {
+    //         this.showPayment = false;
+    //         this.showCommission = true;
+    //     }
+
+    //     setTimeout(() => {
+    //         let child = this.template.querySelector('c-create-payment-policies');
+    //         if (child && this._cachedPolicyData) {
+    //             child.loadData(this._cachedPolicyData);
+    //         }
+    //     }, 0);
+    // }
 
     // ❌ CANCEL → CLOSE QUICK ACTION MODAL
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
-       handleEditClick() {
+    handleEditClick() {
 
         let child = this.template.querySelector('c-create-payment-policies');
         if (!child) return;
@@ -116,10 +176,31 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
         }
 
         savePolicies({
-            policiesJson: JSON.stringify(data),
+            policiesJson: JSON.stringify(data.policies),
+            deletedPolicyIds: data.deletedPolicyIds,
             projectId: this.recordId
         })
         .then(() => {
+            return fetchPolicyData({ projectId: this.recordId });
+
+        })
+        .then(res => {
+            this._cachedPolicyData = res;
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child) {
+                child.loadData(res);
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Policies saved successfully',
+                    variant: 'success'
+                })
+            );
+            this.dispatchEvent(new CloseActionScreenEvent());
+        })
+
+        /* .then(() => {
 
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -131,7 +212,7 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
             // ✅ CLOSE ONLY AFTER SUCCESS
             this.dispatchEvent(new CloseActionScreenEvent());
-        })
+        })*/
         .catch(err => {
 
             this.dispatchEvent(
@@ -146,8 +227,6 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
     } 
     // ✏️ EDIT
 
-
-   
 
     showToast(title, message, variant) {
         this.dispatchEvent(

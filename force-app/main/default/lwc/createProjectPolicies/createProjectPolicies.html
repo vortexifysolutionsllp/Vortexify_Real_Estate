@@ -1,22 +1,32 @@
 <template>
-    <lightning-modal-header label="Create Policies"></lightning-modal-header>
+    <lightning-modal-header label="Create Project Policies"></lightning-modal-header>
 
-    <lightning-modal-body>
+    <lightning-modal-body class="body">
 
-        <lightning-radio-group 
+        <div class="radio-row">
+            <div class="radio-card" onclick={selectPayment}>
+                <lightning-input type="radio" name="policy" label="Create Payment Plan" checked={showPayment}></lightning-input>
+            </div>
+
+            <div class="radio-card" onclick={selectCommission}>
+                <lightning-input type="radio" name="policy" label="Create Commission Policies" checked={showCommission}></lightning-input>
+            </div>
+        </div>
+
+        <!-- <lightning-radio-group 
             label="Select Policy Type"
             options={policyOptions}
             value={selectedPolicy}
             type="radio"
             onchange={handlePolicyChange}>
-        </lightning-radio-group>
+        </lightning-radio-group> -->
 
         <template if:true={showPayment}>
             <c-create-payment-policies record-id={recordId}></c-create-payment-policies>
         </template>
 
         <template if:true={showCommission}>
-            <c-create-commission-policies></c-create-commission-policies>
+            <c-create-commission-policies record-id={recordId}></c-create-commission-policies>
         </template>
 
     </lightning-modal-body>
