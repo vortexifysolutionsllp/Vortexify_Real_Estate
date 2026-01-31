@@ -5,4 +5,11 @@ public class PolicyTermWrapper {
     public String termName;
     public Integer serial;
     public Long id;
+
+    public String policyType;
+    public Boolean active;
+    public Integer amount;
+    public Integer upperCap;
+    public List<PolicyRangeWrapper> ranges;
+
 }
