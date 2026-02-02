@@ -17,11 +17,37 @@ export default class CreateProjectPolicies extends LightningElement {
 
     policyData;        
     _loaded = false;
+    hasPolicy = true; 
+
+    editMode = false;
+    editLabel = 'Edit';
+
+    _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+    _cachedPolicyData = null; // 🆕 store last loaded policy data
+
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
         { label: 'Commission', value: 'Commission' }
     ];
+
+    selectPayment() {
+        this.selectedPolicy = 'Payment';
+        this.showPayment = true;
+        this.showCommission = false;
+        setTimeout(() => {
+            let child = this.template.querySelector('c-create-payment-policies');
+            if (child && this._cachedPolicyData) {
+                child.loadData(this._cachedPolicyData);
+            }
+        }, 0);
+    }
+
+    selectCommission() {
+        this.selectedPolicy = 'Commission';
+        this.showPayment = false;
+        this.showCommission = true;
+    }
 
     renderedCallback() {
         if (this._loaded) return;
@@ -162,7 +188,7 @@ export default class CreateProjectPolicies extends LightningElement {
                 'success'
             );
             this.dispatchEvent(new CloseActionScreenEvent());
-        })
+        })*/
         .catch(err => {
             this.showToast(
                 'Error',

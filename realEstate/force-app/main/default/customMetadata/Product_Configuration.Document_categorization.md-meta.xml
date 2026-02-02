@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Document categorization</label>
+    <protected>false</protected>
+    <values>
+        <field>Json_Configuration__c</field>
+        <value xsi:type="xsd:string">{
+  &quot;Lead&quot;: [
+    {
+      &quot;name&quot;: &quot;Aadhaar&quot;,
+      &quot;sequence&quot;: 1,
+      &quot;required&quot;: true
+    },
+    {
+      &quot;name&quot;: &quot;PAN&quot;,
+      &quot;sequence&quot;: 2,
+      &quot;required&quot;: true
+    },
+    {
+      &quot;name&quot;: &quot;NOC&quot;,
+      &quot;sequence&quot;: 3,
+      &quot;required&quot;: false
+    },
+    {
+      &quot;name&quot;: &quot;Know Your Lead&quot;,
+      &quot;sequence&quot;: 4,
+      &quot;required&quot;: false
+    }
+  ],
+  &quot;Account&quot;: [
+    {
+      &quot;name&quot;: &quot;KYC Documents&quot;,
+      &quot;sequence&quot;: 1,
+      &quot;required&quot;: false
+    },
+    {
+      &quot;name&quot;: &quot;Agreements&quot;,
+      &quot;sequence&quot;: 2,
+      &quot;required&quot;: false
+    },
+    {
+      &quot;name&quot;: &quot;Invoices&quot;,
+      &quot;sequence&quot;: 3,
+      &quot;required&quot;: false
+    }
+  ],
+  &quot;Opportunity&quot;: [
+    {
+      &quot;name&quot;: &quot;Proposal&quot;,
+      &quot;sequence&quot;: 1,
+      &quot;required&quot;: true
+    },
+    {
+      &quot;name&quot;: &quot;SOW&quot;,
+      &quot;sequence&quot;: 2,
+      &quot;required&quot;: true
+    },
+    {
+      &quot;name&quot;: &quot;Contract&quot;,
+      &quot;sequence&quot;: 3,
+      &quot;required&quot;: true
+    }
+  ]
+}</value>
+    </values>
+</CustomMetadata>

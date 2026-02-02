@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+	<types>
+		<members>DocumentFolderConfigUtil</members>
+		<members>RecordDocumentFolderHandler</members>
+		<members>RecordDocumentFolderService</members>
+		<name>ApexClass</name>
+	</types>
+	<types>
+		<members>Product_Configuration.Document_categorization</members>
+		<name>CustomMetadata</name>
+	</types>
+	<types>
+		<members>Product_Configuration__mdt</members>
+		<members>Record_Document_Folder__c</members>
+		<name>CustomObject</name>
+	</types>
+	<types>
+		<members>recordDocumentLibrary</members>
+		<name>LightningComponentBundle</name>
+	</types>
+	<version>65.0</version>
+</Package>

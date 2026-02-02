@@ -2,11 +2,13 @@ import { LightningElement, api, wire, track } from 'lwc';
 import getProgressIndicatorData from '@salesforce/apex/ObjectScoreIndicatorController.getProgressIndicatorData';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import getScoreDetails from '@salesforce/apex/ObjectScoreIndicatorController.getScoreDetails';
+import { refreshApex } from '@salesforce/apex';
 
 export default class ObjectScoreIndicator extends LightningElement {
 
     @api recordId;
     @api objectApiName;
+    wiredProgressResult;
     @track objectLabel;
     @track isShowModal = false;
 
@@ -27,19 +29,38 @@ export default class ObjectScoreIndicator extends LightningElement {
     }
 
     @wire(getProgressIndicatorData, {recordId: '$recordId', objectApiName: '$objectApiName'})
-    wiredData({ data, error }) {
-        if (error) {
-            console.error(error);
+    wiredData(result) {
+        this.wiredProgressResult = result;
+        if (result.error) {
+            console.error(result.error);
             return;
         }
 
-        if (data && !this.animated) {
-            this.totalScore = data.totalScore;
-            this.targetScore = data.currentScore;
-            this.animated = true;
+        if (result.data) {
+            this.totalScore = result.data.totalScore;
+            this.targetScore = result.data.currentScore;
+
+            this.animated = false;
             this.animate();
         }
     }
+
+    connectedCallback() {
+        setTimeout(() => {
+            this.refreshIndicator();
+        }, 500);
+    }
+
+    refreshIndicator() {
+        refreshApex(this.wiredProgressResult)
+            .then(() => {
+                console.log("Score Indicator refreshed automatically");
+            })
+            .catch(error => {
+                console.error("Refresh Error:", error);
+            });
+    }
+
 
     animate() {
         this.currentScore = 0;

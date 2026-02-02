@@ -63,3 +63,27 @@
 .policy-label {
     font-weight: 500;
 }
+.body {
+    padding: 12px;
+}
+
+.radio-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.radio-card {
+    flex: 1;
+    border: 1px solid #cfd9e8;
+    border-radius: 8px;
+    padding: 14px;
+    background: #f2f7fd;
+    cursor: pointer;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

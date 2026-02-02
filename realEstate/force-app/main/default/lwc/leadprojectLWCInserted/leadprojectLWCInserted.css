@@ -1,0 +1,29 @@
+.bg {
+    position: fixed;
+    inset: 0;
+    background-image: url(/resource/realestateleadform);
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+}
+
+.form-container {
+    background: rgba(255,255,255,0.85);
+    max-width: 520px;
+    margin: 60px auto;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+}
+
+.hero-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.button-area {
+    margin-top: 18px;
+    text-align: center;
+}
