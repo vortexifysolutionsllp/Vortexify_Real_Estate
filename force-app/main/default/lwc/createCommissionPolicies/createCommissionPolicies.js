@@ -58,7 +58,7 @@ export default class CreateCommissionPolicies extends LightningElement {
                 id: index + 1,
                 recordId: p.Id,
                 selectedCommissionType: parsed.policyType,
-                active: isActive,
+                active: p.Active__c,
                 isEditMode: false,
                 showStandardFields: parsed.policyType !== 'range',
                 isFixed: parsed.policyType === 'fixed',
@@ -82,7 +82,7 @@ export default class CreateCommissionPolicies extends LightningElement {
                     amount: r.amount ?? null,
                     percent: r.percent ?? null,
                     upperCap: r.upperCap ?? null,
-                    active: r.active ?? true
+                    //active: r.active ?? true
                 }));
             }
 
@@ -167,12 +167,12 @@ export default class CreateCommissionPolicies extends LightningElement {
     }
 
     handleEditSave(event) {
-    const index = event.target.dataset.index;
-    let temp = [...this.policies];
+        const index = event.target.dataset.index;
+        let temp = [...this.policies];
 
-    temp[index].isEditMode = !temp[index].isEditMode;
-    this.policies = temp;
-}
+        temp[index].isEditMode = !temp[index].isEditMode;
+        this.policies = temp;
+    }
 
 
     buildPolicyJSON(policy) {
@@ -193,7 +193,7 @@ export default class CreateCommissionPolicies extends LightningElement {
             minAmount: clean(r.minAmount),
             maxAmount: clean(r.maxAmount),
             commissionType: r.commissionType,
-            active: r.active === true,
+            //active: r.active === true,
             amount: r.commissionType === 'fixed' ? clean(r.amount) : null,
             percent: r.commissionType === 'percentage' ? clean(r.percent) : null,
             upperCap: r.commissionType === 'percentage' ? clean(r.upperCap) : null

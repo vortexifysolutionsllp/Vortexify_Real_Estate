@@ -171,15 +171,14 @@ export default class CreateProjectPolicies extends LightningElement {
 
     deletePromise
         .then(() =>
-            Promise.all(
-                policies.map(p =>
-                    saveCommissionPolicy({
-                        policyJson: JSON.stringify(p.payload),
-                        projectId: this.recordId,
-                        policyId: p.policyId
-                    })
-                )
-            )
+            saveCommissionPolicy({policiesJson: JSON.stringify(policies), projectId: this.recordId})
+            // policies.map(p =>
+            //     saveCommissionPolicy({
+            //         policyJson: JSON.stringify(p.payload),
+            //         projectId: this.recordId,
+            //         policyId: p.policyId
+            //     })
+            // )
         )
         .then(() => {
             this.showToast(
@@ -188,7 +187,7 @@ export default class CreateProjectPolicies extends LightningElement {
                 'success'
             );
             this.dispatchEvent(new CloseActionScreenEvent());
-        })*/
+        })
         .catch(err => {
             this.showToast(
                 'Error',

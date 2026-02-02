@@ -37,16 +37,28 @@
                     </div>
                 </div>
 
-                <div class="slds-m-bottom_small">
-                    <lightning-combobox 
-                        label="Commission Type " 
-                        placeholder="Select an Option"
-                        value={policy.selectedCommissionType} 
-                        options={commissionOptions} 
-                        data-index={index}
-                        onchange={handleCommissionTypeChange}
-                        disabled={policy.isViewMode}>
-                    </lightning-combobox>
+                <div class="slds-grid slds-gutters slds-m-bottom_small">
+                    <div class="slds-col slds-size_1-of-2">
+                        <lightning-combobox 
+                            label="Commission Type " 
+                            placeholder="Select an Option"
+                            value={policy.selectedCommissionType} 
+                            options={commissionOptions} 
+                            data-index={index}
+                            onchange={handleCommissionTypeChange}
+                            disabled={policy.isViewMode}>
+                        </lightning-combobox>
+                    </div>
+                    <lightning-input 
+                                type="toggle" 
+                                label="Active" 
+                                checked={policy.active} 
+                                data-index={index}
+                                data-field="active" 
+                                onchange={handlePolicyFieldChange} 
+                                variant="label-hidden"
+                                disabled={policy.isViewMode}>
+                    </lightning-input>
                 </div>
 
                 <template if:true={policy.showStandardFields}>
@@ -84,7 +96,7 @@
                                 disabled={policy.isPercentDisabled}>
                             </lightning-input>
                         </div>
-                        <div class="slds-col slds-size_1-of-4 slds-p-top_large">
+                        <!-- <div class="slds-col slds-size_1-of-4 slds-p-top_large">
                             <lightning-input 
                                 type="toggle" 
                                 label="Active" 
@@ -96,7 +108,7 @@
                                 disabled={policy.isViewMode}>
                             </lightning-input>
                             <span class="slds-text-body_small">Active</span>
-                        </div>
+                        </div> -->
                     </div>
                 </template>
 
@@ -176,20 +188,6 @@
                                         onchange={handleRangeFieldChange} 
                                         disabled={range.isPercentDisabled}>
                                     </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-4 slds-p-top_large">
-                                    <lightning-input 
-                                        type="toggle" 
-                                        label="Active" 
-                                        checked={range.active}
-                                        data-policy-index={index} 
-                                        data-range-index={rIndex} 
-                                        data-field="active"
-                                        onchange={handleRangeFieldChange} 
-                                        variant="label-hidden"
-                                        disabled={policy.isViewMode}>
-                                    </lightning-input>
-                                    <span class="slds-text-body_small">Active</span>
                                 </div>
                                 <div class="slds-col slds-size_1-of-4 slds-text-align_right slds-p-top_medium">
                                     <lightning-button-icon 
