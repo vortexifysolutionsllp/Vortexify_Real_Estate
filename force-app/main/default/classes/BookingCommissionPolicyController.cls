@@ -1,7 +1,7 @@
 public with sharing class BookingCommissionPolicyController {
 
     // ============================
-    // Fetch Commission Policies
+    // Fetch Commission Policies  
     // ============================
     @AuraEnabled
     public static List<Policy__c> getCommissionPolicies(Id opportunityId) {
