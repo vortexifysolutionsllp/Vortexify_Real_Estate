@@ -1,100 +1,231 @@
 <template>
-
-    <!-- ================= Project Details ================= -->
-    <section class="box slds-p-around_medium">
-        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
-            Project Details
-        </h3>
-
-        <div class="grid-5">
-            <lightning-input label="Project Name"
-                             value={project.Name}
-                             disabled>
-            </lightning-input>
-            
-            <lightning-input type="number"
-                             label="No. of Towers"
-                             value={towerCount}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input label="Project Location"
-                             value={project.Location__c}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="No. of Units"
-                             value={unitCount}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input label="Rera Number"
-                             value={project.RERA_Number__c}
-                             disabled>
-            </lightning-input>
+    <lightning-card title="Project Details">
+        <div class="slds-grid slds-wrap slds-p-around_medium">
+            <div class="slds-col slds-size_1-of-2 slds-p-horizontal_xsmall">
+                <lightning-input label="Project Name" value={project.Name} disabled></lightning-input>
+                <lightning-input label="Project Location" value={project.Location__c} disabled></lightning-input>
+                <lightning-input label="Rera Number" value={project.RERA_Number__c} disabled></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                <lightning-input label="No of Towers" value={project.towers} disabled></lightning-input>
+                <lightning-input label="No of Units" value={project.units}  disabled></lightning-input>
+            </div>
         </div>
-    </section>
+    </lightning-card>
 
-    <!-- ================= Booking Details =================
-    <section class="box slds-p-around_medium slds-m-top_medium">
-        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
-            Booking Details
-        </h3>
+    <lightning-card title="Commission Policies">
+        <template for:each={policiesWithIcons} for:item="policy" for:index="index">
+            <div key={policy.id} class="slds-box slds-theme_default slds-m-around_medium policy-card">
 
-        <div class="grid-5">
-            <lightning-input
-                type="number"
-                label="Unit Number"
-                placeholder="Enter unit number"
-                required>
-            </lightning-input>
+                <div class="range-header slds-grid slds-grid_align-spread slds-m-bottom_small">
+                    <span class="slds-badge slds-theme_info">Policy {policy.id}</span>
+                    <div>
+                        <lightning-button-icon 
+                            icon-name={policy.editIcon} 
+                            variant="bare" 
+                            data-index={index}
+                            onclick={handleEditSave}
+                            class="slds-m-right_small">
+                        </lightning-button-icon>
 
-            <lightning-input
-                type="number"
-                label="Total Deal Cost"
-                placeholder="0.00"
-                required>
-            </lightning-input>
+                        <lightning-button-icon 
+                            icon-name="utility:delete" 
+                            variant="bare" 
+                            data-index={index}
+                            onclick={handleDeletePolicy}>
+                        </lightning-button-icon>
+                    </div>
+                </div>
 
-            <lightning-input
-                type="number"
-                label="Unit Super Area"
-                placeholder="0.00"
-                required>
-            </lightning-input>
+                <div class="slds-m-bottom_small">
+                    <lightning-combobox 
+                        label="Commission Type " 
+                        placeholder="Select an Option"
+                        value={policy.selectedCommissionType} 
+                        options={commissionOptions} 
+                        data-index={index}
+                        onchange={handleCommissionTypeChange}
+                        disabled={policy.isViewMode}>
+                    </lightning-combobox>
+                </div>
 
-            <lightning-input
-                type="number"
-                label="Unit Carpet Area"
-                placeholder="0.00"
-                required>
-            </lightning-input>
+                <template if:true={policy.showStandardFields}>
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_1-of-4">
+                            <lightning-input 
+                                type="number" 
+                                label="Amount" 
+                                value={policy.amount} 
+                                data-index={index}
+                                data-field="amount" 
+                                onchange={handlePolicyFieldChange} 
+                                disabled={policy.isAmountDisabled}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <lightning-input 
+                                type="number" 
+                                label="Percentage" 
+                                value={policy.percent} 
+                                data-index={index}
+                                data-field="percent" 
+                                onchange={handlePolicyFieldChange} 
+                                disabled={policy.isPercentDisabled}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <lightning-input 
+                                type="number" 
+                                label="Upper Cap Amount" 
+                                value={policy.upperCap}
+                                data-index={index} 
+                                data-field="upperCap" 
+                                onchange={handlePolicyFieldChange}
+                                disabled={policy.isPercentDisabled}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-4 slds-p-top_large">
+                            <lightning-input 
+                                type="toggle" 
+                                label="Active" 
+                                checked={policy.active} 
+                                data-index={index}
+                                data-field="active" 
+                                onchange={handlePolicyFieldChange} 
+                                variant="label-hidden"
+                                disabled={policy.isViewMode}>
+                            </lightning-input>
+                            <span class="slds-text-body_small">Active</span>
+                        </div>
+                    </div>
+                </template>
 
-            <lightning-input
-                type="number"
-                label="Price / Sq.ft."
-                placeholder="0.00"
-                required>
-            </lightning-input>
+                <template if:true={policy.isRange}>
+                    <template for:each={policy.ranges} for:item="range" for:index="rIndex">
+                        <div key={range.id} class="slds-box slds-m-top_small range-inner-box">
+                            <div class="slds-grid slds-gutters slds-m-bottom_small">
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-input 
+                                        label="Min Amount" 
+                                        type="number" 
+                                        value={range.minAmount}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="minAmount"
+                                        onchange={handleRangeFieldChange}
+                                        disabled={policy.isViewMode}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-input 
+                                        label="Max Amount" 
+                                        type="number" 
+                                        value={range.maxAmount}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="maxAmount"
+                                        onchange={handleRangeFieldChange}
+                                        disabled={policy.isViewMode}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-combobox 
+                                        label="Type" 
+                                        value={range.commissionType}
+                                        options={rangeCommissionOptions} 
+                                        data-policy-index={index}
+                                        data-range-index={rIndex} 
+                                        onchange={handleRangeTypeChange}
+                                        disabled={policy.isViewMode}>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-input 
+                                        label="Amount" 
+                                        type="number" 
+                                        value={range.amount}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="amount"
+                                        onchange={handleRangeFieldChange} 
+                                        disabled={range.isAmountDisabled}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-input 
+                                        label="Percentage" 
+                                        type="number" 
+                                        value={range.percent}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="percent"
+                                        onchange={handleRangeFieldChange} 
+                                        disabled={range.isPercentDisabled}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4">
+                                    <lightning-input 
+                                        label="Upper Cap" 
+                                        type="number" 
+                                        value={range.upperCap}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="upperCap"
+                                        onchange={handleRangeFieldChange} 
+                                        disabled={range.isPercentDisabled}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4 slds-p-top_large">
+                                    <lightning-input 
+                                        type="toggle" 
+                                        label="Active" 
+                                        checked={range.active}
+                                        data-policy-index={index} 
+                                        data-range-index={rIndex} 
+                                        data-field="active"
+                                        onchange={handleRangeFieldChange} 
+                                        variant="label-hidden"
+                                        disabled={policy.isViewMode}>
+                                    </lightning-input>
+                                    <span class="slds-text-body_small">Active</span>
+                                </div>
+                                <div class="slds-col slds-size_1-of-4 slds-text-align_right slds-p-top_medium">
+                                    <lightning-button-icon 
+                                        icon-name="utility:delete" 
+                                        variant="bare" 
+                                        data-policy-index={index}
+                                        data-range-index={rIndex}
+                                        onclick={handleDeleteRange}
+                                        disabled={policy.isViewMode}>
+                                    </lightning-button-icon>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <div class="slds-m-top_small">
+                        <lightning-button 
+                            label="Add Range" 
+                            variant="base" 
+                            icon-name="utility:add" 
+                            data-index={index}
+                            onclick={handleAddRange}
+                            disabled={policy.isViewMode}>
+                        </lightning-button>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <lightning-button 
+                label="Add Row" 
+                icon-name="utility:add" 
+                variant="base" 
+                onclick={handleAddPolicy}
+                class="add-row-button">
+            </lightning-button>
         </div>
-    </section> -->
-
-    <!-- ================= Commission Policy ================= -->
-    <section class="box slds-p-around_medium slds-m-top_medium">
-        <h3 class="title slds-text-heading_medium slds-m-bottom_medium">
-            Commission Policy
-        </h3>
-
-        <lightning-combobox
-            label="Select Commission Policy"
-            placeholder="Select a policy"
-            options={policyOptions}
-            value={selectedPolicyId}
-            onchange={handlePolicyChange}
-            required>
-        </lightning-combobox>
-
-    </section>
-
+    </lightning-card>
 </template>

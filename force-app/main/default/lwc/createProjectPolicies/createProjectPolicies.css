@@ -1,0 +1,65 @@
+.policy-card-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.policy-card {
+    flex: 1;
+    border: 1px solid #d8dde6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: #f7faff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.15s ease;
+}
+
+/* Hide native radio */
+.policy-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Custom radio circle */
+.radio-ui {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #747474;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* Inner dot */
+.radio-ui::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0176d3;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+/* Checked state */
+.policy-card:has(input[type="radio"]:checked) {
+    border: 2px solid #0176d3;
+    background: #eef4ff;
+}
+
+.policy-card:has(input[type="radio"]:checked) .radio-ui {
+    border-color: #0176d3;
+}
+
+.policy-card:has(input[type="radio"]:checked) .radio-ui::after {
+    opacity: 1;
+}
+
+.policy-label {
+    font-weight: 500;
+}

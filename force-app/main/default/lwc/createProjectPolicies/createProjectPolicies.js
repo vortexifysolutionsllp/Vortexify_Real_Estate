@@ -1,9 +1,11 @@
 import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
-
 import fetchPolicyData from '@salesforce/apex/PolicyController.fetchPolicyData';
 import savePolicies from '@salesforce/apex/PolicyController.savePolicies';
+import saveCommissionPolicy from '@salesforce/apex/CommissionPolicyController.saveCommissionPolicy';
+import deleteCommissionPolicies from '@salesforce/apex/CommissionPolicyController.deleteCommissionPolicies';
+
 
 export default class CreateProjectPolicies extends LightningElement {
 
@@ -13,12 +15,8 @@ export default class CreateProjectPolicies extends LightningElement {
     showPayment = true;
     showCommission = false;
 
-    hasPolicy = true; 
-
-    editMode = false;
-    editLabel = 'Edit';
-
-_loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
+    policyData;        
+    _loaded = false;
 
     policyOptions = [
         { label: 'Payment', value: 'Payment' },
@@ -26,17 +24,13 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
     ];
 
     renderedCallback() {
+        if (this._loaded) return;
+        this._loaded = true;
 
-    if (this._loaded) return;   // guard
-
-    this._loaded = true;
-
-    // wait for child to render
-    setTimeout(() => {
-        this.loadData();
-    }, 0);
-}
-
+        setTimeout(() => {
+            this.loadData();
+        }, 0);
+    }
 
     loadData() {
         if (!this.recordId) {
@@ -46,116 +40,149 @@ _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
 
         fetchPolicyData({ projectId: this.recordId })
             .then(res => {
-
-                let tryFindChild = () => {
-                    let child = this.template.querySelector('c-create-payment-policies');
-                    if (child) {
-                        console.log('child found', child);
-                        child.loadData(res);
-                    } else {
-                        console.log('child not found');
-                        // wait and try again
-                        setTimeout(() => {
-                            tryFindChild();
-                        }, 100);
-                    }
-                };
-
-                tryFindChild();
-
+                this.policyData = res;          
+                this.injectDataIntoChild();     
             })
             .catch(err => {
-                console.error('fetchPolicyData error', err);
-                this.showToast(
-                    'Error',
-                    'Failed to load policy data',
-                    'error'
-                );
+                console.error(err);
+                this.showToast('Error', 'Failed to load policy data', 'error');
             });
     }
 
+    injectDataIntoChild() {
+        let child;
+
+        if (this.showPayment) {
+            child = this.template.querySelector('c-create-payment-policies');
+        } else if (this.showCommission) {
+            child = this.template.querySelector('c-create-commission-policies');
+        }
+
+        if (child && child.loadData && this.policyData) {
+            child.loadData(this.policyData);
+        }
+    }
+
     handlePolicyChange(event) {
-        this.selectedPolicy = event.detail.value;
+        this.selectedPolicy = event.target.value;
+        this.showPayment = this.selectedPolicy === 'Payment';
+        this.showCommission = this.selectedPolicy === 'Commission';
 
-        if (this.selectedPolicy === 'Payment') {
-            this.showPayment = true;
-            this.showCommission = false;
-        } else {
-            this.showPayment = false;
-            this.showCommission = true;
-        }
+            setTimeout(() => {
+            this.injectDataIntoChild();
+        }, 0);
     }
 
-    // ❌ CANCEL → CLOSE QUICK ACTION MODAL
-    handleCancel() {
-        this.dispatchEvent(new CloseActionScreenEvent());
+    get isPayment() {
+        return this.selectedPolicy === 'Payment';
     }
 
-       handleEditClick() {
+    get isCommission() {
+        return this.selectedPolicy === 'Commission';
+    }
 
-        let child = this.template.querySelector('c-create-payment-policies');
-        if (!child) return;
 
-        let data;
+    handleEditClick() {
 
-        try {
-            // 🔍 SAME VALIDATION LOGIC
-            data = child.getPolicies(); // throws error if validation fails
-        } catch (e) {
+    if (this.showPayment) {
+        this.savePaymentPolicies();
+        return;
+    }
 
-            // ✅ SHOW TOAST (NO MODAL CLOSE)
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Validation Error',
-                    message: e.message,
-                    variant: 'error',
-                    mode: 'sticky' // 👈 IMPORTANT for quick action
-                })
-            );
-            return; // ⛔ STOP HERE
-        }
+    if (this.showCommission) {
+        this.saveCommissionPolicies();
+    }
+    }
 
-        savePolicies({
-            policiesJson: JSON.stringify(data),
+    savePaymentPolicies() {
+    const child = this.template.querySelector('c-create-payment-policies');
+    if (!child) return;
+
+    let data;
+    try {
+        data = child.getPolicies();
+    } catch (e) {
+        this.showToast('Validation Error', e.message, 'error');
+        return;
+    }
+
+    savePolicies({
+            policiesJson: JSON.stringify(data.policies),
+            deletedPolicyIds: data.deletedPolicyIds,
             projectId: this.recordId
         })
+    .then(() => {
+        this.showToast('Success', 'Policies saved successfully', 'success');
+        this.dispatchEvent(new CloseActionScreenEvent());
+    })
+    .catch(err => {
+        this.showToast(
+            'Error',
+            err?.body?.message || 'Failed to save policies',
+            'error'
+        );
+    });
+    }
+
+ saveCommissionPolicies() {
+    const child = this.template.querySelector('c-create-commission-policies');
+    if (!child) return;
+
+    let result;
+    try {
+        result = child.getPolicies(); 
+    } catch (e) {
+        this.showToast('Validation Error', e.message, 'error');
+        return;
+    }
+
+    const policies = result.policies;
+    const deletedPolicyIds = result.deletedPolicyIds;
+
+    const deletePromise = deletedPolicyIds.length
+        ? deleteCommissionPolicies({ policyIds: deletedPolicyIds })
+        : Promise.resolve();
+
+    deletePromise
+        .then(() =>
+            Promise.all(
+                policies.map(p =>
+                    saveCommissionPolicy({
+                        policyJson: JSON.stringify(p.payload),
+                        projectId: this.recordId,
+                        policyId: p.policyId
+                    })
+                )
+            )
+        )
         .then(() => {
-
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Success',
-                    message: 'Policies saved successfully',
-                    variant: 'success'
-                })
+            this.showToast(
+                'Success',
+                'Commission policies saved successfully',
+                'success'
             );
-
-            // ✅ CLOSE ONLY AFTER SUCCESS
             this.dispatchEvent(new CloseActionScreenEvent());
         })
         .catch(err => {
-
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error',
-                    message: err?.body?.message || 'Failed to save policies',
-                    variant: 'error',
-                    mode: 'sticky'
-                })
+            this.showToast(
+                'Error',
+                err?.body?.message || 'Failed to save commission policies',
+                'error'
             );
         });
-    } 
-    // ✏️ EDIT
-
-
-   
-
-    showToast(title, message, variant) {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title,
-                message,
-                variant
-            })
-        );
-    }
 }
+
+
+
+
+        handleCancel() {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        }
+
+        showToast(title, message, variant) {
+            this.dispatchEvent(
+                new ShowToastEvent({ title, message, variant })
+            );
+        }
+    }
+        
