@@ -20,13 +20,17 @@ export default class CreateCommissionPolicies extends LightningElement {
         units: data.unitCount
     };
 
-    if (!data.policies || !data.policies.length) {
+const dataFromChild = data.isDataFromChild;
+    if(dataFromChild){
+        this.policies = data.policies;
+    }
+
+    else if (!data.policies || !data.policies.length) {
 
         this.policies = [this.createEmptyPolicy(1)];
         return;
-    }
-
-    // Track active policy per commission type
+    }else{
+ // Track active policy per commission type
     const activeTracker = {};
 
     const commissionPolicies = data.policies
@@ -92,6 +96,9 @@ export default class CreateCommissionPolicies extends LightningElement {
     this.policies = commissionPolicies.length
         ? commissionPolicies
         : [this.createEmptyPolicy(1)];
+    }
+
+   
 }
 
 
@@ -225,6 +232,7 @@ export default class CreateCommissionPolicies extends LightningElement {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent();
 }
 handlePolicyFieldChange(event) {
     const index = Number(event.target.dataset.index);
@@ -243,6 +251,7 @@ handlePolicyFieldChange(event) {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent() ;
 }
 
 
@@ -276,6 +285,7 @@ handleRangeFieldChange(event) {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent();
 }
 
 handleRangeTypeChange(event) {
@@ -304,6 +314,7 @@ handleRangeTypeChange(event) {
 
     handleAddPolicy() { 
         this.policies = [...this.policies, this.createEmptyPolicy(this.policies.length + 1)]; 
+         this.sendPoliciesToParent(this.policies);
     }
     
     handleDeletePolicy(event) {
@@ -482,7 +493,22 @@ showToast(title, message, variant) {
 }
 
 
+ sendPoliciesToParent() {
+    const payload = {
+        isCommissionPolicies:true,
+        isDataFromChild:true,
+        project: this.project,
+        policies: this.policies,
+        deletedPolicyIds: this.deletedPolicyIds
+    };
 
+    // Dispatch the event
+    this.dispatchEvent(new CustomEvent('policiesupdate', {
+        detail: payload,
+        bubbles: true,   // optional, allows event to bubble up
+        composed: true   // optional, allows event to cross shadow DOM boundaries
+    }));
+}
 
 
     

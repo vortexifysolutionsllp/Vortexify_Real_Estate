@@ -1,4 +1,4 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import fetchPolicyData from '@salesforce/apex/PolicyController.fetchPolicyData';
@@ -21,7 +21,8 @@ export default class CreateProjectPolicies extends LightningElement {
 
     editMode = false;
     editLabel = 'Edit';
-
+    @track parentPolicies;
+    @track parentPoliciesCommission;
     _loaded = false; // 🔴 KEPT EXACTLY AS YOU HAD IT
     _cachedPolicyData = null; // 🆕 store last loaded policy data
 
@@ -66,7 +67,12 @@ export default class CreateProjectPolicies extends LightningElement {
 
         fetchPolicyData({ projectId: this.recordId })
             .then(res => {
-                this.policyData = res;          
+                this.policyData = res;     
+                 if (this.parentPolicies) {
+                // Merge cached policies into the response
+                this.policyData.policies = this.parentPolicies;
+                cosole.log('this.policyData.policies',this.policyData.policies);
+            }     
                 this.injectDataIntoChild();     
             })
             .catch(err => {
@@ -85,7 +91,14 @@ export default class CreateProjectPolicies extends LightningElement {
         }
 
         if (child && child.loadData && this.policyData) {
-            child.loadData(this.policyData);
+            if(this.showPayment && this.parentPolicies){
+                child.loadData(this.parentPolicies);
+            }else if(this.showCommission && this.parentPoliciesCommission){
+                child.loadData(this.parentPoliciesCommission);
+            }
+            else{
+                child.loadData(this.policyData);
+            }
         }
     }
 
@@ -171,14 +184,15 @@ export default class CreateProjectPolicies extends LightningElement {
 
     deletePromise
         .then(() =>
-            saveCommissionPolicy({policiesJson: JSON.stringify(policies), projectId: this.recordId})
-            // policies.map(p =>
-            //     saveCommissionPolicy({
-            //         policyJson: JSON.stringify(p.payload),
-            //         projectId: this.recordId,
-            //         policyId: p.policyId
-            //     })
-            // )
+            Promise.all(
+                policies.map(p =>
+                    saveCommissionPolicy({
+                        policyJson: JSON.stringify(p.payload),
+                        projectId: this.recordId,
+                        policyId: p.policyId
+                    })
+                )
+            )
         )
         .then(() => {
             this.showToast(
@@ -209,5 +223,18 @@ export default class CreateProjectPolicies extends LightningElement {
                 new ShowToastEvent({ title, message, variant })
             );
         }
+
+        handlePoliciesUpdate(event) {
+            const data = event.detail;
+            this.parentPolicies = data;
+            console.log('this.parentPolicies',this.parentPolicies);
+            //this.parentDeletedIds = deletedPolicyIds;
+        }
+
+        handlePoliciesUpdateCommission(event){
+            const data = event.detail;
+            this.parentPoliciesCommission = data;
+            console.log('this.parentPolicies',this.parentPolicies);
+        }
+
     }
-        
