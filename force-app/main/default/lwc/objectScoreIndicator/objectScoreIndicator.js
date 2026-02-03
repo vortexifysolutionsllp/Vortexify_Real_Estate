@@ -1,8 +1,11 @@
 import { LightningElement, api, wire, track } from 'lwc';
-import getProgressIndicatorData from '@salesforce/apex/ObjectScoreIndicatorController.getProgressIndicatorData';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
-import getScoreDetails from '@salesforce/apex/ObjectScoreIndicatorController.getScoreDetails';
+import { getRecord } from 'lightning/uiRecordApi';
 import { refreshApex } from '@salesforce/apex';
+import getProgressIndicatorData from '@salesforce/apex/ObjectScoreIndicatorController.getProgressIndicatorData';
+import getScoreDetails from '@salesforce/apex/ObjectScoreIndicatorController.getScoreDetails';
+
+const SCORE_FIELD = 'Lead.Score__c';
 
 export default class ObjectScoreIndicator extends LightningElement {
 
@@ -11,57 +14,81 @@ export default class ObjectScoreIndicator extends LightningElement {
     wiredProgressResult;
     @track objectLabel;
     @track isShowModal = false;
+    @track criteriaList = [];
 
     totalScore = 0;
     currentScore = 0;
     targetScore = 0;
-    animated = false;
-    @track criteriaList = [];
 
-    @wire(getObjectInfo, {objectApiName: '$objectApiName'})
-    wiredObjectInfo({data,error}){
-        if(data){
+    /* -----------------------------
+       OBJECT LABEL
+    ----------------------------- */
+    @wire(getObjectInfo, { objectApiName: '$objectApiName' })
+    wiredObjectInfo({ data, error }) {
+        if (data) {
             this.objectLabel = `${data.label} Score`;
-        }
-        else if(error){
-             this.objectLabel = 'error occured';
+        } else if (error) {
+            console.error(error);
+            this.objectLabel = 'Error occurred';
         }
     }
 
-    @wire(getProgressIndicatorData, {recordId: '$recordId', objectApiName: '$objectApiName'})
+    /* -----------------------------
+       LDS – WATCH SCORE FIELD
+       Auto fires when Score__c changes
+    ----------------------------- */
+    @wire(getRecord, { recordId: '$recordId', fields: [SCORE_FIELD] })
+    wiredLead({ data, error }) {
+        if (data) {
+            const newScore = data.fields.Score__c.value;
+
+            // Refresh Apex only when score actually changes
+            if (newScore !== this.targetScore) {
+                refreshApex(this.wiredProgressResult);
+            }
+        } else if (error) {
+            console.error(error);
+        }
+    }
+
+    /* -----------------------------
+       MAIN SCORE INDICATOR
+    ----------------------------- */
+    @wire(
+        getProgressIndicatorData,
+        { recordId: '$recordId', objectApiName: '$objectApiName' }
+    )
     wiredData(result) {
         this.wiredProgressResult = result;
-        if (result.error) {
-            console.error(result.error);
-            return;
-        }
 
         if (result.data) {
             this.totalScore = result.data.totalScore;
             this.targetScore = result.data.currentScore;
-
-            this.animated = false;
             this.animate();
+        } else if (result.error) {
+            console.error(result.error);
         }
     }
 
-    connectedCallback() {
-        setTimeout(() => {
-            this.refreshIndicator();
-        }, 500);
+    /* -----------------------------
+       SCORE DETAILS (MODAL)
+    ----------------------------- */
+    @wire(
+        getScoreDetails,
+        { recordId: '$recordId', objectApiName: '$objectApiName' }
+    )
+    wiredCriteria({ data, error }) {
+        if (data) {
+            this.criteriaList = data;
+        } else if (error) {
+            console.error(error);
+            this.criteriaList = [];
+        }
     }
 
-    refreshIndicator() {
-        refreshApex(this.wiredProgressResult)
-            .then(() => {
-                console.log("Score Indicator refreshed automatically");
-            })
-            .catch(error => {
-                console.error("Refresh Error:", error);
-            });
-    }
-
-
+    /* -----------------------------
+       ANIMATION
+    ----------------------------- */
     animate() {
         this.currentScore = 0;
 
@@ -74,6 +101,9 @@ export default class ObjectScoreIndicator extends LightningElement {
         }, 20);
     }
 
+    /* -----------------------------
+       UI GETTERS
+    ----------------------------- */
     get percentage() {
         if (this.totalScore === 0) return 0;
         return Math.round((this.currentScore / this.totalScore) * 100);
@@ -90,7 +120,9 @@ export default class ObjectScoreIndicator extends LightningElement {
             `;
         }
 
-        const offset = circumference - (this.currentScore / this.totalScore) * circumference;
+        const offset =
+            circumference -
+            (this.currentScore / this.totalScore) * circumference;
 
         return `
             stroke-dasharray: ${circumference};
@@ -106,22 +138,14 @@ export default class ObjectScoreIndicator extends LightningElement {
         return '#2e844a';
     }
 
-    showModalBox(){
+    /* -----------------------------
+       MODAL
+    ----------------------------- */
+    showModalBox() {
         this.isShowModal = true;
-    }
-
-    @wire(getScoreDetails, {recordId: '$recordId', objectApiName: '$objectApiName'})
-    wiredCriteria({ data, error }) {
-        if (data) {
-            this.criteriaList = data;
-        } else if (error) {
-            console.error(error);
-            this.criteriaList = [];
-        }
     }
 
     closeModal() {
         this.isShowModal = false;
     }
-    
 }

@@ -208,6 +208,7 @@ public with sharing class ScoringCriteriaControllerClass {
 
                 // ✅ Update Conditions also
                 List<Scoring_Condition__c> condUpdates = new List<Scoring_Condition__c>();
+                List<Scoring_Condition__c> condInserts = new List<Scoring_Condition__c>();
 
                 for (ConditionWrapper cond : crit.conditions) {
 
@@ -219,7 +220,8 @@ public with sharing class ScoringCriteriaControllerClass {
                         finalValue = cond.value;
                     }
 
-                    Scoring_Condition__c existingCond = [
+                    if(cond.conditionId != null){
+                        Scoring_Condition__c existingCond = [
                         SELECT Id
                         FROM Scoring_Condition__c
                         WHERE Id = :cond.conditionId
@@ -232,10 +234,20 @@ public with sharing class ScoringCriteriaControllerClass {
                     existingCond.Index__c = cond.serial;
 
                     condUpdates.add(existingCond);
+                    }
+                    else{
+                        Scoring_Condition__c newCond = new Scoring_Condition__c(Name = 'Condition for ' + existingCrit.Name,
+                        Scoring_Criteria__c = existingCrit.Id, Object__c  = objectName, Field__c = cond.field, Operator__c = cond.operator, 
+                        Value__c  = finalValue, Index__c = cond.serial);
+                        condInserts.add(newCond);                    
+                    }
                 }
 
                 if (!condUpdates.isEmpty()) {
                     update condUpdates;
+                }
+                if(!condInserts.isEmpty()){
+                    insert condInserts;
                 }
 
                 continue; // Existing handled
