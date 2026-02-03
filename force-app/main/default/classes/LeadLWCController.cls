@@ -182,9 +182,9 @@ if(!toInsert.isEmpty()){
         return [ SELECT Id, FirstName, LastName, Phone, Email, Location__c FROM Lead WHERE Id = :recordId LIMIT 1];
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static List<Id> getSelectedProjectInterests(Id leadId){
-        List<Project_Interest__c> projectInterestList = [SELECT Project__c FROM Project_Interest__c WHERE Lead__c = :leadId AND Is_Active__c =: true ];
+        List<Project_Interest__c> projectInterestList = [SELECT Project__c FROM Project_Interest__c WHERE Lead__c = :leadId AND Is_Active__c = true ];
         List<Id> projectIds = new List<Id>();
         for(Project_Interest__c pr: projectInterestList){
             if(pr.Project__c != null){

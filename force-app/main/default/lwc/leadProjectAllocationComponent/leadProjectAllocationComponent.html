@@ -11,6 +11,12 @@
                 <!-- BASIC DETAILS -->
 
                 <lightning-card title="Your Details">
+                    <template if:true={isLoading}>
+                        <lightning-spinner 
+                            alternative-text="Saving..." 
+                            size="medium">
+                        </lightning-spinner>
+                    </template>
 
                     <lightning-input label="First Name" value={leadRec.FirstName} onchange={handleChange}
                         data-field="FirstName" required>
@@ -35,9 +41,9 @@
 
                     <div class="button-area slds-align_absolute-center slds-m-top_large">
                         <lightning-button label="Cancel" variant="neutral" onclick={handleCancel}
-                            class="slds-m-right_small">
+                            class="slds-m-right_small"  disabled={isLoading}>
                         </lightning-button>
-                        <lightning-button label="Save" variant="brand" onclick={handleSave}>
+                        <lightning-button label="Save" variant="brand" onclick={handleSave}  disabled={isLoading}>
                         </lightning-button>
                     </div>
 

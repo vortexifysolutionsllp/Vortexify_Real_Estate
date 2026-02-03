@@ -7,8 +7,10 @@ import getSelectedProjectInterests from '@salesforce/apex/LeadLWCController.getS
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { RefreshEvent } from 'lightning/refresh';
 import { getRecordNotifyChange } from 'lightning/uiRecordApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class LeadProjectAllocationComponent extends LightningElement {
+export default class LeadProjectAllocationComponent extends NavigationMixin(LightningElement) {
 
     _recordId;
 
@@ -32,6 +34,7 @@ export default class LeadProjectAllocationComponent extends LightningElement {
     projectOptions = [];
     selectedProjects = [];
     dataLoaded = false;
+    @track isLoading = false;
 
     connectedCallback() {
         getLocationValues()
@@ -42,7 +45,7 @@ export default class LeadProjectAllocationComponent extends LightningElement {
                 }));
             })
             .catch(error => console.error(error));
-            //this.loadLeadData();
+        //this.loadLeadData();
     }
     renderedCallback() {
         if (!this.dataLoaded && this.recordId) {
@@ -53,7 +56,7 @@ export default class LeadProjectAllocationComponent extends LightningElement {
 
     async loadLeadData() {
         try {
-            // Load Lead Record
+
             const result = await getLeadById111({
                 recordId: this.recordId
             });
@@ -61,7 +64,7 @@ export default class LeadProjectAllocationComponent extends LightningElement {
             this.leadRec = { ...result };
             this.location = result.Location__c;
 
-            // Load Project Options Based on Location
+            // Load All Projects
             if (this.location) {
                 const projects = await getProjectsByLocation({
                     location: this.location
@@ -73,17 +76,20 @@ export default class LeadProjectAllocationComponent extends LightningElement {
                 }));
             }
 
-            // Load Existing Project Interests (Selected)
+            // Load Selected Projects
             const selectedIds = await getSelectedProjectInterests({
                 leadId: this.recordId
             });
 
             this.selectedProjects = [...selectedIds];
 
+
+
         } catch (error) {
             console.error("Error in loadLeadData:", error);
         }
     }
+
 
 
     handleChange(event) {
@@ -134,37 +140,62 @@ export default class LeadProjectAllocationComponent extends LightningElement {
     }
 
 
-   handleSave() {
-    saveLeadApex({
-        leadRec: this.leadRec,
-        locationValue: this.location,
-        selectedProjectNames: this.selectedProjects
-    })
-        .then(async () => {
+    handleSave() {
 
-            alert('Thank you! Your details have been saved.');
+        this.isLoading = true;
 
-            // Reload component data automatically
-            // this.dataLoaded = false;
-            // await this.loadLeadData();
-            //window.location.reload();
-            setTimeout(() => {
-                this.dispatchEvent(new CloseActionScreenEvent());
-            }, 500);
-
-             getLocationValues()
-            .then(result => {
-                this.locationOptions = result.map(r => ({
-                    label: r,
-                    value: r
-                }));
-            })
-            .catch(error => console.error(error));
-
-            //await this.loadLeadData();
-
+        saveLeadApex({
+            leadRec: this.leadRec,
+            locationValue: this.location,
+            selectedProjectNames: this.selectedProjects
         })
-        .catch(error => console.error(error));
-}
+            .then(async () => {
+
+                // Reload latest selected projects from DB
+                await this.loadLeadData();
+                // Refresh Lead Record Page
+                getRecordNotifyChange([{ recordId: this.recordId }]);
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: "Success",
+                        message: "Project Interests Saved Successfully!",
+                        variant: "success"
+                    })
+                );
+
+                // Modern Refresh: Navigate back to same record
+                this[NavigationMixin.Navigate]({
+                    type: "standard__recordPage",
+                    attributes: {
+                        recordId: this.recordId,
+                        objectApiName: "Lead",
+                        actionName: "view"
+                    }
+                });
+
+                this.dispatchEvent(new RefreshEvent());
+
+                // Close Quick Action Popup
+                setTimeout(() => {
+                    this.dispatchEvent(new CloseActionScreenEvent());
+                }, 400);
+
+            })
+            .catch(error => {
+
+                console.error("Save Error:", error);
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: "Error",
+                        message: "Something went wrong while saving.",
+                        variant: "error"
+                    })
+                );
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
+    }
+
 
 }
