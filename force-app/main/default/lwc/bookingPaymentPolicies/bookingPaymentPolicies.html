@@ -1,88 +1,37 @@
-<template>
-
+<template> 
+     <!-- 🔴 ERROR WHEN BOOKING HAS NO UNIT PRODUCT -->
+    <template if:true={showNoUnitError}>
+        <div class="unit-error">
+            This booking does not contain a Product of type "Unit".
+            Please choose a booking with a Unit product.
+        </div>
+    </template>
+    
     <!-- PROJECT DETAILS -->
+     <template if:false={showNoUnitError}>
     <section class="box">
         <h3 class="title">Project Details</h3>
-
-        <div class="grid-5">
-            <lightning-input label="Project Name"
-                             value={project.Name}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="No. of Towers"
-                             value={towerCount}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input label="Project Location"
-                             value={project.Location__c}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="No. of Units"
-                             value={unitCount}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input label="Rera Number"
-                             value={project.RERA_Number__c}
-                             disabled>
-            </lightning-input>
-        </div>
-    </section>
-
-    <!-- BOOKING DETAILS -->
+        <div class="grid-5"> <lightning-input label="Project Name" value={project.Name} disabled> </lightning-input>
+            <lightning-input type="number" label="No. of Towers" value={towerCount} disabled> </lightning-input>
+            <lightning-input label="Project Location" value={project.Location__c} disabled> </lightning-input>
+            <lightning-input type="number" label="No. of Units" value={unitCount} disabled> </lightning-input>
+            <lightning-input label="Rera Number" value={project.RERA_Number__c} disabled> </lightning-input> </div>
+    </section> <!-- BOOKING DETAILS -->
     <section class="box">
         <h3 class="title">Booking Details</h3>
-
-        <div class="grid-5">
-            <lightning-input label="Unit Number"
-                             value={unitDetails.Product2.Name}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="Super Area"
-                             value={unitDetails.Product2.SaleableArea__c}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="Carpet Area"
-                             value={unitDetails.Product2.CarpetArea__c}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="Price/Sq.ft."
-                             value={pricePerSqft}
-                             disabled>
-            </lightning-input>
-
-            <lightning-input type="number"
-                             label="Total Deal Cost"
-                             value={totalDealCost}
-                             disabled>
-            </lightning-input>
+        <div class="grid-5"> <lightning-input label="Unit Number" value={unitDetails.Product2.Name} disabled>
+            </lightning-input> <lightning-input type="number" label="Super Area"
+                value={unitDetails.Product2.SaleableArea__c} disabled> </lightning-input> <lightning-input type="number"
+                label="Carpet Area" value={unitDetails.Product2.CarpetArea__c} disabled> </lightning-input>
+            <lightning-input type="number" label="Price/Sq.ft." value={pricePerSqft} disabled> </lightning-input>
+            <lightning-input type="number" label="Total Deal Cost" value={totalDealCost} disabled> </lightning-input>
         </div>
-    </section>
-
-    <!-- PAYMENT PLAN -->
+    </section> <!-- PAYMENT PLAN -->
     <section class="box">
         <h3 class="title">Payment Plan</h3>
-
-        <div class="plan-row">
-            <lightning-combobox
-                label="Select Payment Plan"
-                placeholder="Select a plan"
-                options={paymentPlanOptions}
-                value={selectedPaymentPolicy}
-                onchange={handlePaymentChange}>
-            </lightning-combobox>
-        </div>
+        <div class="plan-row"> <lightning-combobox label="Select Payment Plan" placeholder="Select a plan"
+                options={paymentPlanOptions} value={selectedPaymentPolicy} onchange={handlePaymentChange}>
+            </lightning-combobox> </div>
     </section>
-
+     </template>
 </template>
