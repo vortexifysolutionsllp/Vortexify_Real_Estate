@@ -9,7 +9,7 @@ export default class CreatePaymentPolicies extends LightningElement {
 
 
   @api
-loadData(data){
+    loadData(data){
     this.project = {
         Name : data.project.Name,
         Location__c : data.project.Location__c,
@@ -17,8 +17,12 @@ loadData(data){
         towers: data.towerCount,
         units: data.unitCount
     };
+    const dataFromChild = data.isDataFromChild;
+    if(dataFromChild){
+        this.policies = data.policies;
+    }
 
-    if(data.policies && data.policies.length){
+    else if(data.policies && data.policies.length){
         this.policies = data.policies.filter(p => p.Type__c && p.Type__c.toLowerCase().includes('payment'))
         .map((p,i)=>{
             
@@ -144,6 +148,7 @@ loadData(data){
 
     // Fix serial numbers
     this.reindex();
+     this.sendPoliciesToParent(this.policies);
 }
 
 
@@ -172,6 +177,7 @@ loadData(data){
     this.policies.splice(index, 1);
     this.reindex();
     this.policies = [...this.policies];
+     this.sendPoliciesToParent();
 
 
     }
@@ -549,10 +555,30 @@ getPolicies() {
 
     reindex(){
         this.policies = this.policies.map((p,i)=>({...p, serial:i+1}));
+        
     }
 
     reindexTerms(pIndex){
         this.policies[pIndex].terms = this.policies[pIndex].terms.map((t,i)=>({...t, serial:i+1}));
         this.policies=[...this.policies];
+       
     }
+
+    sendPoliciesToParent() {
+    const payload = {
+        isPaymentPolicies:true,
+        isDataFromChild:true,
+        project: this.project,
+        policies: this.policies,
+        deletedPolicyIds: this.deletedPolicyIds
+    };
+
+    // Dispatch the event
+    this.dispatchEvent(new CustomEvent('policiesupdate', {
+        detail: payload,
+        bubbles: true,   // optional, allows event to bubble up
+        composed: true   // optional, allows event to cross shadow DOM boundaries
+    }));
+}
+
 }

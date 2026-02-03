@@ -194,4 +194,47 @@ if(!toInsert.isEmpty()){
         return projectIds;
     }
 
+    @AuraEnabled
+    public static Id saveLeadRecord(Lead leadRec, String locationValue, List<String> selectedProjectNames) {
+    
+        Boolean isNewLead = (leadRec.Id == null);
+        leadRec.Company = 'Web Lead';
+    
+        if (isNewLead) {
+            insert leadRec;
+        } else {
+            update leadRec;
+        }
+    
+        // create project interest
+        if (selectedProjectNames != null && !selectedProjectNames.isEmpty()) {
+
+    
+            String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
+            String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
+            String leadFullName = leadFirstName + ' ' + leadLastName;
+    
+            List<Project_Interest__c> listPI = new List<Project_Interest__c>();
+            List<Project__c> selectedProjectList = [SELECT Id, Name FROM Project__c WHERE Id IN: selectedProjectNames];
+            Map<Id,String> projectNameById = new Map<Id,String>();
+            for(Project__c prjRec : selectedProjectList){
+                projectNameById.put(prjRec.Id, prjRec.Name);
+            }
+    
+            for (Id projId : selectedProjectNames) {
+                listPI.add(new Project_Interest__c(
+                Name = leadFullName + ' - ' + projectNameById.get(projId),
+                Lead__c = leadRec.Id,
+                Project__c = projId,
+                Location__c = locationValue,
+                Is_Active__c = true
+                ));
+            }
+    
+            insert listPI;
+        }
+    
+        return leadRec.Id;
+    }
+
 }

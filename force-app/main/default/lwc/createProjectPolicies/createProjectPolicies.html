@@ -2,7 +2,7 @@
     <lightning-modal-header label="Create Project Policies"></lightning-modal-header>
 
     <lightning-modal-body class="body">
-
+        <div class="scrollable-content">
         <div class="slds-text-title_bold slds-m-bottom_small">
             Select Policy Type
         </div>
@@ -37,16 +37,16 @@
         </div>
 
         <template if:true={showPayment}>
-            <c-create-payment-policies record-id={recordId}></c-create-payment-policies>
+            <c-create-payment-policies record-id={recordId} onpoliciesupdate={handlePoliciesUpdate} policydata={paymentPolicyChildData}></c-create-payment-policies>
         </template>
 
         <template if:true={showCommission}>
-            <c-create-commission-policies record-id={recordId}></c-create-commission-policies>
+            <c-create-commission-policies record-id={recordId} onpoliciesupdate={handlePoliciesUpdateCommission} policydata={paymentPolicyChildData}></c-create-commission-policies>
         </template>
-
+    </div>
     </lightning-modal-body>
 
-    <lightning-modal-footer>
+    <lightning-modal-footer class="modal-footer">
         <div class="slds-align_absolute-center">
             <lightning-button
                 label="Cancel"

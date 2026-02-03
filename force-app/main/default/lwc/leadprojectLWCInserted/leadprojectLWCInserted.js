@@ -1,7 +1,7 @@
 import { LightningElement, track, wire } from 'lwc';
 
 import checkEmailApex from '@salesforce/apex/LeadLWCController.checkEmail';
-import saveLeadApex from '@salesforce/apex/LeadLWCController.saveLead';
+import saveLeadApexRecord from '@salesforce/apex/LeadLWCController.saveLeadRecord';
 
 import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
 import LEAD_OBJECT from '@salesforce/schema/Lead';
@@ -96,7 +96,7 @@ export default class LeadprojectLWCInserted extends LightningElement {
             .then(result => {
                 this.projectOptions = result.map(p => ({
                     label: p.Name,
-                    value: p.Name // important – showing Name
+                    value: p.Id // important – showing Name
                 }));
                 this.selectedProjects = [];
             })
@@ -120,7 +120,7 @@ export default class LeadprojectLWCInserted extends LightningElement {
         this.showProjectFields = false;
 
         // optional: reset data
-        this.enteredEmail = '';
+        //this.enteredEmail = '';
         this.leadRec = {};
         this.location = null;
         this.projectOptions = [];
@@ -129,8 +129,8 @@ export default class LeadprojectLWCInserted extends LightningElement {
 
 
     // ---------- SAVE ----------
-    handleSave() {
-        saveLeadApex({
+    handleSaveRecord() {
+        saveLeadApexRecord({
             leadRec: this.leadRec,
             locationValue: this.location,
             selectedProjectNames: this.selectedProjects
