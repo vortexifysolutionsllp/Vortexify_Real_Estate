@@ -153,4 +153,10 @@ public static Id saveLead(Lead leadRec, String locationValue, List<String> selec
             ORDER BY Name
         ];
     }
+
+    @AuraEnabled(cacheable=true)
+    public static Lead getLeadById111(Id recordId) {
+        return [ SELECT Id, FirstName, LastName, Phone, Email, Location__c FROM Lead WHERE Id = :recordId LIMIT 1];
+    }
+
 }

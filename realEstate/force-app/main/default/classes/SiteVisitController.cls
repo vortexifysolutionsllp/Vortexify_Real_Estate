@@ -103,4 +103,10 @@ public with sharing class SiteVisitController {
 
         insert visit;
     }
+
+    @AuraEnabled
+public static void deleteSiteVisit(Id visitId) {
+    delete [SELECT Id FROM Site_Visit__c WHERE Id = :visitId];
+}
+
 }

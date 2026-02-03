@@ -30,26 +30,32 @@ export default class CreateBookingPolicies extends LightningElement {
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
-    handleSave() {
-        const child = this.template.querySelector('c-booking-payment-policies');
+   handleSave() {
 
-        if (!child || !child.selectedPaymentPolicy) {
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Missing Payment Plan',
-                    message: 'Please select a Payment Plan before saving.',
-                    variant: 'warning'
-                })
-            );
-            return;
-        }
+    // ================= PAYMENT =================
+    
+    if (this.isPayment) {
+        const paymentChild =
+            this.template.querySelector('c-booking-payment-policies');
 
-        const dealCost = child.dealCost;
+        
+
+        // if (!paymentChild || !paymentChild.selectedPaymentPolicy) {
+        //     this.dispatchEvent(
+        //         new ShowToastEvent({
+        //             title: 'Missing Payment Plan',
+        //             message: 'Please select a Payment Plan before saving.',
+        //             variant: 'warning'
+        //         })
+        //     );
+        //     return;
+        // }
+        
 
         savePaymentPolicy({
             bookingId: this.recordId,
-            paymentPolicyId: child.selectedPaymentPolicy,
-            totalDealCost: dealCost
+            paymentPolicyId: paymentChild.selectedPaymentPolicy,
+            totalDealCost: paymentChild.dealCost
         })
         .then(() => {
             this.dispatchEvent(
@@ -62,14 +68,36 @@ export default class CreateBookingPolicies extends LightningElement {
             this.dispatchEvent(new CloseActionScreenEvent());
         })
         .catch(error => {
-            console.error('Error saving Payment Policy', error);
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Error',
-                    message: 'Something went wrong while saving.',
-                    variant: 'error'
-                })
-            );
+            console.error(error);
         });
+
+        return;
     }
+
+    // ================= COMMISSION =================
+    if (this.isCommission) {
+        const commissionChild =
+            this.template.querySelector('c-booking-commission-policies');
+
+        if (!commissionChild) {
+            return;
+        }
+
+        commissionChild.handleSave()
+            .then(() => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Commission Policy saved successfully.',
+                        variant: 'success'
+                    })
+                );
+                this.dispatchEvent(new CloseActionScreenEvent());
+            })
+            .catch(() => {
+                // child already showed toast
+            });
+    }
+}
+   
 }

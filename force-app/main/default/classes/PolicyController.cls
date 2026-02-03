@@ -27,7 +27,7 @@ public with sharing class PolicyController {
         ];
 
         List<Policy__c> policies = [
-            SELECT Id, Name, Abbreviation__c, Cost_Sqft__c, Term__c, Construction_Linked__c,type__c
+            SELECT Id, Name, Abbreviation__c, Cost_Sqft__c, Term__c, Construction_Linked__c,type__c, Active__c
             FROM Policy__c 
             WHERE Applicable_Project__c =: projectId
             //and Type__c ='Payment Policy'
@@ -48,7 +48,7 @@ public with sharing class PolicyController {
         Id projectId
     ){
 
-        // policiesJson is a JSON ARRAY
+        // ✅ CORRECT: policiesJson is a JSON ARRAY
         List<Object> policyList = (List<Object>)JSON.deserializeUntyped(policiesJson);
 
         Map<Id, Policy__c> uniqueMap = new Map<Id, Policy__c>();
@@ -60,7 +60,7 @@ public with sharing class PolicyController {
 
             Policy__c rec = new Policy__c();
             Id finalId;
-
+            System.debug(p);
             if (p.containsKey('id') && p.get('id') != null) {
                 String incomingId = String.valueOf(p.get('id'));
                 if (incomingId.length() == 15 || incomingId.length() == 18) {
@@ -82,6 +82,9 @@ public with sharing class PolicyController {
             if(p.containsKey('isConstructionLinked')){
                 rec.Construction_Linked__c = (Boolean)p.get('isConstructionLinked');
             }
+            if(p.containsKey('active')){
+                rec.Active__c = (Boolean)p.get('active');
+            }
 
             rec.Applicable_Project__c = projectId;
             rec.Type__c = 'Payment Policy';
@@ -95,9 +98,9 @@ public with sharing class PolicyController {
 
         records.addAll(uniqueMap.values());
 
-        
+        // =====================================================
         // DELETE POLICIES REMOVED IN UI
-      
+        // =====================================================
         if(deletedPolicyIds != null && !deletedPolicyIds.isEmpty()){
             delete [
                 SELECT Id 
@@ -106,13 +109,13 @@ public with sharing class PolicyController {
             ];
         }
 
-       
+        // =====================================================
         // SAFETY DELETE (NOT PRESENT IN INCOMING LIST)
-        
+        // =====================================================
         List<Policy__c> existing = [
             SELECT Id 
             FROM Policy__c 
-            WHERE Applicable_Project__c = :projectId
+            WHERE Applicable_Project__c = :projectId AND Type__c = 'Payment Policy'
         ];
 
         List<Policy__c> toDelete = new List<Policy__c>();

@@ -5,5 +5,6 @@ trigger BookingTrigger on Opportunity (before insert, before update, after inser
 
     if(Trigger.isAfter){
         BookingTriggerHandler.createPaymentSchedule(Trigger.new, Trigger.isUpdate ? Trigger.oldMap : null);
+        BookingTriggerHandler.createBookingCommissionAndUserCommissionAllocations(Trigger.new, Trigger.isUpdate ? Trigger.oldMap : null);
     }
 }
