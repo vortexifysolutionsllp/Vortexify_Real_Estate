@@ -1,16 +1,16 @@
-import { LightningElement, track, wire, api } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import saveLeadApex from '@salesforce/apex/LeadLWCController.saveLead';
 import getProjectsByLocation from '@salesforce/apex/LeadLWCController.getProjectsByLocation';
 import getLeadById111 from '@salesforce/apex/LeadLWCController.getLeadById111';
 import getLocationValues from '@salesforce/apex/LeadLWCController.getLocationValues';
-
-import { getObjectInfo } from 'lightning/uiObjectInfoApi';
-import LEAD_OBJECT from '@salesforce/schema/Lead';
-
+import getSelectedProjectInterests from '@salesforce/apex/LeadLWCController.getSelectedProjectInterests';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import { RefreshEvent } from 'lightning/refresh';
+import { getRecordNotifyChange } from 'lightning/uiRecordApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class LeadProjectAllocationComponent extends LightningElement {
+export default class LeadProjectAllocationComponent extends NavigationMixin(LightningElement) {
 
     _recordId;
 
@@ -18,9 +18,7 @@ export default class LeadProjectAllocationComponent extends LightningElement {
     set recordId(value) {
         this._recordId = value;
 
-        if (value) {
-            this.loadLeadData();
-        }
+
     }
 
     get recordId() {
@@ -29,16 +27,14 @@ export default class LeadProjectAllocationComponent extends LightningElement {
 
 
     @track leadRec = {};
-    enteredEmail = '';
-
-    showBasicFields = true;
-    showProjectFields = false;
 
     locationOptions = [];
     location;
 
     projectOptions = [];
     selectedProjects = [];
+    dataLoaded = false;
+    @track isLoading = false;
 
     connectedCallback() {
         getLocationValues()
@@ -49,31 +45,52 @@ export default class LeadProjectAllocationComponent extends LightningElement {
                 }));
             })
             .catch(error => console.error(error));
+        //this.loadLeadData();
+    }
+    renderedCallback() {
+        if (!this.dataLoaded && this.recordId) {
+            this.dataLoaded = true;
+            this.loadLeadData();
+        }
     }
 
-    loadLeadData() {
-        getLeadById111({ recordId: this.recordId })
-            .then(result => {
-                this.leadRec = { ...result };
-                this.location = result.Location__c;
+    async loadLeadData() {
+        try {
 
-                if (this.location) {
-                    return getProjectsByLocation({ location: this.location });
-                }
-            })
-            .then(projects => {
-                if (projects) {
-                    this.projectOptions = projects.map(p => ({
-                        label: p.Name,
-                        value: p.Id
-                    }));
-                }
-            })
-            .catch(error => console.error(error));
+            const result = await getLeadById111({
+                recordId: this.recordId
+            });
+
+            this.leadRec = { ...result };
+            this.location = result.Location__c;
+
+            // Load All Projects
+            if (this.location) {
+                const projects = await getProjectsByLocation({
+                    location: this.location
+                });
+
+                this.projectOptions = projects.map(p => ({
+                    label: p.Name,
+                    value: p.Id
+                }));
+            }
+
+            // Load Selected Projects
+            const selectedIds = await getSelectedProjectInterests({
+                leadId: this.recordId
+            });
+
+            this.selectedProjects = [...selectedIds];
+
+
+
+        } catch (error) {
+            console.error("Error in loadLeadData:", error);
+        }
     }
 
-    @wire(getObjectInfo, { objectApiName: LEAD_OBJECT })
-    leadObjectInfo;
+
 
     handleChange(event) {
         const field = event.target.dataset.field;
@@ -124,17 +141,61 @@ export default class LeadProjectAllocationComponent extends LightningElement {
 
 
     handleSave() {
+
+        this.isLoading = true;
+
         saveLeadApex({
             leadRec: this.leadRec,
             locationValue: this.location,
             selectedProjectNames: this.selectedProjects
         })
-            .then(() => {
-                alert('Thank you! Your details have been saved.');
+            .then(async () => {
+
+                // Reload latest selected projects from DB
+                await this.loadLeadData();
+                // Refresh Lead Record Page
+                getRecordNotifyChange([{ recordId: this.recordId }]);
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: "Success",
+                        message: "Project Interests Saved Successfully!",
+                        variant: "success"
+                    })
+                );
+
+                // Modern Refresh: Navigate back to same record
+                this[NavigationMixin.Navigate]({
+                    type: "standard__recordPage",
+                    attributes: {
+                        recordId: this.recordId,
+                        objectApiName: "Lead",
+                        actionName: "view"
+                    }
+                });
 
                 this.dispatchEvent(new RefreshEvent());
-                this.dispatchEvent(new CloseActionScreenEvent());
+
+                // Close Quick Action Popup
+                setTimeout(() => {
+                    this.dispatchEvent(new CloseActionScreenEvent());
+                }, 400);
+
             })
-            .catch(error => console.error(error));
+            .catch(error => {
+
+                console.error("Save Error:", error);
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: "Error",
+                        message: "Something went wrong while saving.",
+                        variant: "error"
+                    })
+                );
+            })
+            .finally(() => {
+                this.isLoading = false;
+            });
     }
+
+
 }

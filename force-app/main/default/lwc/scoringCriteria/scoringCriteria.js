@@ -14,6 +14,8 @@ export default class ScoringCriteria extends LightningElement {
     @track error;
     @track criteriaList = [];
     showCriteriaSection = false;
+    @track isCancelled = false;
+    @track isSubmitted = false;
 
     @track objectOptions = [];
     @track fieldOptions = [];
@@ -155,6 +157,12 @@ export default class ScoringCriteria extends LightningElement {
     }
 
     handleObjectChange(event) {
+        this.isCancelled = false;
+        this.isSubmitted = false;
+        this.selectedObject = [];
+        this.criteriaList = [];
+        this.deletedCriteriaIds = [];
+        this.deletedConditionIds = [];
         this.selectedObject = event.detail.value;
         this.showCriteriaSection = true;
 
@@ -183,6 +191,8 @@ export default class ScoringCriteria extends LightningElement {
 
                 if (!result || result.length === 0) {
                     this.criteriaList = [];
+                    this.deletedCriteriaIds = [];
+                    this.deletedConditionIds = [];
                     this.handleAddCriteria();
                     return;
                 }
@@ -535,6 +545,12 @@ export default class ScoringCriteria extends LightningElement {
         return this.criteriaList.length > 0;
     }
 
+    handleCancel(){
+        this.showCriteriaSection = false;
+        this.isCancelled = true;
+        this.selectedObject = '';
+    }
+
     handleSubmit() {
 
         for (let crit of this.criteriaList) {
@@ -601,6 +617,10 @@ export default class ScoringCriteria extends LightningElement {
                         variant: 'success'
                     })
                 );
+                
+                this.showCriteriaSection = false;
+                this.isSubmitted = true;
+                this.selectedObject = '';
             })
             .catch(error => {
                 this.dispatchEvent(
@@ -611,6 +631,7 @@ export default class ScoringCriteria extends LightningElement {
                     })
                 );
             });
+
     }
 
     reindexConditionsForCriteria(critIndex) {
@@ -629,5 +650,9 @@ export default class ScoringCriteria extends LightningElement {
                 variant: 'error'
             })
         );
+    }
+
+    get showFooterButtons(){
+        return !this.isSubmitted && !this.isCancelled;
     }
 }
