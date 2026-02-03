@@ -28,6 +28,10 @@ export default class BookingPaymentPolicies extends LightningElement {
     @track pricePerSqft = null;
     @track totalDealCost = null;
 
+    @track showNoUnitError = false;
+    @track disableAllFields = false;
+
+
     hasValidatedUnit = false;
 
     // Fetch Project & Tower
@@ -36,7 +40,8 @@ export default class BookingPaymentPolicies extends LightningElement {
         if (data) {
             this.project = data.project || {};
             this.tower = data.tower || {};
-            this.projectId = this.project.Id;
+           // this.projectId = this.project.Id;
+             this.projectId = data.projectId;
         } else if (error) {
             console.error('Error fetching project data', error);
         }
@@ -45,6 +50,8 @@ export default class BookingPaymentPolicies extends LightningElement {
     // Fetch Tower Count
     @wire(getTowerCountByProject, { projectId: '$project.Id' })
     wiredTowerCount({ data, error }) {
+        // console.log('ProjectId for policies:', this.projectId);
+
         if (data !== undefined) {
             this.towerCount = data;
         } else if (error) {
@@ -65,7 +72,11 @@ export default class BookingPaymentPolicies extends LightningElement {
     // Fetch Payment Policies
    @wire(getPaymentPoliciesByProject, { projectId: '$projectId' })
     wiredPaymentPolicies({ data, error }) {
+        console.log('ProjectId for policies:', this.projectId);
+
         if (data) {
+            console.log('ProjectId for policies:', this.projectId);
+
             this.paymentPlanOptions = data.map(policy => ({
                 label: policy.Name,
                 value: policy.Id
@@ -76,17 +87,38 @@ export default class BookingPaymentPolicies extends LightningElement {
     }
 
     // Fetch Unit Details
+    // @wire(getUnitBookingDetails, { oppId: '$recordId' })
+    // wiredUnitDetails({ data, error }) {
+    //     if (data) {
+    //         this.unitDetails = data;
+    //     } else if (!data && !this.hasValidatedUnit) {
+    //         this.hasValidatedUnit = true;
+    //         this.showUnitMissingToast();
+    //     } else if (error) {
+    //         console.error('Error fetching unit details', error);
+    //     }
+    // }
+
     @wire(getUnitBookingDetails, { oppId: '$recordId' })
-    wiredUnitDetails({ data, error }) {
-        if (data) {
-            this.unitDetails = data;
-        } else if (!data && !this.hasValidatedUnit) {
-            this.hasValidatedUnit = true;
-            this.showUnitMissingToast();
-        } else if (error) {
-            console.error('Error fetching unit details', error);
-        }
+wiredUnitDetails({ data, error }) {
+    if (data) {
+        this.unitDetails = data;
+        this.showNoUnitError = false;
+        this.disableAllFields = false;
+    } 
+    else if (!data) {
+        // 🔴 No Unit product found
+        this.showNoUnitError = true;
+        this.disableAllFields = true;
+        this.unitDetails = { Product2: {} };
+        this.pricePerSqft = null;
+        this.totalDealCost = null;
+    } 
+    else if (error) {
+        console.error('Error fetching unit details', error);
     }
+}
+
 
     showUnitMissingToast() {
         this.dispatchEvent(

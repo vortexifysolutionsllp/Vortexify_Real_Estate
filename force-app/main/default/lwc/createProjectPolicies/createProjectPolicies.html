@@ -3,23 +3,38 @@
 
     <lightning-modal-body class="body">
 
-        <div class="radio-row">
-            <div class="radio-card" onclick={selectPayment}>
-                <lightning-input type="radio" name="policy" label="Create Payment Plan" checked={showPayment}></lightning-input>
-            </div>
-
-            <div class="radio-card" onclick={selectCommission}>
-                <lightning-input type="radio" name="policy" label="Create Commission Policies" checked={showCommission}></lightning-input>
-            </div>
+        <div class="slds-text-title_bold slds-m-bottom_small">
+            Select Policy Type
         </div>
 
-        <!-- <lightning-radio-group 
-            label="Select Policy Type"
-            options={policyOptions}
-            value={selectedPolicy}
-            type="radio"
-            onchange={handlePolicyChange}>
-        </lightning-radio-group> -->
+        <div class="policy-card-container">
+
+            <label class="policy-card">
+                <input
+                    type="radio"
+                    name="policyType"
+                    value="Payment"
+                    checked
+                    onchange={handlePolicyChange}
+                />
+                <span class="radio-ui"></span>
+                <span class="policy-label">Payment Policy</span>
+            </label>
+
+            <label class="policy-card">
+                <input
+                    type="radio"
+                    name="policyType"
+                    value="Commission"
+                    onchange={handlePolicyChange}
+                />
+                <span class="radio-ui"></span>
+                <span class="policy-label">Commission Policy</span>
+            </label>
+
+
+
+        </div>
 
         <template if:true={showPayment}>
             <c-create-payment-policies record-id={recordId}></c-create-payment-policies>
@@ -33,33 +48,16 @@
 
     <lightning-modal-footer>
         <div class="slds-align_absolute-center">
+            <lightning-button
+                label="Cancel"
+                onclick={handleCancel}>
+            </lightning-button>
 
-         <!--   <template if:true={hasPolicy}>
-                <lightning-button
-                    label="Cancel"
-                    onclick={handleCancel}>
-                </lightning-button>
-
-                <lightning-button
-                    variant="brand"
-                    label={editLabel}
-                    onclick={handleEditClick}>
-                </lightning-button>
-            </template>
-
-            <template if:false={hasPolicy}>-->
-                <lightning-button
-                    label="Cancel"
-                    onclick={handleCancel}>
-                </lightning-button>
-
-                <lightning-button
-                    variant="brand"
-                    label="Save"
-                    onclick={handleEditClick}>
-                </lightning-button>
-        <!--   </template>   --> 
-
+            <lightning-button
+                variant="brand"
+                label="Save"
+                onclick={handleEditClick}>
+            </lightning-button>
         </div>
     </lightning-modal-footer>
 </template>

@@ -1,26 +1,32 @@
-.box {
-    border: 1px solid #cfd9e8;
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-    background: #ffffff;
+.policy-card {
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 1rem;
 }
 
-.title {
-    font-weight: 600;
-    color: #1b5fcc;
-    margin-bottom: 12px;
-    padding-left: 6px;
-    border-left: 4px solid #1b5fcc;
-    font-size: 16px;
+.range-inner-box {
+    background-color: #f9f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 0.75rem;
 }
 
-.grid-5 {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
+.range-delete-icon {
+    --slds-c-icon-color-foreground-default: #ea001e;
 }
 
-.plan-row {
-    max-width: 300px;
+.range-delete-icon:hover {
+    --slds-c-icon-color-foreground-default: #ba0517;
+}
+
+.range-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-row-button {
+    font-weight: bold;
+    --slds-c-button-text-color: #0176d3;
 }

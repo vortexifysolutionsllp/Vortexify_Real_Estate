@@ -86,6 +86,51 @@ export default class SiteVisitForm extends LightningElement {
     this.rows = rows;
 });
 
+            
+            visits.forEach(v => {
+                if (v.Project__c && v.VisitType__c === 'First Visit') {
+                    this.projectFirstVisitMap[v.Project__c] = true;
+                }
+            });
+
+            let rows = [];
+
+            if (visits.length > 0) {
+                rows = visits.map((v, index) => ({
+                    id: v.Id,
+                    customerName: v.CustomerName__c,
+                    customerEmail: v.CustomerEmail__c,
+                    customerPhone: v.Customer_Phone__c,
+                    visitDate: v.VisitDate__c,
+                    visitTime: this.formatTime(v.Visit_Time__c),
+                    visitType: v.VisitType__c,
+                    projectId: v.Project__c,
+                    towerId: v.Tower__c,
+                    towerOptions: [],
+                    isTowerDisabled: !v.Project__c,
+                    salesRepId: v.Sales_Representative__c,
+                    isFirst: index === 0,
+                    visitTypeOptions: this.visitTypeOptions
+                }));
+            }
+
+            
+            rows.push({
+                id: Date.now(),
+                customerName: lead.Name,
+                customerEmail: lead.Email,
+                customerPhone: lead.Phone,
+                visitDate: '',
+                visitTime: '',
+                visitType: '',
+                projectId: null,
+                towerId: null,
+                towerOptions: [],
+                isTowerDisabled: true,
+                salesRepId: lead.OwnerId,
+                isFirst: rows.length === 0,
+                visitTypeOptions: this.visitTypeOptions
+            });
 
             
           
@@ -124,6 +169,34 @@ export default class SiteVisitForm extends LightningElement {
     };
 }
 
+    removeRow(event) {
+
+        const index = Number(event.currentTarget.dataset.index);
+
+        if (this.rows.length === 1) return;
+
+        const row = this.rows[index];
+
+        if (typeof row.id === 'string') {
+
+            deleteSiteVisit({ visitId: row.id })
+                .then(() => {
+                    this.rows.splice(index, 1);
+                    this.rows = [...this.rows];
+
+                    this.showToast('Deleted','Site Visit deleted','success');
+                })
+                .catch(error => {
+                    this.showError(error.body?.message);
+                });
+
+        } else {
+            this.rows.splice(index, 1);
+            this.rows = [...this.rows];
+        }
+    }
+
+   
     removeRow(event) {
 
         const index = Number(event.currentTarget.dataset.index);

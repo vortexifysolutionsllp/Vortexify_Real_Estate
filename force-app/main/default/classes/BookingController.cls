@@ -27,7 +27,10 @@ public with sharing class BookingController {
                 oli.Product2.Tower__r.Project__r != null) {
 
                 result.put('tower', oli.Product2.Tower__r);
+                //result.put('project', oli.Product2.Tower__r.Project__r);
                 result.put('project', oli.Product2.Tower__r.Project__r);
+                result.put('projectId', oli.Product2.Tower__r.Project__c);
+
             }
         }
 
@@ -71,7 +74,7 @@ public with sharing class BookingController {
             SELECT Id, Name, Type__c
             FROM Policy__c
             WHERE Applicable_Project__c = :projectId
-              AND Type__c = 'Payment Policy'
+              AND Type__c LIKE '%Payment%' 
             ORDER BY Name
         ];
     }
