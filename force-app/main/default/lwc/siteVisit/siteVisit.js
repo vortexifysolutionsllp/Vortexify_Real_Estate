@@ -42,38 +42,53 @@ export default class SiteVisitForm extends LightningElement {
             getLeadDetails({ leadId: this.recordId }),
             getSiteVisits({ leadId: this.recordId })
         ])
-        .then(([lead, visits]) => {
+       .then(([lead, visits]) => {
+
+    this.leadInfo = {
+        customerName: lead.Name,
+        customerEmail: lead.Email,
+        customerPhone: lead.Phone,
+        salesRepId: lead.OwnerId
+    };
+
+    visits.forEach(v => {
+        if (v.Project__c && v.VisitType__c === 'First Visit') {
+            this.projectFirstVisitMap[v.Project__c] = true;
+        }
+    });
+
+    let rows = [];
+
+    if (visits.length > 0) {
+        rows = visits.map((v, index) => ({
+            id: v.Id,
+            customerName: v.CustomerName__c,
+            customerEmail: v.CustomerEmail__c,
+            customerPhone: v.Customer_Phone__c,
+            visitDate: v.VisitDate__c,
+            visitTime: this.formatTime(v.Visit_Time__c),
+            visitType: v.VisitType__c,
+            projectId: v.Project__c,
+            towerId: v.Tower__c,
+            towerOptions: [],
+            isTowerDisabled: !v.Project__c,
+            salesRepId: v.Sales_Representative__c,
+            isFirst: index === 0,
+            visitTypeOptions: this.visitTypeOptions
+        }));
+    }
+
+    // ✅ ONLY add blank row if NO existing visits
+    if (rows.length === 0) {
+        rows.push(this.createEmptyRow(true));
+    }
+
+    this.rows = rows;
+});
+
 
             
-            visits.forEach(v => {
-                if (v.Project__c && v.VisitType__c === 'First Visit') {
-                    this.projectFirstVisitMap[v.Project__c] = true;
-                }
-            });
-
-            let rows = [];
-
-            if (visits.length > 0) {
-                rows = visits.map((v, index) => ({
-                    id: v.Id,
-                    customerName: v.CustomerName__c,
-                    customerEmail: v.CustomerEmail__c,
-                    customerPhone: v.Customer_Phone__c,
-                    visitDate: v.VisitDate__c,
-                    visitTime: this.formatTime(v.Visit_Time__c),
-                    visitType: v.VisitType__c,
-                    projectId: v.Project__c,
-                    towerId: v.Tower__c,
-                    towerOptions: [],
-                    isTowerDisabled: !v.Project__c,
-                    salesRepId: v.Sales_Representative__c,
-                    isFirst: index === 0,
-                    visitTypeOptions: this.visitTypeOptions
-                }));
-            }
-
-            this.rows = rows;
-        });
+          
     }
 
     
@@ -87,26 +102,28 @@ export default class SiteVisitForm extends LightningElement {
 
     
     addRow() {
-        const leadRow = this.rows[0];
-        this.rows = [...this.rows, {
-            id: Date.now(),
-            customerName: leadRow.customerName,
-            customerEmail: leadRow.customerEmail,
-            customerPhone: leadRow.customerPhone,
-            visitDate: '',
-            visitTime: '',
-            visitType: '',
-            projectId: null,
-            towerId: null,
-            towerOptions: [],
-            isTowerDisabled: true,
-            salesRepId: leadRow.salesRepId,
-            isFirst: false,
-            visitTypeOptions: this.visitTypeOptions
-        }];
-    }
+    this.rows = [...this.rows, this.createEmptyRow(false)];
+}
 
-   
+   createEmptyRow(isFirst = false) {
+    return {
+        id: Date.now(),
+        customerName: this.leadInfo?.customerName || '',
+        customerEmail: this.leadInfo?.customerEmail || '',
+        customerPhone: this.leadInfo?.customerPhone || '',
+        visitDate: '',
+        visitTime: '',
+        visitType: '',
+        projectId: null,
+        towerId: null,
+        towerOptions: [],
+        isTowerDisabled: true,
+        salesRepId: this.leadInfo?.salesRepId || null,
+        isFirst,
+        visitTypeOptions: this.visitTypeOptions
+    };
+}
+
     removeRow(event) {
 
         const index = Number(event.currentTarget.dataset.index);
@@ -196,12 +213,6 @@ export default class SiteVisitForm extends LightningElement {
         this.isLoading = true; 
 
         const newRows = this.rows.filter(row => typeof row.id === 'number');
-
-         if (newRows.length === 0) {
-            this.isLoading = false;
-            this.showError('Please add a new Site Visit before submitting or Click Cancel to go back');
-            return;
-        }
 
         for (let row of newRows) {
 
