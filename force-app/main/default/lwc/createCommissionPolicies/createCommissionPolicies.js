@@ -20,13 +20,17 @@ export default class CreateCommissionPolicies extends LightningElement {
         units: data.unitCount
     };
 
-    if (!data.policies || !data.policies.length) {
+const dataFromChild = data.isDataFromChild;
+    if(dataFromChild){
+        this.policies = data.policies;
+    }
+
+    else if (!data.policies || !data.policies.length) {
 
         this.policies = [this.createEmptyPolicy(1)];
         return;
-    }
-
-    // Track active policy per commission type
+    }else{
+ // Track active policy per commission type
     const activeTracker = {};
 
     const commissionPolicies = data.policies
@@ -58,7 +62,7 @@ export default class CreateCommissionPolicies extends LightningElement {
                 id: index + 1,
                 recordId: p.Id,
                 selectedCommissionType: parsed.policyType,
-                active: isActive,
+                active: p.Active__c,
                 isEditMode: false,
                 showStandardFields: parsed.policyType !== 'range',
                 isFixed: parsed.policyType === 'fixed',
@@ -82,7 +86,7 @@ export default class CreateCommissionPolicies extends LightningElement {
                     amount: r.amount ?? null,
                     percent: r.percent ?? null,
                     upperCap: r.upperCap ?? null,
-                    active: r.active ?? true
+                    //active: r.active ?? true
                 }));
             }
 
@@ -92,6 +96,9 @@ export default class CreateCommissionPolicies extends LightningElement {
     this.policies = commissionPolicies.length
         ? commissionPolicies
         : [this.createEmptyPolicy(1)];
+    }
+
+   
 }
 
 
@@ -167,12 +174,12 @@ export default class CreateCommissionPolicies extends LightningElement {
     }
 
     handleEditSave(event) {
-    const index = event.target.dataset.index;
-    let temp = [...this.policies];
+        const index = event.target.dataset.index;
+        let temp = [...this.policies];
 
-    temp[index].isEditMode = !temp[index].isEditMode;
-    this.policies = temp;
-}
+        temp[index].isEditMode = !temp[index].isEditMode;
+        this.policies = temp;
+    }
 
 
     buildPolicyJSON(policy) {
@@ -193,7 +200,7 @@ export default class CreateCommissionPolicies extends LightningElement {
             minAmount: clean(r.minAmount),
             maxAmount: clean(r.maxAmount),
             commissionType: r.commissionType,
-            active: r.active === true,
+            //active: r.active === true,
             amount: r.commissionType === 'fixed' ? clean(r.amount) : null,
             percent: r.commissionType === 'percentage' ? clean(r.percent) : null,
             upperCap: r.commissionType === 'percentage' ? clean(r.upperCap) : null
@@ -225,6 +232,7 @@ export default class CreateCommissionPolicies extends LightningElement {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent();
 }
 handlePolicyFieldChange(event) {
     const index = Number(event.target.dataset.index);
@@ -243,6 +251,7 @@ handlePolicyFieldChange(event) {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent() ;
 }
 
 
@@ -276,6 +285,7 @@ handleRangeFieldChange(event) {
     };
 
     this.policies = policies;
+    this.sendPoliciesToParent();
 }
 
 handleRangeTypeChange(event) {
@@ -304,6 +314,7 @@ handleRangeTypeChange(event) {
 
     handleAddPolicy() { 
         this.policies = [...this.policies, this.createEmptyPolicy(this.policies.length + 1)]; 
+         this.sendPoliciesToParent(this.policies);
     }
     
     handleDeletePolicy(event) {
@@ -482,7 +493,22 @@ showToast(title, message, variant) {
 }
 
 
+ sendPoliciesToParent() {
+    const payload = {
+        isCommissionPolicies:true,
+        isDataFromChild:true,
+        project: this.project,
+        policies: this.policies,
+        deletedPolicyIds: this.deletedPolicyIds
+    };
 
+    // Dispatch the event
+    this.dispatchEvent(new CustomEvent('policiesupdate', {
+        detail: payload,
+        bubbles: true,   // optional, allows event to bubble up
+        composed: true   // optional, allows event to cross shadow DOM boundaries
+    }));
+}
 
 
     

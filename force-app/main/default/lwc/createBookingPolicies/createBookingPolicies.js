@@ -2,6 +2,8 @@ import { LightningElement, api, track } from 'lwc';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import savePaymentPolicy from '@salesforce/apex/BookingController.savePaymentPolicy';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getRecordNotifyChange } from 'lightning/uiRecordApi';
+
 //import saveDealCostToSalesPrice from '@salesforce/apex/PolicyController.saveDealCostToSalesPrice';
 
 
@@ -65,6 +67,7 @@ export default class CreateBookingPolicies extends LightningElement {
                     variant: 'success'
                 })
             );
+            getRecordNotifyChange([{ recordId: this.recordId }]);
             this.dispatchEvent(new CloseActionScreenEvent());
         })
         .catch(error => {
@@ -92,6 +95,7 @@ export default class CreateBookingPolicies extends LightningElement {
                         variant: 'success'
                     })
                 );
+                getRecordNotifyChange([{ recordId: this.recordId }]);
                 this.dispatchEvent(new CloseActionScreenEvent());
             })
             .catch(() => {
