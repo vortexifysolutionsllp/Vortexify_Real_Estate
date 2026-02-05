@@ -1,6 +1,6 @@
 public with sharing class LeadLWCController {
 
-    // STEP 1 — Check email and return lead if exists
+    // Check email and return lead if exists
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> checkEmail(String email) {
 
@@ -39,96 +39,119 @@ public with sharing class LeadLWCController {
         return response;
     }
 
-
-    // STEP 2 — Save lead (insert or update) + create Project_Interest__c child records
-  /*  @AuraEnabled
-    public static Id saveLead(Lead leadRec, String locationValue, String selectedProjectNames) {
+    @AuraEnabled
+    public static Id saveLead(Lead leadRec, String locationValue, List<String> selectedProjectNames) {
 
         Boolean isNewLead = (leadRec.Id == null);
-
-        // Required standard field
         leadRec.Company = 'Web Lead';
 
-        // Save lead
         if (isNewLead) {
             insert leadRec;
         } else {
             update leadRec;
         }
 
-        // Create child records from multiselect picklist
-        if (!String.isBlank(leadRec.Project_Interest__c)) {
+        // create project interest
+        if (selectedProjectNames != null) {
 
-            List<Project_Interest__c> listPI = new List<Project_Interest__c>();
+           // Step 1: Fetch existing project interests
+List<Project_Interest__c> existingProjectInterest =
+    [SELECT Id, Project__c, Is_Active__c
+     FROM Project_Interest__c
+     WHERE Lead__c = :leadRec.Id];
 
-            // Split multi-select values like A;B;C
-            for (String p : leadRec.Project_Interest__c.split(';')) {
+Map<Id, Project_Interest__c> projectInterestMap = new Map<Id, Project_Interest__c>();
 
-                if (String.isBlank(p)) continue;
+for(Project_Interest__c pi : existingProjectInterest){
+    if(pi.Project__c != null){
+        projectInterestMap.put(pi.Project__c, pi);
+    }
+}
 
-                listPI.add(new Project_Interest__c(
-                    Lead__c = leadRec.Id,
-                    Projects__c = p,
-                    		Projects_Name__c=selectedProjectNames
-                   // Location__c = locationValue   // <-- NEW: save Location
-                ));
-            }
+// Step 2: Convert selected ids
+Set<Id> selectedProjectIds = new Set<Id>();
+for(String pid : selectedProjectNames){
+    selectedProjectIds.add((Id)pid);
+}
 
-            if (!listPI.isEmpty()) {
-                insert listPI;
-            }
+// Step 3: Deactivate removed projects
+List<Project_Interest__c> toDeactivate = new List<Project_Interest__c>();
+
+for(Project_Interest__c pi : existingProjectInterest){
+    if(!selectedProjectIds.contains(pi.Project__c)){
+        pi.Is_Active__c = false;
+        toDeactivate.add(pi);
+    }
+}
+
+if(!toDeactivate.isEmpty()){
+    update toDeactivate;
+}
+
+// Step 4: Reactivate OR Insert selected projects
+List<Project_Interest__c> toInsert = new List<Project_Interest__c>();
+List<Project_Interest__c> toReactivate = new List<Project_Interest__c>();
+
+// Get project names
+List<Project__c> selectedProjects =
+    [SELECT Id, Name FROM Project__c WHERE Id IN :selectedProjectIds];
+
+Map<Id, String> projectNameById = new Map<Id, String>();
+for(Project__c prj : selectedProjects){
+    projectNameById.put(prj.Id, prj.Name);
+}
+
+// Lead full name
+String leadFullName =
+    (leadRec.FirstName != null ? leadRec.FirstName : '') +
+    ' ' +
+    (leadRec.LastName != null ? leadRec.LastName : '');
+
+for(Id projId : selectedProjectIds){
+
+    // Case 1: Already exists → Reactivate
+    if(projectInterestMap.containsKey(projId)){
+
+        Project_Interest__c existingPI = projectInterestMap.get(projId);
+
+        if(existingPI.Is_Active__c == false){
+            existingPI.Is_Active__c = true;
+            toReactivate.add(existingPI);
+        }
+
+    }
+    // Case 2: Doesn't exist → Insert new
+    else{
+
+        String projectName = projectNameById.get(projId);
+
+        toInsert.add(new Project_Interest__c(
+            Name = leadFullName + ' - ' + projectName,
+            Lead__c = leadRec.Id,
+            Project__c = projId,
+            Location__c = locationValue,
+            Is_Active__c = true
+        ));
+    }
+}
+
+// Perform updates/inserts
+if(!toReactivate.isEmpty()){
+    update toReactivate;
+}
+
+if(!toInsert.isEmpty()){
+    insert toInsert;
+}
+
         }
 
         return leadRec.Id;
-    }*/
+    }
 
+
+    // Get picklist values for Location__c on Project_Interest__c
     @AuraEnabled
-public static Id saveLead(Lead leadRec, String locationValue, List<String> selectedProjectNames) {
-
-    Boolean isNewLead = (leadRec.Id == null);
-    leadRec.Company = 'Web Lead';
-
-    if (isNewLead) {
-        insert leadRec;
-    } else {
-        update leadRec;
-    }
-
-    // create project interest children
-    if (selectedProjectNames != null && !selectedProjectNames.isEmpty()) {
-         // 🔥 create combined text for Projects_Name__c field
-       // String combinedNames = String.join(selectedProjectNames, '; ');
-
-        String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
-        String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
-        String leadFullName = leadFirstName + ' ' + leadLastName;
-
-        List<Project_Interest__c> listPI = new List<Project_Interest__c>();
-        List<Project__c> selectedProjectList = [SELECT Id, Name FROM Project__c WHERE Id IN: selectedProjectNames];
-        Map<Id,String> projectNameById = new Map<Id,String>();
-        for(Project__c prjRec : selectedProjectList){
-            projectNameById.put(prjRec.Id, prjRec.Name);
-        }
-
-        for (String projName : selectedProjectNames) {
-			String projectName = projectNameById.containsKey(projName) ? projectNameById.get(projName) : 'Project Interest';
-            listPI.add(new Project_Interest__c(
-                Name = leadFullName + ' - ' + projectName,
-                Lead__c = leadRec.Id,
-                Project__c = projName,
-                Location__c = locationValue
-            ));
-        }
-
-        insert listPI;
-    }
-
-    return leadRec.Id;
-}
-
-
-    // STEP 3 — Get picklist values for Location__c on Project_Interest__c
-    @AuraEnabled(cacheable=true)
     public static List<String> getLocationValues() {
 
         List<String> results = new List<String>();
@@ -154,9 +177,64 @@ public static Id saveLead(Lead leadRec, String locationValue, List<String> selec
         ];
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static Lead getLeadById111(Id recordId) {
         return [ SELECT Id, FirstName, LastName, Phone, Email, Location__c FROM Lead WHERE Id = :recordId LIMIT 1];
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List<Id> getSelectedProjectInterests(Id leadId){
+        List<Project_Interest__c> projectInterestList = [SELECT Project__c FROM Project_Interest__c WHERE Lead__c = :leadId AND Is_Active__c = true ];
+        List<Id> projectIds = new List<Id>();
+        for(Project_Interest__c pr: projectInterestList){
+            if(pr.Project__c != null){
+                projectIds.add(pr.Project__c);
+            }
+        }
+        return projectIds;
+    }
+
+    @AuraEnabled
+    public static Id saveLeadRecord(Lead leadRec, String locationValue, List<String> selectedProjectNames) {
+    
+        Boolean isNewLead = (leadRec.Id == null);
+        leadRec.Company = 'Web Lead';
+    
+        if (isNewLead) {
+            insert leadRec;
+        } else {
+            update leadRec;
+        }
+    
+        // create project interest
+        if (selectedProjectNames != null && !selectedProjectNames.isEmpty()) {
+
+    
+            String leadFirstName = leadRec.FirstName!=null ? leadRec.FirstName : 'Unknown';
+            String leadLastName = leadRec.LastName!=null ? leadRec.LastName : 'Unknown';
+            String leadFullName = leadFirstName + ' ' + leadLastName;
+    
+            List<Project_Interest__c> listPI = new List<Project_Interest__c>();
+            List<Project__c> selectedProjectList = [SELECT Id, Name FROM Project__c WHERE Id IN: selectedProjectNames];
+            Map<Id,String> projectNameById = new Map<Id,String>();
+            for(Project__c prjRec : selectedProjectList){
+                projectNameById.put(prjRec.Id, prjRec.Name);
+            }
+    
+            for (Id projId : selectedProjectNames) {
+                listPI.add(new Project_Interest__c(
+                Name = leadFullName + ' - ' + projectNameById.get(projId),
+                Lead__c = leadRec.Id,
+                Project__c = projId,
+                Location__c = locationValue,
+                Is_Active__c = true
+                ));
+            }
+    
+            insert listPI;
+        }
+    
+        return leadRec.Id;
     }
 
 }

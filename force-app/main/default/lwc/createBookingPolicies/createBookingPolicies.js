@@ -35,48 +35,49 @@ export default class CreateBookingPolicies extends LightningElement {
    handleSave() {
 
     // ================= PAYMENT =================
-    
     if (this.isPayment) {
         const paymentChild =
             this.template.querySelector('c-booking-payment-policies');
 
-        
+        if (!paymentChild) {
+            return;
+        }
 
-        // if (!paymentChild || !paymentChild.selectedPaymentPolicy) {
-        //     this.dispatchEvent(
-        //         new ShowToastEvent({
-        //             title: 'Missing Payment Plan',
-        //             message: 'Please select a Payment Plan before saving.',
-        //             variant: 'warning'
-        //         })
-        //     );
-        //     return;
-        // }
         
-
-        savePaymentPolicy({
-            bookingId: this.recordId,
-            paymentPolicyId: paymentChild.selectedPaymentPolicy,
-            totalDealCost: paymentChild.dealCost
-        })
-        .then(() => {
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'Success',
-                    message: 'Payment Policy has been saved successfully.',
-                    variant: 'success'
-                })
-            );
-            getRecordNotifyChange([{ recordId: this.recordId }]);
-            this.dispatchEvent(new CloseActionScreenEvent());
-        })
-        .catch(error => {
-            console.error(error);
-        });
+        paymentChild.handleSave()
+            .then(() => {
+             
+                return savePaymentPolicy({
+                    bookingId: this.recordId,
+                    paymentPolicyId: paymentChild.selectedPaymentPolicy,
+                    totalDealCost: paymentChild.dealCost
+                });
+            })
+            .then(() => {
+                return paymentChild.refreshData();
+            })
+            .then(() => {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: 'Payment Policy has been saved successfully.',
+                        variant: 'success'
+                    })
+                );
+                getRecordNotifyChange([{ recordId: this.recordId }]);
+                this.dispatchEvent(new CloseActionScreenEvent());
+            })
+            .catch(() => {
+                
+            });
 
         return;
     }
 
+
+        
+
+       
     // ================= COMMISSION =================
     if (this.isCommission) {
         const commissionChild =

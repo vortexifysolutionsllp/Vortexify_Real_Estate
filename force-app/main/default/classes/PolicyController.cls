@@ -27,9 +27,10 @@ public with sharing class PolicyController {
         ];
 
         List<Policy__c> policies = [
-            SELECT Id, Name, Abbreviation__c, Cost_Sqft__c, Term__c, Construction_Linked__c
+            SELECT Id, Name, Abbreviation__c, Cost_Sqft__c, Term__c, Construction_Linked__c,type__c, Active__c
             FROM Policy__c 
             WHERE Applicable_Project__c =: projectId
+            //and Type__c ='Payment Policy'
         ];
 
         res.put('project', proj);
@@ -43,16 +44,15 @@ public with sharing class PolicyController {
     @AuraEnabled
     public static void savePolicies(
         String policiesJson,
-        List<Id> deletedPolicyIds, // ⭐ ADDED (NO EXISTING PARAM REMOVED)
+        List<Id> deletedPolicyIds,
         Id projectId
     ){
 
+        // ✅ CORRECT: policiesJson is a JSON ARRAY
         List<Object> policyList = (List<Object>)JSON.deserializeUntyped(policiesJson);
 
-        // ⭐ ADD THIS
         Map<Id, Policy__c> uniqueMap = new Map<Id, Policy__c>();
         List<Policy__c> records = new List<Policy__c>();
-
         Set<Id> incomingIds = new Set<Id>();
 
         for(Object obj : policyList){
@@ -60,7 +60,7 @@ public with sharing class PolicyController {
 
             Policy__c rec = new Policy__c();
             Id finalId;
-
+            System.debug(p);
             if (p.containsKey('id') && p.get('id') != null) {
                 String incomingId = String.valueOf(p.get('id'));
                 if (incomingId.length() == 15 || incomingId.length() == 18) {
@@ -82,23 +82,24 @@ public with sharing class PolicyController {
             if(p.containsKey('isConstructionLinked')){
                 rec.Construction_Linked__c = (Boolean)p.get('isConstructionLinked');
             }
+            if(p.containsKey('active')){
+                rec.Active__c = (Boolean)p.get('active');
+            }
 
             rec.Applicable_Project__c = projectId;
             rec.Type__c = 'Payment Policy';
 
-            // ⭐ PREVENT DUPLICATE
             if(finalId != null){
                 uniqueMap.put(finalId, rec);
             } else {
-                records.add(rec); // new record
+                records.add(rec);
             }
         }
 
-        // ⭐ ADD MAP VALUES
         records.addAll(uniqueMap.values());
 
         // =====================================================
-        // ⭐ EXPLICIT DELETE FOR UI-REMOVED POLICIES (ADDED)
+        // DELETE POLICIES REMOVED IN UI
         // =====================================================
         if(deletedPolicyIds != null && !deletedPolicyIds.isEmpty()){
             delete [
@@ -108,10 +109,13 @@ public with sharing class PolicyController {
             ];
         }
 
+        // =====================================================
+        // SAFETY DELETE (NOT PRESENT IN INCOMING LIST)
+        // =====================================================
         List<Policy__c> existing = [
             SELECT Id 
             FROM Policy__c 
-            WHERE Applicable_Project__c = :projectId
+            WHERE Applicable_Project__c = :projectId AND Type__c = 'Payment Policy'
         ];
 
         List<Policy__c> toDelete = new List<Policy__c>();

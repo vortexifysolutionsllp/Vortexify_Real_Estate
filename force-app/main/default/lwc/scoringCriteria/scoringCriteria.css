@@ -107,6 +107,24 @@
     gap: 10px;
 }
 
+.scroll-area {
+    max-height: 45vh; 
+    overflow-y: auto;
+    padding-bottom: 80px; 
+}
+
+.sticky-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 20px;
+    border-top: 1px solid #d8dde6;
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+}
+
+
 
 
 lightning-input,

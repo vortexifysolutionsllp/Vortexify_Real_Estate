@@ -7,6 +7,14 @@ public with sharing class BookingController {
         Map<String, Object> result = new Map<String, Object>();
         if (oppId == null) return result;
 
+        // ✅ Query Opportunity for Payment Policy
+    Opportunity opp = [
+        SELECT Id, Payment_Policy__c
+        FROM Opportunity
+        WHERE Id = :oppId
+        LIMIT 1
+    ];
+
         List<OpportunityLineItem> oliList = [
             SELECT Id,
                    Product2.Tower__c,
@@ -27,11 +35,16 @@ public with sharing class BookingController {
                 oli.Product2.Tower__r.Project__r != null) {
 
                 result.put('tower', oli.Product2.Tower__r);
+                //result.put('project', oli.Product2.Tower__r.Project__r);
                 result.put('project', oli.Product2.Tower__r.Project__r);
+                result.put('projectId', oli.Product2.Tower__r.Project__c);
+
             }
         }
+  result.put('paymentPolicyId', opp.Payment_Policy__c);
 
         return result;
+
     }
 
     // Total towers for project
@@ -71,7 +84,7 @@ public with sharing class BookingController {
             SELECT Id, Name, Type__c
             FROM Policy__c
             WHERE Applicable_Project__c = :projectId
-              AND Type__c = 'Payment Policy'
+              AND Type__c LIKE '%Payment%' 
             ORDER BY Name
         ];
     }
@@ -130,7 +143,7 @@ public with sharing class BookingController {
     }
 
     // 🔹 NEW METHOD: Fetch Cost/Sqft from Policy
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static Decimal getCostPerSqftByPolicy(Id policyId) {
         if (policyId == null) return null;
 
