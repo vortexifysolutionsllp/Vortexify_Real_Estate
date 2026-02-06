@@ -9,13 +9,22 @@
     padding: 16px;
 }
 
-/* --- TOWER GRID: FIXED 5 COLUMNS --- */
+/* --- DYNAMIC TOWER GRID: MAX 5 COLUMNS, AUTO-FILL SPACE --- */
 .tower-grid-container {
     display: grid;
-    /* This forces exactly 5 equal columns per line */
-    grid-template-columns: repeat(5, 1fr); 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     width: 100%;
+}
+
+.tower-grid-container {
+    grid-auto-flow: row;
+}
+
+@media (min-width: 1000px) {
+    .tower-grid-container {
+        grid-template-columns: repeat(auto-fit, minmax(max(180px, calc((100% - 60px) / 5)), 1fr));
+    }
 }
 
 .tower-card {
@@ -26,11 +35,10 @@
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-
-    min-height: 190px;   /* 🔥 Increased from 150px */
+    min-height: 190px;
     padding: 6px;
+    max-width: 100%;
 }
-
 
 .tower-details {
     text-align: center;
@@ -40,17 +48,14 @@
     align-items: center;
 }
 
-
 .tower-floor-picker {
     margin-top: 6px;
     width: 100%;
 }
 
-
 .tower-image {
-    height: 95px;   /* 🔥 Increased image height */
+    height: 95px;
     flex: none;
-
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
@@ -58,7 +63,6 @@
     padding: 10px;
     border-radius: 6px;
 }
-
 
 .tower-card.selected {
     border: 2px solid #0070d2 !important;
@@ -71,28 +75,16 @@
     transform: translateY(-2px);
 }
 
-.tower-details {
-    text-align: center;
-    padding: 6px;
-    background: white;
-    border-top: 1px solid #f1f5f9;
-}
-
 .tower-title {
     font-size: 0.95rem;
     font-weight: 700;
     color: #1e293b;
 }
 
-
 .tower-subtitle {
     font-size: 0.82rem;
     color: #64748b;
 }
-.tower-grid-container {
-    gap: 16px;
-}
-
 
 /* Floor Dropdown Styling */
 .floor-selection-area {
@@ -129,8 +121,23 @@
 }
 
 /* Status Colors */
-.status-Available { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-.status-Booked { background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+.status-Available { 
+    background: #dcfce7; 
+    color: #15803d; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 10px; 
+    font-weight: bold; 
+}
+
+.status-Booked { 
+    background: #fee2e2; 
+    color: #b91c1c; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: 10px; 
+    font-weight: bold; 
+}
 
 .section-label {
     font-size: 0.8rem;
@@ -149,6 +156,134 @@
     justify-content: flex-end;
 }
 
-.tower-floor-picker {
-    margin-top: 6px;
+.unit-section-container {
+    margin-top: 24px;
+}
+
+/* ========== OPPORTUNITY CARDS SECTION - ELEGANT & PROFESSIONAL ========== */
+
+.opportunity-cards-section {
+    padding: 32px 24px;
+    background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.success-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.success-icon {
+    color: #059669;
+    margin-bottom: 8px;
+}
+
+.success-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 12px 0 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.success-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.opportunity-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.opportunity-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+.opportunity-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0070d2 0%, #0176d3 100%);
+}
+
+.opportunity-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
+}
+
+.opp-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 24px;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.opp-icon {
+    color: #0070d2;
+}
+
+.opp-card-body {
+    padding: 24px;
+    background: white;
+}
+
+.opp-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+.opp-unit {
+    font-size: 0.9rem;
+    margin: 8px 0;
+    color: #475569;
+    font-weight: 500;
+}
+
+.opp-project {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+.opp-card-footer {
+    background: #f8fafc;
+    padding: 14px 24px;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+}
+
+.view-link {
+    color: #0070d2;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    transition: color 0.2s ease;
+}
+
+.opportunity-card:hover .view-link {
+    color: #005fb2;
 }

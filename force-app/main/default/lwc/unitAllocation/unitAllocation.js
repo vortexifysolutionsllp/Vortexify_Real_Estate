@@ -24,6 +24,9 @@ export default class ProjectTowerPicker extends LightningElement {
     existingTowerId;
     existingFloor;
 
+    @track showOpportunityCards = false;
+    @track createdOpportunities = [];
+
 
     get hasUnits() {
         return this.units && this.units.length > 0;
@@ -325,21 +328,35 @@ handleFloorChange(event) {
         leadId: this.isLeadContext ? this.recordId : null,
         opportunityId: this.isOpportunityContext ? this.recordId : null
     })
-    .then(() => {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Opportunities created successfully',
-                variant: 'success'
-            })
-        );
-        this.dispatchEvent(new CloseActionScreenEvent());
-        //window.location.reload();
-        //this.dispatchEvent(new CloseActionScreenEvent());
-        setTimeout(() => {
-            window.location.reload();
-        }, 600); 
-
+    .then((result) => {
+        // If Lead context and multiple units, show opportunity cards
+        if (this.isLeadContext && selectedUnitIds.length > 1) {
+            this.createdOpportunities = result.map(opp => ({
+                Id: opp.Id,
+                Name: opp.Name,
+                UnitNumber: opp.unitNumber,
+                ProjectName: opp.projectName
+            }));
+            this.showOpportunityCards = true;
+        } else {
+            // For single unit or opportunity context, navigate directly
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Opportunity created successfully',
+                    variant: 'success'
+                })
+            );
+            
+            if (this.isLeadContext && result && result.length > 0) {
+                // Navigate to the single opportunity
+                window.location.href = `/${result[0].Id}`;
+            } else {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 600);
+            }
+        }
     })
     .catch(error => {
         console.error('FULL ERROR 👉', JSON.stringify(error));
@@ -353,6 +370,15 @@ handleFloorChange(event) {
     });
 }
 
+handleOpportunityCardClick(event) {
+    const oppId = event.currentTarget.dataset.id;
+    window.location.href = `/${oppId}`;
+}
+
+handleBackToUnits() {
+    this.showOpportunityCards = false;
+    this.createdOpportunities = [];
+}
 
 
     handleCancel() {

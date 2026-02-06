@@ -17,66 +17,121 @@
 
                 <!-- Towers Section -->
                 <template if:true={towers}>
-                    <div class="tower-grid-container">
-                        <template for:each={towers} for:item="tower">
-                            <article key={tower.Id} 
-                                     class={tower.towerClass} 
-                                     data-id={tower.Id} 
-                                     onclick={handleTowerClick}>
+                    <template if:false={showOpportunityCards}>
+                        <div class="tower-grid-container">
+                            <template for:each={towers} for:item="tower">
+                                <article key={tower.Id} 
+                                         class={tower.towerClass} 
+                                         data-id={tower.Id} 
+                                         onclick={handleTowerClick}>
 
-                                <!-- Tower Image -->
-                                <div class="tower-image" style={tower.towerStyle}></div>
+                                    <!-- Tower Image -->
+                                    <div class="tower-image" style={tower.towerStyle}></div>
 
-                                <!-- Tower Details -->
-                                <div class="tower-details slds-p-around_x-small">
-                                    <h2 class="tower-title">{tower.Name}</h2>
-                                    <p class="tower-subtitle">
-                                        Floors: {tower.Total_Floors__c}
-                                    </p>
+                                    <!-- Tower Details -->
+                                    <div class="tower-details slds-p-around_x-small">
+                                        <h2 class="tower-title">{tower.Name}</h2>
+                                        <p class="tower-subtitle">
+                                            Floors: {tower.Total_Floors__c}
+                                        </p>
 
-                                    <!-- Floor Selector INSIDE Tower -->
-                                    <template if:true={tower.isSelected}>
-                                        <div class="tower-floor-picker">
-                                            <lightning-combobox
-                                                label="Select Floor"
-                                                value={selectedFloor}
-                                                options={floorOptions}
-                                                placeholder="Choose Floor"
-                                                data-tower-id={tower.Id}
-                                                onchange={handleFloorChange}>
-                                            </lightning-combobox>
-                                        </div>
-                                    </template>
+                                        <!-- Floor Selector INSIDE Tower -->
+                                        <template if:true={tower.isSelected}>
+                                            <div class="tower-floor-picker">
+                                                <lightning-combobox
+                                                    label="Select Floor"
+                                                    value={selectedFloor}
+                                                    options={floorOptions}
+                                                    placeholder="Choose Floor"
+                                                    data-tower-id={tower.Id}
+                                                    onchange={handleFloorChange}>
+                                                </lightning-combobox>
+                                            </div>
+                                        </template>
 
-                                </div>
-
-                            </article>
-                        </template>
-                    </div>
-                </template>
-
-                <!-- Units Section -->
-                <template if:true={hasUnits}>
-                    <div class="unit-section-container slds-m-top_large">
-                        <h3 class="section-label">Units</h3>
-
-                        <div class="unit-grid">
-                            <template for:each={units} for:item="unit">
-                                <article key={unit.Id} 
-                                         class={unit.cssClass} 
-                                         data-id={unit.Id} 
-                                         onclick={handleUnitClick}>
-
-                                    <p class="unit-id">{unit.UnitNumber__c}</p>
-
-                                    <div class="slds-m-top_xx-small">
-                                        <span class={unit.statusClass}>
-                                            {unit.UnitStatus__c}
-                                        </span>
                                     </div>
 
                                 </article>
                             </template>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- Units Section -->
+                <template if:true={hasUnits}>
+                    <template if:false={showOpportunityCards}>
+                        <div class="unit-section-container slds-m-top_large">
+                            <h3 class="section-label">Units</h3>
+
+                            <div class="unit-grid">
+                                <template for:each={units} for:item="unit">
+                                    <article key={unit.Id} 
+                                             class={unit.cssClass} 
+                                             data-id={unit.Id} 
+                                             onclick={handleUnitClick}>
+
+                                        <p class="unit-id">{unit.UnitNumber__c}</p>
+
+                                        <div class="slds-m-top_xx-small">
+                                            <span class={unit.statusClass}>
+                                                {unit.UnitStatus__c}
+                                            </span>
+                                        </div>
+
+                                    </article>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- Opportunity Cards Selection (After Multiple Bookings) -->
+                <template if:true={showOpportunityCards}>
+                    <div class="opportunity-cards-section">
+                        <div class="success-header">
+                            <lightning-icon icon-name="utility:success" 
+                                          size="small" 
+                                          class="success-icon"></lightning-icon>
+                            <h3 class="success-title">
+                                {createdOpportunities.length} Bookings Created Successfully!
+                            </h3>
+                            <p class="success-subtitle">
+                                Select a booking to view details
+                            </p>
+                        </div>
+
+                        <div class="opportunity-cards-grid">
+                            <template for:each={createdOpportunities} for:item="opp">
+                                <article key={opp.Id} 
+                                         class="opportunity-card" 
+                                         data-id={opp.Id}
+                                         onclick={handleOpportunityCardClick}>
+                                    
+                                    <div class="opp-card-header">
+                                        <lightning-icon icon-name="standard:opportunity" 
+                                                      size="medium"
+                                                      class="opp-icon"></lightning-icon>
+                                    </div>
+                                    
+                                    <div class="opp-card-body">
+                                        <h4 class="opp-name">{opp.Name}</h4>
+                                        <p class="opp-unit">Unit: {opp.UnitNumber}</p>
+                                        <p class="opp-project">{opp.ProjectName}</p>
+                                    </div>
+                                    
+                                    <div class="opp-card-footer">
+                                        <span class="view-link">View Booking →</span>
+                                    </div>
+                                </article>
+                            </template>
+                        </div>
+
+                        <div class="slds-m-top_medium slds-text-align_center">
+                            <lightning-button
+                                label="← Back to Units"
+                                variant="neutral"
+                                onclick={handleBackToUnits}>
+                            </lightning-button>
                         </div>
                     </div>
                 </template>
@@ -95,19 +150,21 @@
 
         <!-- Footer -->
         <div slot="footer" class="sticky-footer">
-            <lightning-button
-                label="Cancel"
-                variant="neutral"
-                onclick={handleCancel}>
-            </lightning-button>
+            <template if:false={showOpportunityCards}>
+                <lightning-button
+                    label="Cancel"
+                    variant="neutral"
+                    onclick={handleCancel}>
+                </lightning-button>
 
-            <lightning-button
-                label="Allocate"
-                variant="brand"
-                class="slds-m-left_small"
-                onclick={handleAllocate}
-                disabled={disableAllocate}>
-            </lightning-button>
+                <lightning-button
+                    label="Allocate"
+                    variant="brand"
+                    class="slds-m-left_small"
+                    onclick={handleAllocate}
+                    disabled={disableAllocate}>
+                </lightning-button>
+            </template>
         </div>
     </lightning-card>
 </template>
