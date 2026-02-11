@@ -20,7 +20,7 @@ public class LeadVFController {
 
     List<Lead> leads = [
         SELECT Id, Email, FirstName, LastName, Phone, City,
-               Fax, AnnualRevenue, Project_Interest__c
+               Fax, AnnualRevenue
         FROM Lead
         WHERE Email = :enteredEmail
         LIMIT 1
@@ -60,18 +60,18 @@ public class LeadVFController {
         }
 
         // Existing functionality: Project Interest child records
-        if (!String.isBlank(leadRec.Project_Interest__c)) {
+        // if (!String.isBlank(leadRec.Project_Interest__c)) {
 
-            List<Project_Interest__c> listPI = new List<Project_Interest__c>();
+        //     List<Project_Interest__c> listPI = new List<Project_Interest__c>();
 
-            for (String p : leadRec.Project_Interest__c.split(';')) {
-                listPI.add(new Project_Interest__c(
-                    Lead__c = leadRec.Id,
-                    Project_Name__c = p
-                ));
-            }
-            insert listPI;
-        }
+        //     for (String p : leadRec.Project_Interest__c.split(';')) {
+        //         listPI.add(new Project_Interest__c(
+        //             Lead__c = leadRec.Id,
+        //             Project_Name__c = p
+        //         ));
+        //     }
+        //     insert listPI;
+        // }
 
         ApexPages.addMessage(
             new ApexPages.Message(
