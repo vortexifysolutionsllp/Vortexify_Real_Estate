@@ -67,7 +67,7 @@
                         <apex:inputField value="{!leadRec.LastName}" required="true"/>
                         <apex:inputField value="{!leadRec.Phone}" required="true"/>
                         <apex:inputField value="{!leadRec.City}" required="true"/>
-                        <apex:inputField value="{!leadRec.Project_Interest__c}" />
+                        <apex:inputField value="{!leadRec.LastName}" />
                     </apex:pageBlockSection>
 
                     <apex:pageBlockButtons location="bottom">
