@@ -1,6 +1,6 @@
 <template>
     <lightning-quick-action-panel header="Project Interest">
-        <div class="panel-body">
+        <div class="modal-body">
         <div class="bg">
             <!-- SCROLLABLE CONTENT ADDED BY Aviral -->
             <div class="form-container"> 
@@ -62,7 +62,7 @@
                             onchange={handleChange} data-field="AnnualRevenue">
                         </lightning-input>
 
-                        <div class="slds-var-m-top_medium button-area">
+                        <div class="slds-var-m-top_medium">
                             <lightning-button label="Back" onclick={handleBack} class="slds-var-m-right_x-small">
                             </lightning-button>
 
@@ -80,7 +80,7 @@
     </div>
 
            
-    </lightning-quick-action-panel>
+   <!--- </lightning-quick-action-panel>
         <div class="fixed-footer" style="height:50px;border-top:1px solid gray;padding-top:7px;text-align:center;">
             <div class="button-area">
                 <lightning-button label="Cancel" variant="neutral"
@@ -90,5 +90,11 @@
                 <lightning-button label="Save" variant="brand"
                     onclick={handleSave} disabled={isLoading}></lightning-button>
             </div>
+        </div> -->
+         <div slot="footer" class="footer-center">
+            <lightning-button label="Cancel" variant="neutral" onclick={handleCancel} disabled={isLoading}></lightning-button>
+            <lightning-button label="Save" variant="brand" onclick={handleSave} disabled={isLoading}></lightning-button>
         </div>
+
+    </lightning-quick-action-panel>
 </template>

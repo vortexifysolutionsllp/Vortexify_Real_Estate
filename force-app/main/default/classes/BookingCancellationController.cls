@@ -50,7 +50,7 @@ public with sharing class BookingCancellationController {
                 unit.UnitStatus__c = 'Available';
             }
 
-            opp.Booking_Status__c = 'Canceled';
+            opp.Booking_Status__c = 'Cancelled';
 
             // Update together
             update opp;
