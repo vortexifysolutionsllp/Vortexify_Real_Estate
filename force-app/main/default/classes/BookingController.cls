@@ -9,6 +9,14 @@ public with sharing class BookingController {
         Map<String, Object> result = new Map<String, Object>();
         if (oppId == null) return result;
 
+        // ✅ Query Opportunity for Payment Policy
+    Opportunity opp = [
+        SELECT Id, Payment_Policy__c
+        FROM Opportunity
+        WHERE Id = :oppId
+        LIMIT 1
+    ];
+
         List<OpportunityLineItem> oliList = [
             SELECT Id,
                    Product2.Tower__c,
@@ -35,8 +43,10 @@ public with sharing class BookingController {
 
             }
         }
+  result.put('paymentPolicyId', opp.Payment_Policy__c);
 
         return result;
+
     }
 
     // Total towers for project

@@ -134,6 +134,14 @@ if (isOpportunityContext) {
         LIMIT 1
 
     ];
+
+List<OpportunityLineItem> existingOlis = [
+    SELECT Id, Product2Id
+    FROM OpportunityLineItem
+    WHERE OpportunityId = :opp.Id
+    LIMIT 1
+];
+
  
     if (opp.Pricebook2Id == null) {
 
@@ -143,6 +151,19 @@ if (isOpportunityContext) {
 
 }
  
+if (!existingOlis.isEmpty() && existingOlis[0].Product2Id == unitIds[0]) {
+    return;
+}
+
+if (!existingOlis.isEmpty()) {
+    update new Product2(
+        Id = existingOlis[0].Product2Id,
+        UnitStatus__c = 'Available'
+    );
+
+    delete existingOlis;
+}
+
  
     List<PricebookEntry> pbeList = [
 
@@ -485,5 +506,26 @@ accountId = accList[0].Id;
 
 }
  
+@AuraEnabled(cacheable=true)
+public static Product2 getAllocatedUnit(Id opportunityId) {
+    List<OpportunityLineItem> oliList = [
+        SELECT Product2Id,
+               Product2.FloorNumber__c,
+               Product2.Tower__c
+        FROM OpportunityLineItem
+        WHERE OpportunityId = :opportunityId
+        LIMIT 1
+    ];
+
+    if (oliList.isEmpty()) return null;
+
+    return [
+        SELECT Id, UnitStatus__c, FloorNumber__c, Tower__c
+        FROM Product2
+        WHERE Id = :oliList[0].Product2Id
+        LIMIT 1
+    ];
+}
+
  
 }

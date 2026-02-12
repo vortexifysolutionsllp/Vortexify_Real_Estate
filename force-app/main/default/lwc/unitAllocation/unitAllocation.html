@@ -1,128 +1,113 @@
 <template>
     <lightning-card title="Unit Allocation">
-        <div class="slds-p-around_medium">
+        <div class="slds-p-around_medium unit-allocation-container">
+            <div class="scroll-body">
+                
+                <!-- Project Picker -->
+                <template if:true={showProjectPicker}>
+                    <div class="slds-m-bottom_medium picker-box">
+                        <lightning-record-picker
+                            label="Select Project"
+                            placeholder="Search Project..."
+                            object-api-name="Project__c"
+                            onchange={handleProjectChange}>
+                        </lightning-record-picker>
+                    </div>
+                </template>
 
-            <lightning-record-picker
-                label="Select Project"
-                placeholder="Search Project..."
-                object-api-name="Project__c"
-                onchange={handleProjectChange}>
-            </lightning-record-picker>
+                <!-- Towers Section -->
+                <template if:true={towers}>
+                    <div class="tower-grid-container">
+                        <template for:each={towers} for:item="tower">
+                            <article key={tower.Id} 
+                                     class={tower.towerClass} 
+                                     data-id={tower.Id} 
+                                     onclick={handleTowerClick}>
 
-            <template if:true={towers}>
-                <div class="slds-grid slds-wrap slds-m-top_medium">
+                                <!-- Tower Image -->
+                                <div class="tower-image" style={tower.towerStyle}></div>
 
-                    <template for:each={towers} for:item="tower">
-                        <div
-                            key={tower.Id}
-                            class="slds-col slds-size_1-of-1
-                                   slds-medium-size_1-of-2
-                                   slds-large-size_1-of-3
-                                   slds-p-around_small"
-                        >
-
-                            <article
-                                class="slds-box slds-theme_default
-                                       slds-text-align_center
-                                       slds-p-around_medium tower-card"
-                                data-id={tower.Id}
-                                onclick={handleTowerClick}
-                            >
-                                <h2 class="slds-text-heading_small">
-                                    {tower.Name}
-                                </h2>
-
-                                <p class="slds-text-body_small slds-m-top_x-small">
-                                    Total Floors: {tower.Total_Floors__c}
-                                </p>
-                            </article>
-
-                            <template if:true={tower.isSelected}>
-                                <div class="slds-m-top_small">
-                                    <lightning-combobox
-                                        label="Select Floor"
-                                        options={floorOptions}
-                                        placeholder="Choose Floor"
-                                        data-tower-id={tower.Id}
-                                        onchange={handleFloorChange}>
-                                    </lightning-combobox>
-                                </div>
-                            </template>
-
-                        </div>
-                    </template>
-
-                </div>
-            </template>
-
-            <template if:true={hasUnits}>
-                <div class="slds-m-top_large">
-                    <h3 class="slds-text-heading_small slds-m-bottom_small">
-                        Units
-                    </h3>
-
-                    <div class="slds-grid slds-wrap">
-                        <template for:each={units} for:item="unit">
-                            <div
-                                key={unit.Id}
-                                class="slds-col slds-size_1-of-2
-                                       slds-large-size_1-of-3
-                                       slds-p-around_x-small"
-                            >
-
-                                <article
-                                    class={unit.cssClass}
-                                    data-id={unit.Id}
-                                    onclick={handleUnitClick}
-                                >
-
-
-                                    <p class="slds-text-heading_small">
-                                        {unit.UnitNumber__c}
+                                <!-- Tower Details -->
+                                <div class="tower-details slds-p-around_x-small">
+                                    <h2 class="tower-title">{tower.Name}</h2>
+                                    <p class="tower-subtitle">
+                                        Floors: {tower.Total_Floors__c}
                                     </p>
 
-                                    <div class="slds-m-top_x-small">
+                                    <!-- Floor Selector INSIDE Tower -->
+                                    <template if:true={tower.isSelected}>
+                                        <div class="tower-floor-picker">
+                                            <lightning-combobox
+                                                label="Select Floor"
+                                                value={selectedFloor}
+                                                options={floorOptions}
+                                                placeholder="Choose Floor"
+                                                data-tower-id={tower.Id}
+                                                onchange={handleFloorChange}>
+                                            </lightning-combobox>
+                                        </div>
+                                    </template>
 
+                                </div>
+
+                            </article>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Units Section -->
+                <template if:true={hasUnits}>
+                    <div class="unit-section-container slds-m-top_large">
+                        <h3 class="section-label">Units</h3>
+
+                        <div class="unit-grid">
+                            <template for:each={units} for:item="unit">
+                                <article key={unit.Id} 
+                                         class={unit.cssClass} 
+                                         data-id={unit.Id} 
+                                         onclick={handleUnitClick}>
+
+                                    <p class="unit-id">{unit.UnitNumber__c}</p>
+
+                                    <div class="slds-m-top_xx-small">
                                         <span class={unit.statusClass}>
                                             {unit.UnitStatus__c}
                                         </span>
-
-
                                     </div>
 
                                 </article>
-
-                            </div>
-                        </template>
+                            </template>
+                        </div>
                     </div>
-                </div>
-            </template>
+                </template>
 
-            <template if:true={noTowers}>
-                <div class="slds-text-color_error slds-m-top_medium">
-                    No towers found for this project.
-                </div>
-            </template>
+                <!-- No Tower Message -->
+                <template if:true={noTowers}>
+                    <div class="slds-text-color_error 
+                                slds-p-around_medium 
+                                slds-text-align_center">
+                        No towers found for this project.
+                    </div>
+                </template>
 
+            </div>
         </div>
 
-<div class="slds-m-top_large slds-text-align_right">
+        <!-- Footer -->
+        <div slot="footer" class="sticky-footer">
+            <lightning-button
+                label="Cancel"
+                variant="neutral"
+                onclick={handleCancel}>
+            </lightning-button>
 
-    <lightning-button
-        label="Cancel"
-        variant="neutral"
-        onclick={handleCancel}>
-    </lightning-button>
-
-    <lightning-button
-        label="Allocate"
-        variant="brand"
-        class="slds-m-left_small"
-        onclick={handleAllocate}
-        disabled={disableAllocate}>
-    </lightning-button>
-
-</div>
-
+            <lightning-button
+                label="Allocate"
+                variant="brand"
+                class="slds-m-left_small"
+                onclick={handleAllocate}
+                disabled={disableAllocate}>
+            </lightning-button>
+        </div>
     </lightning-card>
 </template>

@@ -18,7 +18,10 @@ export default class BookingPaymentPolicies extends LightningElement {
 
     towerCount = 0;
     unitCount = 0;
-@track wiredBookingDataResult;
+    @track wiredBookingDataResult;
+    @track wiredPaymentPoliciesResult;
+    @track wiredUnitDetailsResult;
+
     @track paymentPlanOptions = [];
     @api selectedPaymentPolicy;
 
@@ -76,7 +79,10 @@ export default class BookingPaymentPolicies extends LightningElement {
 
     // Fetch Payment Policies
    @wire(getPaymentPoliciesByProject, { projectId: '$projectId' })
-    wiredPaymentPolicies({ data, error }) {
+    //wiredPaymentPolicies({ data, error }) {
+    wiredPaymentPolicies(result) {
+        this.wiredPaymentPoliciesResult = result;
+        const{data, error} = result;// store full wire result
         console.log('ProjectId for policies:', this.projectId);
 
         if (data) {
@@ -105,14 +111,18 @@ export default class BookingPaymentPolicies extends LightningElement {
     // }
 
     @wire(getUnitBookingDetails, { oppId: '$recordId' })
-wiredUnitDetails({ data, error }) {
+//wiredUnitDetails({ data, error }) {
+    wiredUnitDetails(result) {
+    this.wiredUnitDetailsResult = result; 
+
+    const { data, error } = result;
     if (data) {
         this.unitDetails = data;
         this.showNoUnitError = false;
         this.disableAllFields = false;
     } 
     else if (!data) {
-        // 🔴 No Unit product found
+        // No Unit product found
         this.showNoUnitError = true;
         this.disableAllFields = true;
         this.unitDetails = { Product2: {} };
@@ -160,7 +170,52 @@ get dealCost(){
                 console.error('Error fetching cost per sqft', error);
             });
     }
-   
+        @api
+    refreshData() {
+        const promises = [];
 
-   
-}//
+        if (this.wiredBookingDataResult) {
+            promises.push(refreshApex(this.wiredBookingDataResult));
+        }
+
+        if (this.wiredPaymentPoliciesResult) {
+            promises.push(refreshApex(this.wiredPaymentPoliciesResult));
+        }
+
+        if (this.wiredUnitDetailsResult) {
+            promises.push(refreshApex(this.wiredUnitDetailsResult));
+        }
+
+        return Promise.all(promises);
+    }
+        @api
+    handleSave() {
+        //Block if booking has no Unit product
+        if (this.showNoUnitError) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Invalid Booking',
+                    message: 'Booking must contain a Unit product before selecting a Payment Plan.',
+                    variant: 'error'
+                })
+            );
+            return Promise.reject();
+        }
+
+        // Block if no Payment Plan selected
+        if (!this.selectedPaymentPolicy) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Missing Payment Plan',
+                    message: 'Please select a Payment Plan before saving.',
+                    variant: 'warning'
+                })
+            );
+            return Promise.reject();
+        }
+
+        // Allow parent save to continue
+        return Promise.resolve();
+    }
+
+}

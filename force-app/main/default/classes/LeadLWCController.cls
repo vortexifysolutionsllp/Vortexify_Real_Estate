@@ -179,7 +179,7 @@ if(!toInsert.isEmpty()){
 
     @AuraEnabled
     public static Lead getLeadById111(Id recordId) {
-        return [ SELECT Id, FirstName, LastName, Phone, Email, Location__c FROM Lead WHERE Id = :recordId LIMIT 1];
+        return [ SELECT Id, FirstName, LastName, Phone, Email FROM Lead WHERE Id = :recordId LIMIT 1];
     }
 
     @AuraEnabled(cacheable=false)
@@ -226,7 +226,6 @@ if(!toInsert.isEmpty()){
                 Name = leadFullName + ' - ' + projectNameById.get(projId),
                 Lead__c = leadRec.Id,
                 Project__c = projId,
-                Location__c = locationValue,
                 Is_Active__c = true
                 ));
             }
