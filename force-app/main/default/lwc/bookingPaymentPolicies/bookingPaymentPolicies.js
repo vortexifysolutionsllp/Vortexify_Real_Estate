@@ -6,6 +6,7 @@ import getPaymentPoliciesByProject from '@salesforce/apex/BookingController.getP
 import getUnitBookingDetails from '@salesforce/apex/BookingController.getUnitBookingDetails';
 import getCostPerSqftByPolicy from '@salesforce/apex/BookingController.getCostPerSqftByPolicy';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { refreshApex } from '@salesforce/apex';
 
 export default class BookingPaymentPolicies extends LightningElement {
 
@@ -17,7 +18,7 @@ export default class BookingPaymentPolicies extends LightningElement {
 
     towerCount = 0;
     unitCount = 0;
-
+@track wiredBookingDataResult;
     @track paymentPlanOptions = [];
     @api selectedPaymentPolicy;
 
@@ -36,12 +37,16 @@ export default class BookingPaymentPolicies extends LightningElement {
 
     // Fetch Project & Tower
     @wire(getProjectAndTowerFromBooking, { oppId: '$recordId' })
-    wiredBookingData({ data, error }) {
+    wiredBookingData(result) {
+      this.wiredBookingDataResult = result; // store full wire result
+    const { data, error } = result;
         if (data) {
             this.project = data.project || {};
             this.tower = data.tower || {};
            // this.projectId = this.project.Id;
              this.projectId = data.projectId;
+             this.selectedPaymentPolicy = data.paymentPolicyId;
+              
         } else if (error) {
             console.error('Error fetching project data', error);
         }
@@ -156,4 +161,6 @@ get dealCost(){
             });
     }
    
-}
+
+   
+}//

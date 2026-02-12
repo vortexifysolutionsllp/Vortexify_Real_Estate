@@ -1,167 +1,229 @@
-<apex:page controller="SiteVisitFeedbackController"
+<apex:page controller="SiteVisitFeedbackController"      
            showHeader="false"
            sidebar="false"
            standardStylesheets="false"
            applyHtmlTag="false"
            applyBodyTag="false">
-
+ 
 <html>
 <head>
     <apex:slds />
-
+ 
     <style>
         body {
             margin: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f4f6f9, #e8edf3);
             font-family: "Salesforce Sans", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f4f6f9, #e8edf3);
         }
-
+ 
         .feedback-container {
-            max-width: 560px;
-            margin: 80px auto;
-            padding: 0 16px;
+            width: 100%;
+            max-width: 580px;
+            padding: 20px;
         }
-
+ 
+        /* GLASS CARD */
         .feedback-card {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 20px;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.35),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2);
             overflow: hidden;
         }
-
+ 
+        /* HEADER */
         .feedback-header {
-            background: #0176d3;
-            color: #ffffff;
+            padding: 28px;
             text-align: center;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
             font-size: 26px;
             font-weight: 700;
-            padding: 24px;
+            letter-spacing: 0.6px;
+            color: #ffffff;
+            box-shadow: 0 0 25px rgba(0, 198, 255, 0.6);
         }
-
+ 
         .feedback-body {
-            padding: 32px;
+            padding: 34px 32px 40px;
         }
-
+ 
         .feedback-text {
-            font-size: 16px;
-            color: #444;
-            margin-bottom: 28px;
-            line-height: 1.6;
             text-align: center;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #000000;
+            margin-bottom: 36px;
         }
-
+ 
         .field-block {
-            margin-bottom: 24px;
+            margin-bottom: 30px;
         }
-
+ 
         .field-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: #2e2e2e;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #000000;
             margin-bottom: 8px;
             display: block;
+            font-weight: 600;
         }
-
-        /* ⭐ STAR RATING */
-        .star-rating {
-            font-size: 34px;
-            color: #d8dde6;
-            cursor: pointer;
-            user-select: none;
+ 
+        /* INPUTS */
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: #000000;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
         }
-
-        .star-rating .star.selected {
-            color: #f4b400;
+ 
+        select:focus,
+        textarea:focus {
+            border-color: #0072ff;
+            box-shadow: 0 0 18px rgba(0, 198, 255, 0.6);
+            background: rgba(0, 0, 0, 0.2);
         }
-
+ 
+        textarea {
+            resize: none;
+        }
+ 
+        /* BUTTON */
         .submit-wrapper {
             text-align: center;
-            margin-top: 32px;
+            margin-top: 42px;
         }
-
+ 
         .submit-btn {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border: none;
+            color: #001a2e;
             font-size: 16px;
-            padding: 12px 36px;
-            border-radius: 24px;
+            font-weight: 700;
+            padding: 14px 46px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 25px rgba(79, 172, 254, 0.8);
         }
-
+ 
+        .submit-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 0 40px rgba(79, 172, 254, 1);
+        }
+ 
+        /* SUCCESS / MESSAGE */
+        .thank-you {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2e844a;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+ 
+        /* ERROR */
         .error-text {
             text-align: center;
             color: #c23934;
             font-size: 16px;
             padding: 40px 20px;
+            font-weight: 600;
+        }
+ 
+        .slds-text-color_error {
+            color: #c23934 !important;
         }
     </style>
- 
 </head>
-
+ 
 <body>
 <div class="feedback-container">
     <div class="feedback-card">
-
+ 
         <!-- HEADER -->
         <div class="feedback-header">
             Site Visit Feedback
         </div>
-
+ 
         <div class="feedback-body">
-
-            <!-- FORM (VISIBLE ONLY BEFORE SUBMIT) -->
-            <apex:form rendered="{!AND(isValidLink, NOT(isSubmitted))}">
-                <apex:messages />
-
-                <div class="feedback-text">
-                    Thank you for visiting our site.  
-                    We value your feedback and would love to hear your thoughts.
-                </div>
-
-                    <!-- Rating -->
-                    <div class="field-block">
-                        <label class="field-label">Rating</label>
-                        <apex:selectList value="{!rating}" size="1"
-                            styleClass="slds-select slds-size_1-of-1">
-                            <apex:selectOption itemLabel="Select a rating" itemValue=""/>
-                            <apex:selectOption itemLabel="1 - Very Poor" itemValue="1"/>
-                            <apex:selectOption itemLabel="2 - Poor" itemValue="2"/>
-                            <apex:selectOption itemLabel="3 - Average" itemValue="3"/>
-                            <apex:selectOption itemLabel="4 - Good" itemValue="4"/>
-                            <apex:selectOption itemLabel="5 - Excellent" itemValue="5"/>
-                        </apex:selectList>
-                    </div>
-
-
-                <!-- Comments -->
-                <div class="field-block">
-                    <label class="field-label">Comments</label>
-                    <apex:inputTextarea value="{!comments}"
-                        rows="5"
-                        styleClass="slds-textarea"/>
-                </div>
-
-                <!-- Submit -->
-                <div class="submit-wrapper">
-                    <apex:commandButton value="Submit Feedback"
-                        action="{!submitFeedback}"
-                        styleClass="slds-button slds-button_brand submit-btn"/>
-                </div>
-            </apex:form>
-
-            <!-- THANK YOU VIEW (AFTER SUBMIT) -->
-            <apex:outputPanel rendered="{!isSubmitted}">
-                <div class="feedback-text" style="font-weight:600;">
-                    Thank you for filling the form.  
-                    We appreciate your valuable feedback.
+ 
+            <!-- FEEDBACK ALREADY RECEIVED -->
+            <apex:outputPanel rendered="{!isAlreadyReceived}">
+                <div class="thank-you">
+                    ✅ Feedback Already Received  
+                    <br/>Thank you for your time.
                 </div>
             </apex:outputPanel>
-
+ 
+            <!-- FORM -->
+            <apex:form rendered="{!AND(isValidLink, NOT(isSubmitted), NOT(isAlreadyReceived))}">
+                <apex:messages />
+ 
+                <div class="feedback-text">
+                    Thank you for visiting our site.  
+                    Your experience helps us shape the future.
+                </div>
+ 
+                <!-- Rating -->
+                <div class="field-block">
+                    <label class="field-label">Overall Experience</label>
+                    <apex:selectList value="{!rating}" size="1">
+                        <apex:selectOption itemLabel="Select rating" itemValue=""/>
+                        <apex:selectOption itemLabel="1 – Very Poor" itemValue="1"/>
+                        <apex:selectOption itemLabel="2 – Poor" itemValue="2"/>
+                        <apex:selectOption itemLabel="3 – Average" itemValue="3"/>
+                        <apex:selectOption itemLabel="4 – Good" itemValue="4"/>
+                        <apex:selectOption itemLabel="5 – Excellent" itemValue="5"/>
+                    </apex:selectList>
+                </div>
+ 
+                <!-- Comments -->
+                <div class="field-block">
+                    <label class="field-label">Your Thoughts</label>
+                    <apex:inputTextarea
+                        value="{!comments}"
+                        rows="5"
+                        style="width:-webkit-fill-available;"/>
+                </div>
+ 
+                <!-- Submit -->
+                <div class="submit-wrapper">
+                    <apex:commandButton
+                        value="Submit Feedback"
+                        action="{!submitFeedback}"
+                        styleClass="submit-btn"/>
+                </div>
+            </apex:form>
+ 
+            <!-- AFTER SUBMIT -->
+            <apex:outputPanel rendered="{!isSubmitted}">
+                <div class="thank-you">
+                    🚀 Feedback received successfully  
+                    <br/>Thank you for being part of our journey
+                </div>
+            </apex:outputPanel>
+ 
             <!-- INVALID LINK -->
             <apex:outputPanel rendered="{!NOT(isValidLink)}">
                 <div class="error-text">
-                    This feedback link is invalid or has expired.
+                    ⚠️ This feedback link is invalid or expired
                 </div>
             </apex:outputPanel>
-
+ 
         </div>
     </div>
 </div>

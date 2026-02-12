@@ -1,3 +1,5 @@
+//payment boooking apex
+
 public with sharing class BookingController {
 
     // Fetch Project and Tower from Booking (Opportunity)
@@ -133,7 +135,7 @@ public with sharing class BookingController {
     }
 
     // 🔹 NEW METHOD: Fetch Cost/Sqft from Policy
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled(cacheable=false)
     public static Decimal getCostPerSqftByPolicy(Id policyId) {
         if (policyId == null) return null;
 

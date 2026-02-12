@@ -39,8 +39,8 @@
                 <lightning-input label="Last Name" value={leadRec.LastName}
                     onchange={handleChange} data-field="LastName" required></lightning-input>
 
-                <lightning-input label="Phone" value={leadRec.Phone}
-                    onchange={handleChange} data-field="Phone" required></lightning-input>
+                <lightning-input label="Phone"  value={leadRec.Phone}
+                    onchange={handlePhoneChange} data-field="Phone" type="tel" message-when-pattern-mismatch="Please enter a valid phone number (123-456-7890)" required></lightning-input>
 
                <!--  <lightning-input label="City" value={leadRec.City}
                     onchange={handleChange} data-field="City" required></lightning-input> -->
