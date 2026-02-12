@@ -1,7 +1,19 @@
-.body {
+/* Only body content scrolls inside the Salesforce modal */
+.modal-body {
+    min-height: 50vh;
+    max-height: 50vh;   /* keeps header/footer visible */
+    overflow-y: auto;
     padding: 12px;
 }
 
+/* Footer layout */
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Layout styles */
 .radio-row {
     display: flex;
     gap: 12px;
@@ -15,10 +27,4 @@
     padding: 14px;
     background: #f2f7fd;
     cursor: pointer;
-}
-
-.footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
 }

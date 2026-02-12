@@ -1,39 +1,29 @@
-/* 🔥 THIS makes Quick Action body obey height */
-.panel-body {
-    display: flex;
-    flex-direction: column;
-    overflow-y: hidden;
+/* Scroll only this area */
+.modal-body {
+    
+    overflow-y: none;
 }
 
-/* Main layout */
+/* Background section */
 .bg {
     background-image: url(/resource/realestateleadform);
     background-size: cover;
     background-position: center;
     border-radius: 12px;
     padding: 10px;
-
-    display: flex;
-    flex-direction: column;
-    flex: 1;
 }
 
-/* Scroll only middle section */
+/* Inner form spacing */
 .form-container {
     padding: 20px;
-
-    /* prevents overlap with footer */
-    padding-bottom: 90px;
+    max-height: 50vh;
 }
 
-/* Footer locked at bottom */
-.fixed-footer {
-    flex-shrink: 0;
-    background: #ffffff;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.06);
-}
-
-/* Center buttons */
-.button-area {
+/* Center footer buttons */
+.footer-center {
+    display: flex;
+    justify-content: center;
     gap: 16px;
+    width: 100%;
+    padding: 10px 0;
 }

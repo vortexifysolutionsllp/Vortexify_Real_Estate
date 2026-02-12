@@ -151,20 +151,34 @@ if(!toInsert.isEmpty()){
 
 
     // Get picklist values for Location__c on Project_Interest__c
-    @AuraEnabled
+    // @AuraEnabled
+    // public static List<String> getLocationValues() {
+
+    //     List<String> results = new List<String>();
+
+    //     Schema.DescribeFieldResult d =
+    //         Project__c.Locations__c.getDescribe();
+
+    //     for (Schema.PicklistEntry pe : d.getPicklistValues()) {
+    //         results.add(pe.getValue());   // use value for LWC combobox
+    //     }
+
+    //     return results;
+    // }
+
+
+        @AuraEnabled
     public static List<String> getLocationValues() {
 
-        List<String> results = new List<String>();
-
-        Schema.DescribeFieldResult d =
-            Project__c.Locations__c.getDescribe();
-
-        for (Schema.PicklistEntry pe : d.getPicklistValues()) {
-            results.add(pe.getValue());   // use value for LWC combobox
-        }
-
-        return results;
+        return new List<String>{
+            'UP',
+            'Noida',
+            'Delhi',
+            'Gurugram',
+            'Gaziabad'
+        };
     }
+
 
 	 @AuraEnabled(cacheable=true)
     public static List<Project__c> getProjectsByLocation(String location) {
@@ -172,6 +186,7 @@ if(!toInsert.isEmpty()){
         return [
             SELECT Id, Name
             FROM Project__c
+            //Where LOWER(Locations__c) = :location.toLowerCase()
             WHERE Locations__c = :location
             ORDER BY Name
         ];
@@ -200,11 +215,19 @@ if(!toInsert.isEmpty()){
         Boolean isNewLead = (leadRec.Id == null);
         leadRec.Company = 'Web Lead';
     
+        try {
         if (isNewLead) {
             insert leadRec;
         } else {
             update leadRec;
         }
+    } catch (DmlException e) {
+        System.debug('Error while saving Lead: ' + e.getMessage());
+
+        throw new AuraHandledException(
+            'Lead could not be saved because email daily limit was reached.'
+        );
+    }
     
         // create project interest
         if (selectedProjectNames != null && !selectedProjectNames.isEmpty()) {
