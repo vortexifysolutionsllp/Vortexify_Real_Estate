@@ -170,13 +170,16 @@ if(!toInsert.isEmpty()){
         @AuraEnabled
     public static List<String> getLocationValues() {
 
-        return new List<String>{
-            'UP',
-            'Noida',
-            'Delhi',
-            'Gurugram',
-            'Gaziabad'
-        };
+        List<String> results = new List<String>();
+
+        Schema.DescribeFieldResult d =
+            Project__c.Locations__c.getDescribe();
+
+        for (Schema.PicklistEntry pe : d.getPicklistValues()) {
+            results.add(pe.getValue());   // use value for LWC combobox
+        }
+
+        return results;
     }
 
 
