@@ -44,18 +44,18 @@ export default class LeadprojectLWCInserted extends LightningElement {
     @wire(getObjectInfo, { objectApiName: LEAD_OBJECT })
     leadObjectInfo;
 
-   /* @wire(getPicklistValues, {
-        recordTypeId: '$leadObjectInfo.data.defaultRecordTypeId',
-        fieldApiName: PROJECT_INTEREST
-    })
-    wiredProjectInterestValues({ data, error }) {
-        if (data) {
-            this.projectOptions = data.values.map(v => ({
-                label: v.label,
-                value: v.value
-            }));
-        }
-    }*/
+    /* @wire(getPicklistValues, {
+         recordTypeId: '$leadObjectInfo.data.defaultRecordTypeId',
+         fieldApiName: PROJECT_INTEREST
+     })
+     wiredProjectInterestValues({ data, error }) {
+         if (data) {
+             this.projectOptions = data.values.map(v => ({
+                 label: v.label,
+                 value: v.value
+             }));
+         }
+     }*/
 
     // ---------- EMAIL STEP ----------
     handleEmailChange(event) {
@@ -87,6 +87,57 @@ export default class LeadprojectLWCInserted extends LightningElement {
         const field = event.target.dataset.field;
         this.leadRec[field] = event.target.value;
     }
+
+    // handlePhoneChange(event){
+    //     let phoneValue = event.target.value;
+    //     // remove all non-numeric characters.
+    //     phoneValue = phoneValue.replace(/\D/g, '');
+    //     //update input value
+    //     event.target.value = phoneValue;
+
+    //     // Phone number should not be less than 10
+    //     if(phoneValue.length !== 10){
+    //         event.target.setCustomValidity("Phone number must be exactly 10 digits");
+    //     }
+    //     else{
+    //         event.target.setCustomValidity("");
+    //     }
+    //     event.target.reportValidity();
+
+    //     //store phone in lead record
+    //     this.leadRec.Phone = phoneValue;
+    // }
+
+    handlePhoneChange(event) {
+
+    let phoneValue = event.target.value.trim();
+
+    // Allow +, digits, spaces, -, ()
+    const phoneRegex = /^\+?[0-9\s\-()]{10,25}$/;
+
+    // Count digits only (ignore spaces/dashes/brackets)
+    let digitsOnly = phoneValue.replace(/\D/g, "");
+
+    // Validation: format + digit length
+    if (
+        !phoneRegex.test(phoneValue) ||
+        digitsOnly.length < 10 ||
+        digitsOnly.length > 15
+    ) {
+        event.target.setCustomValidity(
+            "Enter valid phone number (10–15 digits, spaces allowed, country code optional)"
+        );
+    } else {
+        event.target.setCustomValidity("");
+    }
+
+    event.target.reportValidity();
+
+    // Store phone WITH spaces and + (as user typed)
+    this.leadRec.Phone = phoneValue;
+}
+
+
 
     // ---------- LOCATION CHANGE + LOAD PROJECTS ----------
     handleLocationChange(event) {
@@ -130,6 +181,19 @@ export default class LeadprojectLWCInserted extends LightningElement {
 
     // ---------- SAVE ----------
     handleSaveRecord() {
+        // Validate all inputs before saving
+        const allValid = [...this.template.querySelectorAll('lightning-input')]
+            .reduce((validSoFar, inputCmp) => {
+                inputCmp.reportValidity();
+                return validSoFar && inputCmp.checkValidity();
+            }, true);
+
+        // Stop Save if invalid
+        if (!allValid) {
+            alert("Please enter valid details before saving.");
+            return;
+        }
+
         saveLeadApexRecord({
             leadRec: this.leadRec,
             locationValue: this.location,

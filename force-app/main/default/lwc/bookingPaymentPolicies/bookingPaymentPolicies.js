@@ -18,8 +18,8 @@ export default class BookingPaymentPolicies extends LightningElement {
 
     towerCount = 0;
     unitCount = 0;
-@track wiredBookingDataResult;
-@track wiredPaymentPoliciesResult;
+    @track wiredBookingDataResult;
+    @track wiredPaymentPoliciesResult;
     @track wiredUnitDetailsResult;
 
     @track paymentPlanOptions = [];
