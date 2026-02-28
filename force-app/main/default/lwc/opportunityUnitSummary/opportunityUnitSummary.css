@@ -1,0 +1,157 @@
+.container {
+    padding: 1.2rem;
+}
+
+/* ================= HEADER ================= */
+
+.unit-card {
+    background: linear-gradient(135deg, #f4f6f9, #ffffff);
+    padding: 1.2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.unit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unit-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.unit-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e2a38;
+}
+
+.unit-meta {
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    color: #5f6b7a;
+}
+
+.badge {
+    background: #e3f2fd;
+    color: #0d47a1;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.price-container {
+    text-align: right;
+}
+
+.price-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.price-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1b5e20;
+}
+
+/* ================= PRICING GRID ================= */
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pricing-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5eaf0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.card-header {
+    background: #f1f5f9;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.parking-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.8rem;
+    align-items: end;
+    margin-bottom: 0.8rem;
+}
+
+.add-btn {
+    margin-top: 0.5rem;
+}
+
+/* ================= SUMMARY ================= */
+
+.summary-card {
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5eaf0;
+    overflow: hidden;
+}
+
+.summary-header {
+    background: #f1f5f9;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-body {
+    padding: 1.2rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.summary-item .amount {
+    font-weight: 600;
+}
+
+.summary-item.discount {
+    color: #c62828;
+}
+
+.divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 1rem 0;
+}
+
+.summary-item.final {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0d47a1;
+}
+
+.summary-item.final .amount {
+    font-size: 1.3rem;
+}
