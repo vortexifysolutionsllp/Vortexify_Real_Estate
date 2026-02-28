@@ -1,0 +1,184 @@
+<template>
+    <lightning-card title="Unit Booking Summary" icon-name="standard:opportunity">
+
+        <div class="container">
+
+            <!-- ================= HEADER ================= -->
+            <div class="unit-card">
+                <div class="unit-header">
+
+                    <div class="unit-left">
+                        <div class="unit-title">
+                            <lightning-icon 
+                                icon-name="standard:household" 
+                                size="small"
+                                class="unit-icon">
+                            </lightning-icon>
+                            <span class="unit-name">{unitName}</span>
+                        </div>
+
+                        <div class="unit-meta">
+                            <span class="badge">{unitType}</span>
+                            <span class="dot">•</span>
+                            <span class="area">{area} Sq Ft</span>
+                        </div>
+                    </div>
+
+                    <div class="price-container">
+                        <span class="price-label">Base Price</span>
+                        <span class="price-value">₹ {basePrice}</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ================= MIDDLE CONTENT ================= -->
+
+            <div class="pricing-grid">
+
+                <!-- PRICE COMPONENTS -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:pricebook" size="x-small"></lightning-icon>
+                        <span>Price Components</span>
+                    </div>
+
+                    <div class="card-body">
+                        <lightning-input
+                            type="number"
+                            label="PLC Amount"
+                            value={plcAmount}
+                            data-field="plcAmount"
+                            onchange={handleFieldChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <!-- PARKING -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:truck" size="x-small"></lightning-icon>
+                        <span>Parking</span>
+                    </div>
+
+                    <div class="card-body">
+
+                        <template for:each={parkingList} for:item="park">
+                            <div key={park.id} class="parking-row">
+
+                                <lightning-combobox
+                                    label="Parking Type"
+                                    value={park.parkingType}
+                                    options={parkingOptions}
+                                    data-id={park.id}
+                                    onchange={handleParkingType}>
+                                </lightning-combobox>
+
+                                <lightning-input
+                                    type="number"
+                                    label="Amount"
+                                    value={park.amount}
+                                    data-id={park.id}
+                                    onchange={handleParkingAmount}>
+                                </lightning-input>
+
+                                <lightning-button-icon
+                                    icon-name="utility:delete"
+                                    alternative-text="Remove"
+                                    data-id={park.id}
+                                    onclick={removeParking}>
+                                </lightning-button-icon>
+
+                            </div>
+                        </template>
+
+                        <lightning-button
+                            label="Add Parking"
+                            variant="neutral"
+                            class="add-btn"
+                            onclick={addParking}>
+                        </lightning-button>
+
+                    </div>
+                </div>
+
+                <!-- ADDITIONAL CHARGES -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                        <span>Additional Charges</span>
+                    </div>
+
+                    <div class="card-body">
+                        <lightning-input
+                            type="number"
+                            label="Other Charges"
+                            value={otherCharges}
+                            data-field="otherCharges"
+                            onchange={handleFieldChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <!-- DISCOUNTS -->
+                <div class="pricing-card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:discount" size="x-small"></lightning-icon>
+                        <span>Discounts</span>
+                    </div>
+
+                    <div class="card-body">
+                        <lightning-input
+                            type="number"
+                            label="Discount"
+                            value={discount}
+                            data-field="discount"
+                            onchange={handleFieldChange}>
+                        </lightning-input>
+
+                        <lightning-input
+                            type="number"
+                            label="Special Discount"
+                            value={specialDiscount}
+                            data-field="specialDiscount"
+                            onchange={handleFieldChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= SUMMARY ================= -->
+
+            <div class="summary-card">
+
+                <div class="summary-header">
+                    <lightning-icon icon-name="utility:moneybag" size="small"></lightning-icon>
+                    <span>Booking Summary</span>
+                </div>
+
+                <div class="summary-body">
+
+                    <div class="summary-item">
+                        <span>Total Cost</span>
+                        <span class="amount">₹ {totalCost}</span>
+                    </div>
+
+                    <div class="summary-item discount">
+                        <span>Total Discount</span>
+                        <span class="amount">- ₹ {totalDiscount}</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="summary-item final">
+                        <span>Final Price</span>
+                        <span class="amount">₹ {finalPrice}</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>
