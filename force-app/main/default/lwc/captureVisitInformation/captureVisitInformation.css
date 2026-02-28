@@ -1,0 +1,42 @@
+/* Container Background & Border */
+.form-container {
+    background-color: #f9fbfe; /* Very light blue tint */
+    border-top: 1px solid #dddbda;
+}
+
+/* Custom banner for the completed state */
+.completed-banner {
+    display: flex;
+    align-items: center;
+    background-color: #fff1f1;
+    border: 1px solid #ea001e;
+    border-left: 4px solid #ea001e; /* Color accent */
+    border-radius: 4px;
+    padding: 12px;
+    color: #ba0517;
+    font-weight: 600;
+}
+
+/* Enhance Label visibility */
+:host {
+    --lwc-formLabelFontSize: 0.85rem;
+    --lwc-colorTextLabel: #3e3e3c;
+}
+
+/* Adding a shadow effect to the footer */
+.custom-footer {
+    background-color: white;
+    border-top: 1px solid #dddbda;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Styling the Dual Listbox to make it pop */
+lightning-dual-listbox .slds-dueling-list__column {
+    background: #ffffff;
+    border-radius: 4px;
+}
+
+/* Custom Focus/Hover style for Save Button */
+lightning-button[variant="brand"] {
+    --lwc-brandAccessible: #005fb2; /* Slightly deeper blue */
+}

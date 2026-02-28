@@ -157,7 +157,7 @@ public class SiteVisitTriggerHandler {
                 t.Status = 'Not Started';
                 t.Priority = 'Normal';
                 t.Description = 'Prepare for the scheduled site visit. Coordinate with the customer, confirm date and time, and ensure all visit details are in place.';
-                t.ActivityDate = sv.VisitDate__c;
+                t.ActivityDate = sv.VisitDate__c.addDays(-1);
 
                 tasksToInsert.add(t);
             }
@@ -172,7 +172,7 @@ public class SiteVisitTriggerHandler {
                 t.Status = 'Not Started';
                 t.Priority = 'Normal';
                 t.Description = 'Prepare for the scheduled site visit. Coordinate with the customer, confirm date and time, and ensure all visit details are in place.';
-                t.ActivityDate = sv.VisitDate__c;
+                t.ActivityDate = sv.VisitDate__c.addDays(-1);
 
                 tasksToInsert.add(t);
             }

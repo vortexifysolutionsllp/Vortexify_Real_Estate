@@ -1,3 +1,10 @@
+/* Scroll only this area */
+.modal-body {
+    
+    overflow-y: none;
+}
+
+/* Background section */
 .bg {
     background-image: url(/resource/realestateleadform);
     background-size: cover;
@@ -6,21 +13,17 @@
     padding: 10px;
 }
 
-
+/* Inner form spacing */
 .form-container {
     padding: 20px;
-    margin: 0 auto;
+    max-height: 50vh;
 }
 
-
-.hero-title {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
+/* Center footer buttons */
+.footer-center {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding: 10px 0;
 }
-
-.button-area {
-    gap: 14px;
-}
-

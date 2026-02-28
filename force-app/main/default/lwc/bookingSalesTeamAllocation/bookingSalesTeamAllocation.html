@@ -1,102 +1,75 @@
 <template>
 
-    
     <template if:true={isLoading}>
         <div class="spinner-container">
-            <lightning-spinner 
-                alternative-text="Saving..." 
-                size="large">
+            <lightning-spinner alternative-text="Saving..." size="large">
             </lightning-spinner>
         </div>
     </template>
 
-    <lightning-card
-        icon-name="standard:account"
-        variant="brand"
-        title="Sales Team Allocation"
-        class="slds-p-around_medium">
+    <!-- NEW: Main flex wrapper added -->
+     <div class="modal-container">
+    <div class="panel-body" style="height:100%;">
 
-        <div class="slds-p-horizontal_medium">
+        <!--  NEW: Scrollable content wrapper added -->
+        <div class="content-area">
 
-            <template for:each={rows} for:item="row" for:index="index">
-                <lightning-layout
-                    key={row.id}
-                    vertical-align="end"
-                    class="slds-m-bottom_medium slds-box slds-theme_default">
+            <lightning-card icon-name="standard:account" variant="brand" title="Sales Team Allocation"
+                class="slds-p-around_medium">
 
-                  
-                    <lightning-layout-item size="5" padding="around-small">
-                        <lightning-record-picker
-                            label="Sales Team Member"
-                            placeholder="Search User"
-                            object-api-name="User"
-                            value={row.userId}
-                            data-index={index}
-                            onchange={handleRecordChange}>
-                        </lightning-record-picker>
-                    </lightning-layout-item>
+                <div class="slds-p-horizontal_medium">
 
-                    
-                    <lightning-layout-item size="3" padding="around-small">
-                        <lightning-input
-                            type="number"
-                            label="Commission Allocation%"
-                            placeholder="Enter percent"
-                            value={row.percent}
-                            data-index={index}
-                            onchange={handlePercentChange}>
-                        </lightning-input>
-                    </lightning-layout-item>
+                    <template for:each={rows} for:item="row" for:index="index">
+                        <lightning-layout key={row.id} vertical-align="end"
+                            class="slds-m-bottom_medium slds-box slds-theme_default">
 
-                    
-                    <lightning-layout-item
-                        size="2"
-                        class="slds-align_absolute-center slds-p-around_small">
-                        <lightning-button
-                            icon-name="utility:add"
-                            variant="brand"
-                            title="Add Row"
-                            onclick={addRow}
-                            disabled={isLoading}>
-                        </lightning-button>
-                    </lightning-layout-item>
+                            <lightning-layout-item size="5" padding="around-small">
+                                <lightning-record-picker label="Sales Team Member" placeholder="Search User"
+                                    object-api-name="User" value={row.userId} data-index={index}
+                                    onchange={handleRecordChange}>
+                                </lightning-record-picker>
+                            </lightning-layout-item>
 
-                    
-                    <lightning-layout-item
-                        size="2"
-                        class="slds-align_absolute-center slds-p-around_small">
-                        <lightning-button
-                            icon-name="utility:delete"
-                            variant="destructive"
-                            title="Delete Row"
-                            data-index={index}
-                            onclick={removeRow}
-                            disabled={isLoading}>
-                        </lightning-button>
-                    </lightning-layout-item>
+                            <lightning-layout-item size="3" padding="around-small">
+                                <lightning-input type="number" label="Commission Allocation%" placeholder="Enter percent"
+                                    value={row.percent} data-index={index} onchange={handlePercentChange}>
+                                </lightning-input>
+                            </lightning-layout-item>
 
-                </lightning-layout>
-            </template>
+                            <lightning-layout-item size="2" class="slds-align_absolute-center">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-button icon-name="utility:add" variant="brand" title="Add Row"
+                                        onclick={addRow} disabled={isLoading}>
+                                    </lightning-button>
 
-           
-            <div class="slds-align_absolute-center slds-m-top_large">
-                <lightning-button
-                    variant="brand"
-                    label="Save"
-                    class="slds-m-right_small"
-                    onclick={handleSaveClick}
-                    disabled={isLoading}>
-                </lightning-button>
+                                    <lightning-button icon-name="utility:delete" variant="destructive" title="Delete Row"
+                                        data-index={index} onclick={removeRow} disabled={isLoading}
+                                        class="slds-m-left_x-small">
+                                    </lightning-button>
+                                </div>
+                            </lightning-layout-item>
 
-                <lightning-button
-                    variant="neutral"
-                    label="Cancel"
-                    onclick={handleCancelClick}
-                    disabled={isLoading}>
-                </lightning-button>
-            </div>
+                        </lightning-layout>
+                    </template>
 
+                </div>
+            </lightning-card>
+
+        </div> 
+        <!--  NEW: Fixed footer added -->
+        <div class="fixed-footer">
+            <lightning-button variant="neutral" label="Cancel"
+                onclick={handleCancelClick} disabled={isLoading}
+                class="slds-m-right_small">
+            </lightning-button>
+
+            <lightning-button variant="brand" label="Save"
+                onclick={handleSaveClick} disabled={isLoading}>
+            </lightning-button>
         </div>
-    </lightning-card>
+
+    </div> 
+    </div>
+    
 
 </template>

@@ -70,12 +70,12 @@ public class OpportunityTriggerHandler {
             oli.BookingDate__c = null;
 
             // 🔥 NEW: Clear history when NOT cancelled
-            if (stage != 'Cancelled' && stage != 'Closed Lost') {
+            if (stage != 'Cancelled') {
                 oli.ReleaseDate__c = null;
                 oli.CancelledDate__c = null;
             }
 
-            if (stage == 'Unit Blocked') {
+            if (stage == 'Blocked') {
                 oli.Blocked__c = true;
                 oli.BlockedDate__c = Date.today();
             }
@@ -126,12 +126,12 @@ public class OpportunityTriggerHandler {
                     prod.BookingDate__c = null;
 
                     // 🔥 NEW: Clear history when NOT cancelled
-                    if (stage != 'Cancelled' && stage != 'Closed Lost') {
+                    if (stage != 'Cancelled') {
                         prod.ReleaseDate__c = null;
                         prod.CancelledDate__c = null;
                     }
 
-                    if (stage == 'Unit Blocked') {
+                    if (stage == 'Blocked') {
                         prod.Blocked__c = true;
                         prod.BlockedDtae__c = Date.today();
                     }

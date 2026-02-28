@@ -110,6 +110,13 @@
 
             <!-- TERMS SECTION -->
             <div class="slds-m-top_medium slds-p-left_medium">
+                 <lightning-button
+                    class="slds-m-top_small"
+                    label="Add Term"
+                    data-index={index}
+
+                    onclick={handleAddTerm}>
+                </lightning-button>
 
                 <template for:each={policy.terms} for:item="term" for:index="tIndex">
 

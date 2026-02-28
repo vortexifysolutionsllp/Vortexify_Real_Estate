@@ -1,62 +1,75 @@
 <template>
-    <lightning-card title="Capture Visit Information">
-
-        <!-- Validation message when site visit is already completed -->
+    <lightning-card title="Capture Visit Information" icon-name="standard:visit_templates">
+        
         <template if:true={isCompleted}>
-            <div class="slds-text-color_error slds-p-around_medium">
-                {validationMessage}
+            <div class="completed-banner slds-m-around_medium">
+                <lightning-icon icon-name="utility:lock" size="x-small" variant="error" class="slds-m-right_small"></lightning-icon>
+                <span>{validationMessage}</span>
             </div>
         </template>
 
-        <div class="slds-p-around_medium">
+        <div class="form-container slds-p-around_large">
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <lightning-input
+                        type="number"
+                        label="Budget"
+                        formatter="currency"
+                        value={budget}
+                        disabled={isCompleted}
+                        data-field="Budget__c"
+                        onchange={handleInputChange}>
+                    </lightning-input>
+                </div>
 
-            <lightning-input
-                type="number"
-                label="Budget"
-                value={budget}
-                disabled={isCompleted}
-                data-field="Budget__c"
-                onchange={handleInputChange}>
-            </lightning-input>
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <lightning-dual-listbox
+                        label="Project Interest"
+                        source-label="Available"
+                        selected-label="Selected"
+                        options={projectInterestOptions}
+                        value={projectInterestValues}
+                        disabled={isCompleted}
+                        onchange={handleProjectInterestChange}>
+                    </lightning-dual-listbox>
+                </div>
 
-            <lightning-dual-listbox
-                label="Project Interest"
-                source-label="Available"
-                selected-label="Selected"
-                options={projectInterestOptions}
-                value={projectInterestValues}
-                disabled={isCompleted}
-                onchange={handleProjectInterestChange}>
-            </lightning-dual-listbox>
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <lightning-combobox
+                        label="Buying Timeline"
+                        value={buyingTimeline}
+                        options={buyingTimelineOptions}
+                        disabled={isCompleted}
+                        onchange={handleBuyingTimelineChange}>
+                    </lightning-combobox>
+                </div>
 
-            <lightning-combobox
-                label="Buying Timeline"
-                value={buyingTimeline}
-                options={buyingTimelineOptions}
-                disabled={isCompleted}
-                onchange={handleBuyingTimelineChange}>
-            </lightning-combobox>
-
-            <lightning-textarea
-                label="Description"
-                value={description}
-                disabled={isCompleted}
-                data-field="Description"
-                onchange={handleInputChange}>
-            </lightning-textarea>
-
+                <div class="slds-col slds-size_1-of-1">
+                    <lightning-textarea
+                        label="Description"
+                        value={description}
+                        disabled={isCompleted}
+                        data-field="Description"
+                        onchange={handleInputChange}
+                        class="custom-textarea">
+                    </lightning-textarea>
+                </div>
+            </div>
         </div>
 
-        <div class="slds-modal__footer slds-align_absolute-center">
-            <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+        <div class="custom-footer slds-p-around_medium slds-align_absolute-center">
+            <lightning-button 
+                label="Cancel" 
+                onclick={closeModal} 
+                variant="neutral">
+            </lightning-button>
             <lightning-button
-                label="Save"
+                label="Save Information"
                 variant="brand"
                 class="slds-m-left_small"
                 disabled={isCompleted}
                 onclick={handleSave}>
             </lightning-button>
         </div>
-
     </lightning-card>
 </template>

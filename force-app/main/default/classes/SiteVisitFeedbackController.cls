@@ -1,82 +1,77 @@
-public without sharing class SiteVisitFeedbackController {
 
+//keshav code
+public without sharing class SiteVisitFeedbackController {
+ 
     // Form fields
     public String rating { get; set; }
     public String comments { get; set; }
-
+ 
     // URL parameter
     public Id siteVisitId { get; set; }
-
-    // UI control flags
+ 
+    // UI state flags
     public Boolean isValidLink { get; set; }
-    public Boolean isSubmitted { get; set; } // NEW (UI only)
-
-    // Constructor
+    public Boolean isSubmitted { get; set; }
+    public Boolean isAlreadyReceived { get; set; }
+ 
+    // Constructor (runs on page load)
     public SiteVisitFeedbackController() {
-        siteVisitId = ApexPages.currentPage()
-            .getParameters()
-            .get('id');
-
+ 
+        siteVisitId = ApexPages.currentPage().getParameters().get('id');
+ 
         isValidLink = (siteVisitId != null);
         isSubmitted = false;
+        isAlreadyReceived = false;
+ 
+        // Decide UI BEFORE page renders
+        if (siteVisitId != null) {
+            Site_Visit__c sv = [
+                SELECT Feedback_Received__c
+                FROM Site_Visit__c
+                WHERE Id = :siteVisitId
+                LIMIT 1
+            ];
+ 
+            if (sv.Feedback_Received__c == true) {
+                isAlreadyReceived = true;
+            }
+        }
     }
-
+ 
     // Submit feedback
     public PageReference submitFeedback() {
-
+ 
         try {
-            // Validate link
+ 
             if (siteVisitId == null) {
-                ApexPages.addMessage(
-                    new ApexPages.Message(
-                        ApexPages.Severity.ERROR,
-                        'This feedback link is invalid or expired.'
-                    )
-                );
                 return null;
             }
-
-            // Prevent duplicate submissions
+ 
             Site_Visit__c svCheck = [
                 SELECT Feedback_Received__c
                 FROM Site_Visit__c
                 WHERE Id = :siteVisitId
                 LIMIT 1
             ];
-
+ 
+            // Extra protection
             if (svCheck.Feedback_Received__c) {
-                ApexPages.addMessage(
-                    new ApexPages.Message(
-                        ApexPages.Severity.ERROR,
-                        'Feedback has already been submitted for this visit.'
-                    )
-                );
+                isAlreadyReceived = true;
                 return null;
             }
-
-            // Create Feedback record
+ 
             Feedback__c fb = new Feedback__c();
-            fb.Site_Visit__c = siteVisitId;
-            fb.Rating__c = rating;
-            fb.Comments__c = comments;
-            fb.Submitted_On__c = system.today();   
+            fb.Site_Visit__c   = siteVisitId;
+            fb.Rating__c       = rating;
+            fb.Comments__c     = comments;
+            fb.Submitted_On__c = System.today();
             insert fb;
-
-            // Update Site Visit
+ 
             svCheck.Feedback_Received__c = true;
             update svCheck;
-
-            // Mark UI as submitted (NO MORE EDITING)
+ 
             isSubmitted = true;
-
-            // Success message
-            ApexPages.addMessage(
-                new ApexPages.Message(
-                    ApexPages.Severity.CONFIRM,
-                    'Thank you! Your feedback has been submitted successfully.'
-                )
-            );
-
+ 
         } catch (Exception e) {
             ApexPages.addMessage(
                 new ApexPages.Message(
@@ -85,7 +80,7 @@ public without sharing class SiteVisitFeedbackController {
                 )
             );
         }
-
+ 
         return null;
     }
 }

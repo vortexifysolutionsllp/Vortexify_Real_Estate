@@ -66,4 +66,58 @@ public with sharing class LeadTriggerHandler {
             insert taskList;
         }
     }
+    
+        public static void createFollowUpTaskWhenSiteVisit(List<Lead> newLeads, Map<Id, Lead> oldMap){
+
+        List<Task> taskList = new List<Task>();
+        Set<Id> leadIds = new Set<Id>();
+        for(Lead newLead: newLeads){
+            if((newLead.Status != oldMap.get(newLead.Id).Status) && (newLead.Status == 'Site Visit Scheduled' || newLead.Status == 'Site Visit Completed')){
+                leadIds.add(newLead.Id);
+            }
+        }
+
+        if(leadIds.isEmpty()){
+            return;
+        }
+
+        Map<Id, Site_Visit__c> leadSiteVisitMap = new Map<Id, Site_Visit__c>();
+        List<Site_Visit__c> siteVisitList = [SELECT Id, Lead__c, VisitDate__c, Visit_Time__c, Visit_Status__c FROM Site_Visit__c WHERE Lead__c IN :leadIds AND VisitDate__c != null ORDER BY VisitDate__c DESC Limit 1];
+        for(Site_Visit__c siteVisit: siteVisitList){
+            if(!leadSiteVisitMap.containsKey(siteVisit.Lead__c)){
+                leadSiteVisitMap.put(siteVisit.Lead__c, siteVisit);
+            }
+        }
+
+        for(Lead newLead : newLeads){
+            if(!leadIds.contains(newLead.Id)){
+                continue;
+            }
+
+            Site_Visit__c latestVisit = leadSiteVisitMap.get(newLead.Id);
+            
+            Lead oldLead = oldMap.get(newLead.Id);
+
+            if(newLead.Status != oldLead.Status){
+
+                if(newLead.Status == 'Site Visit Scheduled' ||
+                   newLead.Status == 'Site Visit Completed'){
+
+                    Task t = new Task();
+                    t.Subject = 'Follow up - ' + newLead.Status;
+                    t.WhoId = newLead.Id;  
+				    t.OwnerId = newLead.OwnerId;
+                    t.Status = 'Not Started';
+                    t.Priority = 'Normal';
+                    t.ActivityDate = latestVisit.VisitDate__c.addDays(-1);
+
+                    taskList.add(t);
+                }
+            }
+        }
+
+        if(!taskList.isEmpty()){
+            insert taskList;
+        }
+    }
 }

@@ -5,7 +5,7 @@ import getTowerCountByProject from '@salesforce/apex/BookingController.getTowerC
 import getUnitCountByProject from '@salesforce/apex/BookingController.getUnitCountByProject';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getCommissionPolicies from '@salesforce/apex/BookingCommissionPolicyController.getCommissionPolicies';
-
+import { refreshApex } from '@salesforce/apex';
 
 export default class BookingCommissionPolicies extends LightningElement {
 
@@ -20,6 +20,7 @@ export default class BookingCommissionPolicies extends LightningElement {
 
     @track commissionPolicyOptions = [];
     @api selectedCommissionPolicy;
+    wiredPoliciesResult;
 
     /* ---------------- Project & Tower ---------------- */
 
@@ -50,16 +51,24 @@ export default class BookingCommissionPolicies extends LightningElement {
 
 
     @wire(getCommissionPolicies, { opportunityId: '$recordId' })
-    wiredCommissionPolicies({ data, error }) {
-        if (data) {
-            this.commissionPolicyOptions = data.map(policy => ({
-                label: policy.Name,
-                value: policy.Id
-            }));
-        } else if (error) {
-            console.error('Commission Policy Error:', error);
-        }
+    wiredCommissionPolicies(result) {
+    this.wiredPoliciesResult = result;
+
+    const { data, error } = result;
+
+    if (data) {
+        this.commissionPolicyOptions = data.policies.map(policy => ({
+            label: policy.Name,
+            value: policy.Id
+        }));
+
+        this.selectedCommissionPolicy = data.selectedPolicyId;
+    } else if (error) {
+        console.error('Commission Policy Error:', error);
     }
+}
+
+
 
 
 
@@ -85,6 +94,9 @@ export default class BookingCommissionPolicies extends LightningElement {
         return saveCommissionPolicy({
             opportunityId: this.recordId,
             policyId: this.selectedCommissionPolicy
+        }).then(() => {
+            return refreshApex(this.wiredPoliciesResult);
         });
     }
+
 }

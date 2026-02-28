@@ -1,17 +1,154 @@
-.unit-card {
+.unit-allocation-container {
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.scroll-body {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* --- TOWER GRID: FIXED 5 COLUMNS --- */
+.tower-grid-container {
+    display: grid;
+    /* This forces exactly 5 equal columns per line */
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 12px;
+    width: 100%;
+}
+
+.tower-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+
+    min-height: 190px;   /* 🔥 Increased from 150px */
+    padding: 6px;
+}
+
+
+.tower-details {
+    text-align: center;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.tower-floor-picker {
+    margin-top: 6px;
+    width: 100%;
+}
+
+
+.tower-image {
+    height: 95px;   /* 🔥 Increased image height */
+    flex: none;
+
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-color: #f1f5f9;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+
+.tower-card.selected {
+    border: 2px solid #0070d2 !important;
+    background-color: #f0f9ff;
+    box-shadow: 0 4px 10px rgba(0, 112, 210, 0.2);
+}
+
+.tower-card:hover:not(.selected) {
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.tower-details {
+    text-align: center;
+    padding: 6px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+}
+
+.tower-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+
+.tower-subtitle {
+    font-size: 0.82rem;
+    color: #64748b;
+}
+.tower-grid-container {
+    gap: 16px;
+}
+
+
+/* Floor Dropdown Styling */
+.floor-selection-area {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-top: 16px;
+}
+
+/* Unit Grid Layout (4 per line) */
+.unit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.unit-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
 }
 
 .selected-unit {
-    border: 2px solid #1b96ff;
-    background: #f0f8ff;
-    box-shadow: 0 0 0 1px #1b96ff inset;
+    border: 2px solid #0070d2 !important;
+    background-color: #f0f9ff !important;
 }
 
-
-.disabled-unit {
-    opacity: 0.4;
-    pointer-events: none;
+.unit-id {
+    font-weight: 700;
 }
 
+/* Status Colors */
+.status-Available { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+.status-Booked { background: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+.section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 8px;
+    display: block;
+    text-transform: uppercase;
+}
+
+.sticky-footer {
+    padding: 16px 24px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.tower-floor-picker {
+    margin-top: 6px;
+}
