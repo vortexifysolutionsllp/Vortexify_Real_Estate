@@ -102,7 +102,6 @@ public with sharing class BookingController {
                    TotalPrice,
                    Quantity,
                    Product2.Name,
-                   Product2.UnitNumber__c,
                    Product2.SaleableArea__c,
                    Product2.CarpetArea__c,
                    Product2.Family
