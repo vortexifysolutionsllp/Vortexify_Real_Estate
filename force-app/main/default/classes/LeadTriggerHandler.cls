@@ -109,7 +109,7 @@ public with sharing class LeadTriggerHandler {
 				    t.OwnerId = newLead.OwnerId;
                     t.Status = 'Not Started';
                     t.Priority = 'Normal';
-                    t.ActivityDate = latestVisit.VisitDate__c.addDays(-1);
+                    t.ActivityDate = latestVisit != null ? latestVisit.VisitDate__c.addDays(-1) : System.Today();
 
                     taskList.add(t);
                 }

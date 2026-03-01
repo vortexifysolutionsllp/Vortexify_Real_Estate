@@ -102,7 +102,6 @@ public with sharing class BookingController {
                    TotalPrice,
                    Quantity,
                    Product2.Name,
-                   Product2.UnitNumber__c,
                    Product2.SaleableArea__c,
                    Product2.CarpetArea__c,
                    Product2.Family
@@ -134,7 +133,7 @@ public with sharing class BookingController {
         OpportunityLineItem oli = [
             SELECT Id, UnitPrice
             FROM OpportunityLineItem
-            WHERE OpportunityId = :bookingId
+            WHERE OpportunityId = :bookingId AND Product2.RecordType.Name = 'Unit'
             LIMIT 1
         ];
 

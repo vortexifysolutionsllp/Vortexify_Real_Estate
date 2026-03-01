@@ -253,4 +253,153 @@ public with sharing class BookingTriggerHandler {
         }
     }
 
+    public static void createWorkOrders(List<Opportunity> newBookingList,Map<Id, Opportunity> oldMap){
+        try{
+            List<WorkOrder> workOrderList = new List<WorkOrder>();
+            Id stdPricebookId = [
+                SELECT Id 
+                FROM Pricebook2 
+                WHERE IsStandard = true 
+                LIMIT 1
+            ].Id;
+            Set<Id> eligibleOppIds = new Set<Id>();
+            for(Opportunity opp : newBookingList){
+                if((oldMap == null && opp.StageName == 'Possession Ready') || 
+                (oldMap != null && opp.StageName == 'Possession Ready' && oldMap.get(opp.Id).StageName != 'Possession Ready')){
+                    eligibleOppIds.add(opp.Id);
+                    WorkOrder wo = new WorkOrder();
+                    wo.Booking__c = opp.Id;
+                    wo.AccountId = opp.AccountId;
+                    wo.StartDate = System.Today();
+                    wo.Subject = 'Pre-Handover Inspection & Quality Checks';
+                    wo.Priority = 'High';
+                    wo.Status = 'Open';
+                    wo.EndDate = System.Today().addDays(7);
+                    wo.Pricebook2Id = stdPricebookId;
+                    wo.Description = 'Please perform the following checks:';
+                    wo.Description += '\n1. Check for any damage to the property';
+                    wo.Description += '\n2. Check for any defects in the property';
+                    workOrderList.add(wo);
+
+                    WorkOrder wo2 = new WorkOrder();
+                    wo2.Booking__c = opp.Id;
+                    wo2.AccountId = opp.AccountId;
+                    wo2.StartDate = System.Today();
+                    wo2.Subject = 'Financial Closure & Dues Clearance';
+                    wo2.Priority = 'High';
+                    wo2.Status = 'Open';
+                    wo2.EndDate = System.Today().addDays(14);
+                    wo2.Pricebook2Id = stdPricebookId;
+                    wo2.Description = 'Please perform the following checks:';
+                    wo2.Description += '\n1. Check for any outstanding dues';
+                    workOrderList.add(wo2);
+
+                    WorkOrder wo3 = new WorkOrder();
+                    wo3.Booking__c = opp.Id;
+                    wo3.AccountId = opp.AccountId;
+                    wo3.StartDate = System.Today();
+                    wo3.Subject = 'Documentation & Legal Handover';
+                    wo3.Priority = 'High';
+                    wo3.Status = 'Open';
+                    wo3.EndDate = System.Today().addDays(45);
+                    wo3.Pricebook2Id = stdPricebookId;
+                    wo3.Description = 'Please perform the following checks:';
+                    wo3.Description += '\n1. Check for any outstanding documentation';
+                    workOrderList.add(wo3);
+
+                    WorkOrder wo4 = new WorkOrder();
+                    wo4.Booking__c = opp.Id;
+                    wo4.AccountId = opp.AccountId;
+                    wo4.StartDate = System.Today();
+                    wo4.Subject = 'Utility Activation & Technical Setup';
+                    wo4.Priority = 'High';
+                    wo4.Status = 'Open';
+                    wo4.EndDate = System.Today().addDays(60);
+                    wo4.Pricebook2Id = stdPricebookId;
+                    wo4.Description = 'Please perform the following checks:';
+                    wo4.Description += '\n1. Check for any outstanding utility activation';
+                    workOrderList.add(wo4);
+                }
+            }
+
+            if(eligibleOppIds?.size()>0){
+                List<WorkOrder> existingWorkOrders = [SELECT Id FROM WorkOrder WHERE Booking__c IN: eligibleOppIds];
+                if(existingWorkOrders?.size()>0){
+                    delete existingWorkOrders;
+                }
+            }
+
+            if(!workOrderList.isEmpty()){
+                insert workOrderList;
+                PricebookEntry possessionPBE = [
+                    SELECT Id 
+                    FROM PricebookEntry
+                    WHERE Pricebook2Id = :stdPricebookId
+                    AND Product2.Name = 'Possession Activity'
+                    AND IsActive = true
+                    LIMIT 1
+                ];
+
+                Map<String, List<String>> subjectToActivities = new Map<String, List<String>>{
+                    
+                    'Pre-Handover Inspection & Quality Checks' => new List<String>{
+                        'Civil Inspection',
+                        'Electrical Testing',
+                        'Plumbing Testing',
+                        'Snag Rectification'
+                    },
+
+                    'Financial Closure & Dues Clearance' => new List<String>{
+                        'Final Demand Verification',
+                        'Outstanding Dues Check',
+                        'Maintenance Deposit Collection',
+                        'PLC Adjustment Review'
+                    },
+
+                    'Documentation & Legal Handover' => new List<String>{
+                        'Possession Letter Draft',
+                        'OC Verification',
+                        'Agreement Copy Verification',
+                        'Bank NOC Collection'
+                    },
+
+                    'Utility Activation & Technical Setup' => new List<String>{
+                        'Electricity Meter Activation',
+                        'Water Connection Activation',
+                        'Gas Connection Activation',
+                        'Intercom Setup'
+                    }
+                };
+
+                List<WorkOrderLineItem> lineItemList = new List<WorkOrderLineItem>();
+
+                for(WorkOrder wo : workOrderList){
+
+                    if(subjectToActivities.containsKey(wo.Subject)){
+
+                        for(String activityName : subjectToActivities.get(wo.Subject)){
+
+                            WorkOrderLineItem woli = new WorkOrderLineItem();
+                            woli.WorkOrderId = wo.Id;
+                            woli.PricebookEntryId = possessionPBE.Id;
+                            woli.Quantity = 1;
+                            woli.UnitPrice = 0;
+                            woli.Description = activityName;
+                            woli.Activity_Type__c = activityName;
+
+                            lineItemList.add(woli);
+                        }
+                    }
+                }
+
+                if(!lineItemList.isEmpty()){
+                    insert lineItemList;
+                }
+            }
+        }catch(exception e){
+            System.debug('Error: ' + e.getMessage());
+            System.debug('Line: ' + e.getLineNumber());
+        }
+    }
+
 }

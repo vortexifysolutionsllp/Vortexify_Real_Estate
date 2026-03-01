@@ -18,7 +18,6 @@ public with sharing class unitAllocationController {
         return [
             SELECT Id,
                    Name,
-                   UnitNumber__c,
                    UnitStatus__c,
                    Booked__c,
                    Blocked__c
@@ -26,7 +25,7 @@ public with sharing class unitAllocationController {
             WHERE Tower__c = :towerId
             AND FloorNumber__c = :floorNumber
             AND RecordType.Name = 'Unit'
-            ORDER BY UnitNumber__c
+            ORDER BY Name
         ]; 
     }
 
@@ -87,11 +86,12 @@ public with sharing class unitAllocationController {
                 WHERE OpportunityId = :opp.Id
                 LIMIT 1
             ];
- 
+            opp.Booking_Status__c = 'Active';
+            opp.StageName = 'Unit Blocked';
             if (opp.Pricebook2Id == null) {
                 opp.Pricebook2Id = standardPricebookId;
-                update opp;
             }
+            update opp;
  
             if (!existingOlis.isEmpty() && existingOlis[0].Product2Id == unitIds[0]) {
                 return new List<OpportunityWrapper>();
@@ -242,7 +242,7 @@ public with sharing class unitAllocationController {
  
         // -------------------- UNIT DATA --------------------
         Map<Id, Product2> unitMap = new Map<Id, Product2>([
-            SELECT Id, Name, UnitNumber__c, Tower__r.Project__r.Name, Tower__r.Project__c
+            SELECT Id, Name, Tower__r.Project__r.Name, Tower__r.Project__c
             FROM Product2
             WHERE Id IN :unitIds
         ]);
@@ -325,7 +325,7 @@ public with sharing class unitAllocationController {
                 wrapperList.add(new OpportunityWrapper(
                     oppsToInsert[i].Id,
                     oppsToInsert[i].Name,
-                    unit.UnitNumber__c,
+                    unit.Name,
                     unit.Tower__r.Project__r.Name
                 ));
             }

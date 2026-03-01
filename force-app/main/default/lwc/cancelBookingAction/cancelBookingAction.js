@@ -2,6 +2,7 @@ import { LightningElement, api } from 'lwc';
 import cancelBooking from '@salesforce/apex/BookingCancellationController.cancelBooking';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
+import { NavigationMixin } from 'lightning/navigation';
 
 export default class CancelBookingModal extends LightningElement {
     @api recordId;
@@ -36,5 +37,8 @@ export default class CancelBookingModal extends LightningElement {
         }
 
         this.dispatchEvent(new CloseActionScreenEvent());
+        setTimeout(() => {
+            window.location.reload();
+        }, 600); 
     }
 }
