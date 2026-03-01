@@ -5,4 +5,7 @@ trigger OpportunityLineItemTrigger on OpportunityLineItem (before insert, after 
     if(Trigger.isAfter && Trigger.isInsert){
         OpportunityLineItemTriggerHandler.createPLC(Trigger.new);
     }
+    if(Trigger.isBefore && Trigger.isInsert){
+        OpportunityLineItemTriggerHandler.updateAmount(Trigger.new);
+    }
 }

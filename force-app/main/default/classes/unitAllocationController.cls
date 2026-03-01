@@ -86,11 +86,12 @@ public with sharing class unitAllocationController {
                 WHERE OpportunityId = :opp.Id
                 LIMIT 1
             ];
- 
+            opp.Booking_Status__c = 'Active';
+            opp.StageName = 'Unit Blocked';
             if (opp.Pricebook2Id == null) {
                 opp.Pricebook2Id = standardPricebookId;
-                update opp;
             }
+            update opp;
  
             if (!existingOlis.isEmpty() && existingOlis[0].Product2Id == unitIds[0]) {
                 return new List<OpportunityWrapper>();

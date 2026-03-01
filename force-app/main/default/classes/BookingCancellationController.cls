@@ -51,6 +51,7 @@ public with sharing class BookingCancellationController {
             }
 
             opp.Booking_Status__c = 'Cancelled';
+            opp.StageName = 'Cancelled';
 
             // Update together
             update opp;

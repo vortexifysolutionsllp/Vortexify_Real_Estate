@@ -64,157 +64,209 @@ public class OpportunityLineItemTriggerHandler {
     }
 
     //plc creation logic
-public static void createPLC(List<OpportunityLineItem> newList){
-    Set<Id> productIds = new Set<Id>();
-    Set<Id> oppIds = new Set<Id>();
+    public static void createPLC(List<OpportunityLineItem> newList){
+        Set<Id> productIds = new Set<Id>();
+        Set<Id> oppIds = new Set<Id>();
+        Set<Id> newProdIds = new Set<Id>();
 
-    for(OpportunityLineItem oli : newList){
-        if(oli.Product2Id != null) productIds.add(oli.Product2Id);
-        if(oli.OpportunityId != null) oppIds.add(oli.OpportunityId);
-    }
-
-    Map<Id, Product2> products = new Map<Id, Product2>([
-        SELECT Id, Name, Family, RecordType.Name,
-               Applicable_PLC__c, Cost_Sqft__c, SaleableArea__c,
-               Tower__r.Project__c, FloorNumber__c
-        FROM Product2
-        WHERE Id IN :productIds
-    ]);
-
-    Set<Id> projectIds = new Set<Id>();
-    for(Product2 p : products.values()){
-        if(p.Tower__r != null && p.Tower__r.Project__c != null){
-            projectIds.add(p.Tower__r.Project__c);
-        }
-    }
-
-    Map<String, Product2> plcProducts = new Map<String, Product2>();
-    Map<String, Product2> floorPlcProducts = new Map<String, Product2>();
-    for(Product2 p : [
-        SELECT Id, Name, Tower__r.Project__c, FloorNumber__c, Cost_Sqft__c
-        FROM Product2
-        WHERE (RecordType.Name = 'PLC' OR Family = 'PLC')
-        AND Tower__r.Project__c IN :projectIds
-    ]){
-        String keyName = normalizePLCName(p.Name) + '-' + p.Tower__r.Project__c;
-        if(keyName.containsIgnoreCase('Floor')){
-            floorPlcProducts.put(p.FloorNumber__c + '-'+ p.Tower__r.Project__c, p);
-        }else{
-            plcProducts.put(keyName, p);
-        }
-    }
-
-    Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>([
-        SELECT Id, Pricebook2Id FROM Opportunity WHERE Id IN :oppIds
-    ]);
-
-    Map<Id, Set<Id>> oppToExistingProducts = new Map<Id, Set<Id>>();
-    for(OpportunityLineItem oli : [
-        SELECT OpportunityId, PricebookEntry.Product2Id
-        FROM OpportunityLineItem
-        WHERE OpportunityId IN :oppIds
-    ]){
-        if(!oppToExistingProducts.containsKey(oli.OpportunityId)){
-            oppToExistingProducts.put(oli.OpportunityId, new Set<Id>());
-        }
-        oppToExistingProducts.get(oli.OpportunityId).add(oli.PricebookEntry.Product2Id);
-    }
-
-    Map<String, PricebookEntry> pbeMap = new Map<String, PricebookEntry>();
-    for(PricebookEntry pbe : [
-        SELECT Id, Product2Id, Pricebook2Id
-        FROM PricebookEntry
-        WHERE IsActive = true
-    ]){
-        pbeMap.put(pbe.Product2Id + '-' + pbe.Pricebook2Id, pbe);
-    }
-
-    List<OpportunityLineItem> toInsert = new List<OpportunityLineItem>();
-
-    for(OpportunityLineItem oli : newList){
-
-        Product2 unit = products.get(oli.Product2Id);
-        if(unit == null){
-            continue;
+        for(OpportunityLineItem oli : newList){
+            if(oli.Product2Id != null) productIds.add(oli.Product2Id);
+            if(oli.OpportunityId != null) oppIds.add(oli.OpportunityId);
         }
 
-        Boolean isUnit = unit.Family == 'Unit' || unit.RecordType.Name == 'Unit';
-        if(!isUnit){
-            continue;
+        Map<Id, Product2> products = new Map<Id, Product2>([
+            SELECT Id, Name, Family, RecordType.Name,
+                Applicable_PLC__c, Cost_Sqft__c, SaleableArea__c,
+                Tower__r.Project__c, FloorNumber__c
+            FROM Product2
+            WHERE Id IN :productIds
+        ]);
+
+        Set<Id> projectIds = new Set<Id>();
+        for(Product2 p : products.values()){
+            if(p.Tower__r != null && p.Tower__r.Project__c != null){
+                projectIds.add(p.Tower__r.Project__c);
+            }
         }
 
-        if(String.isBlank(unit.Applicable_PLC__c)){
-            continue;
+        Map<String, Product2> plcProducts = new Map<String, Product2>();
+        Map<String, Product2> floorPlcProducts = new Map<String, Product2>();
+        Map<String, Product2> miscChargeProducts = new Map<String, Product2>();
+        for(Product2 p : [
+            SELECT Id, Name, Tower__r.Project__c, FloorNumber__c, Cost_Sqft__c, Project__c
+            FROM Product2
+            WHERE (RecordType.Name = 'PLC' OR Family = 'PLC')
+            AND Tower__r.Project__c IN :projectIds
+        ]){
+            String projectId = p.Project__c != null ? p.Project__c : p.Tower__r.Project__c;
+            String keyName = normalizePLCName(p.Name) + '-' + projectId;
+            if(keyName.containsIgnoreCase('Floor')){
+                floorPlcProducts.put(p.FloorNumber__c + '-'+ projectId, p);
+            }else{
+                plcProducts.put(keyName, p);
+            }
+            newProdIds.add(p.Id);
         }
 
-        if(unit.Tower__r == null || unit.Tower__r.Project__c == null){
-            continue;
+        for(Product2 p : [
+            SELECT Id, Name, Tower__r.Project__c, FloorNumber__c, Cost_Sqft__c, Project__c
+            FROM Product2
+            WHERE (RecordType.Name = 'Misc' OR Family = 'EEC' OR Family = 'IFMS')
+            AND (Tower__r.Project__c IN :projectIds OR Project__c IN :projectIds)
+        ]){
+            String projectId = p.Project__c != null ? p.Project__c : p.Tower__r.Project__c;
+            String keyName = p.Name + '-' + projectId;
+            miscChargeProducts.put(keyName, p);
+            newProdIds.add(p.Id);
         }
 
-        Opportunity opp = oppMap.get(oli.OpportunityId);
-        if(opp == null || opp.Pricebook2Id == null){
-            continue;
+        Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>([
+            SELECT Id, Pricebook2Id FROM Opportunity WHERE Id IN :oppIds
+        ]);
+
+        Map<Id, Set<Id>> oppToExistingProducts = new Map<Id, Set<Id>>();
+        for(OpportunityLineItem oli : [
+            SELECT OpportunityId, PricebookEntry.Product2Id
+            FROM OpportunityLineItem
+            WHERE OpportunityId IN :oppIds
+        ]){
+            if(!oppToExistingProducts.containsKey(oli.OpportunityId)){
+                oppToExistingProducts.put(oli.OpportunityId, new Set<Id>());
+            }
+            oppToExistingProducts.get(oli.OpportunityId).add(oli.PricebookEntry.Product2Id);
         }
 
-        Set<Id> existingProducts = oppToExistingProducts.get(oli.OpportunityId);
-        if(existingProducts == null) existingProducts = new Set<Id>();
+        Map<String, PricebookEntry> pbeMap = new Map<String, PricebookEntry>();
+        for(PricebookEntry pbe : [
+            SELECT Id, Product2Id, Pricebook2Id
+            FROM PricebookEntry
+            WHERE IsActive = true AND Product2Id IN :newProdIds
+        ]){
+            pbeMap.put(pbe.Product2Id + '-' + pbe.Pricebook2Id, pbe);
+        }
 
-         String floorNumber = String.valueOf(unit.FloorNumber__c);
-         String floorPlcName = '';
-        for(String plcName : unit.Applicable_PLC__c.split(';')){
-            plcName = normalizePLCName(plcName) + '-' + unit.Tower__r.Project__c;
-            floorPlcName = floorNumber + '-' + unit.Tower__r.Project__c;
-            if(!plcProducts.containsKey(plcName) && !floorPlcProducts.containsKey(floorPlcName)){
+        List<OpportunityLineItem> toInsert = new List<OpportunityLineItem>();
+
+        for(OpportunityLineItem oli : newList){
+
+            Product2 unit = products.get(oli.Product2Id);
+            if(unit == null){
                 continue;
             }
 
-            Product2 plcProd = plcName.containsIgnoreCase('Floor') ? floorPlcProducts.get(floorPlcName) : plcProducts.get(plcName);
-            System.debug('plcProd--> ' + plcProd);
-            System.debug('unit.SaleableArea__c--> ' + unit.SaleableArea__c);
-            if(existingProducts.contains(plcProd.Id)){
+            Boolean isUnit = unit.Family == 'Unit' || unit.RecordType.Name == 'Unit';
+            if(!isUnit){
                 continue;
             }
 
-            Decimal plcPrice = (plcProd.Cost_Sqft__c != null && unit.SaleableArea__c != null)
-                ? plcProd.Cost_Sqft__c * unit.SaleableArea__c
-                : 0;
+            if(String.isBlank(unit.Applicable_PLC__c)){
+                continue;
+            }
 
-            String key = plcProd.Id + '-' + opp.Pricebook2Id;
+            if(unit.Tower__r == null || unit.Tower__r.Project__c == null){
+                continue;
+            }
 
-            if(pbeMap.containsKey(key)){
+            Opportunity opp = oppMap.get(oli.OpportunityId);
+            if(opp == null || opp.Pricebook2Id == null){
+                continue;
+            }
 
-                toInsert.add(new OpportunityLineItem(
-                    OpportunityId = oli.OpportunityId,
-                    PricebookEntryId = pbeMap.get(key).Id,
-                    Quantity = 1,
-                    UnitPrice = plcPrice
-                ));
+            Set<Id> existingProducts = oppToExistingProducts.get(oli.OpportunityId);
+            if(existingProducts == null) existingProducts = new Set<Id>();
 
-                existingProducts.add(plcProd.Id);
-                oppToExistingProducts.put(oli.OpportunityId, existingProducts);
-            } else {
-                System.debug('No active PricebookEntry found for PLC product: ' + plcProd.Name);
+            String floorNumber = String.valueOf(unit.FloorNumber__c);
+            String floorPlcName = '';
+            for(String plcName : unit.Applicable_PLC__c.split(';')){
+                plcName = normalizePLCName(plcName) + '-' + unit.Tower__r.Project__c;
+                floorPlcName = floorNumber + '-' + unit.Tower__r.Project__c;
+                if(!plcProducts.containsKey(plcName) && !floorPlcProducts.containsKey(floorPlcName)){
+                    continue;
+                }
+
+                Product2 plcProd = plcName.containsIgnoreCase('Floor') ? floorPlcProducts.get(floorPlcName) : plcProducts.get(plcName);
+                if(existingProducts.contains(plcProd.Id)){
+                    continue;
+                }
+
+                Decimal plcPrice = (plcProd.Cost_Sqft__c != null && unit.SaleableArea__c != null)
+                    ? plcProd.Cost_Sqft__c * unit.SaleableArea__c
+                    : 0;
+
+                String key = plcProd.Id + '-' + opp.Pricebook2Id;
+
+                if(pbeMap.containsKey(key)){
+
+                    toInsert.add(new OpportunityLineItem(
+                        OpportunityId = oli.OpportunityId,
+                        PricebookEntryId = pbeMap.get(key).Id,
+                        Quantity = 1,
+                        UnitPrice = plcPrice
+                    ));
+
+                    existingProducts.add(plcProd.Id);
+                    oppToExistingProducts.put(oli.OpportunityId, existingProducts);
+                } else {
+                    System.debug('No active PricebookEntry found for PLC product: ' + plcProd.Name);
+                }
+            }
+            for(String miscKey : miscChargeProducts.keySet()){
+                Product2 prod = miscChargeProducts.get(miscKey);
+                if(existingProducts.contains(prod.Id)){
+                    continue;
+                }
+                String key = prod.Id + '-' + opp.Pricebook2Id;
+                String key2 = prod.Name + '-' + unit.Tower__r.Project__c;
+                if(pbeMap.containsKey(key)){
+                    toInsert.add(new OpportunityLineItem(
+                        OpportunityId = oli.OpportunityId,
+                        PricebookEntryId = pbeMap.get(key).Id,
+                        Quantity = 1,
+                        UnitPrice = prod.Cost_Sqft__c * unit.SaleableArea__c
+                    ));
+                }
             }
         }
+
+
+        if(!toInsert.isEmpty()){
+            skipValidation = true;
+            insert toInsert;
+            skipValidation = false;
+        } else {
+            System.debug('No PLC OLIs to insert');
+        }
+    }
+    private static String normalizePLCName(String name){
+        if(String.isBlank(name)) return null;
+        name = name.toLowerCase().trim();
+        name = name.replace(' plc','');   // remove " PLC"
+        name = name.replace('plc','');    // remove "PLC" if no space
+        return name.trim();
     }
 
-
-    if(!toInsert.isEmpty()){
-        skipValidation = true;
-        insert toInsert;
-        skipValidation = false;
-    } else {
-        System.debug('No PLC OLIs to insert');
+    public static void updateAmount(List<OpportunityLineItem> oliList){
+        try{
+            Set<Id> prodIds = new Set<Id>();
+            Set<Id> OppIds =  new Set<Id>();
+            for(OpportunityLineItem oli : oliList){
+                prodIds.add(oli.Product2Id);
+                OppIds.add(oli.OpportunityId);
+            }
+            List<Product2> prodList = [SELECT Id, Name, SaleableArea__c FROM Product2 WHERE Id IN :prodIds AND RecordType.Name = 'Unit'];
+            Map<Id, Product2> prodMap = new Map<Id, Product2>(prodList);
+            List<Opportunity> oppList = [SELECT Id, Name, Payment_Policy__r.Cost_Sqft__c FROM Opportunity WHERE Id IN :OppIds];
+            Map<Id, Opportunity> oppMap = new Map<Id, Opportunity>(oppList);
+            for(OpportunityLineItem oli : oliList){
+                Product2 prod = prodMap.get(oli.Product2Id);
+                Opportunity opp = oppMap.get(oli.OpportunityId);
+                oli.UnitPrice = prod.SaleableArea__c * opp.Payment_Policy__r.Cost_Sqft__c;
+            }
+        }catch(exception e){
+            System.debug('Error in updateAmount: ' + e.getMessage());
+            System.debug('Line: ' + e.getLineNumber());
+        }
     }
-
-}
-private static String normalizePLCName(String name){
-    if(String.isBlank(name)) return null;
-    name = name.toLowerCase().trim();
-    name = name.replace(' plc','');   // remove " PLC"
-    name = name.replace('plc','');    // remove "PLC" if no space
-    return name.trim();
-}
 
 
 }

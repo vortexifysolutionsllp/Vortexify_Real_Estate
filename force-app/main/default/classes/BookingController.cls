@@ -133,7 +133,7 @@ public with sharing class BookingController {
         OpportunityLineItem oli = [
             SELECT Id, UnitPrice
             FROM OpportunityLineItem
-            WHERE OpportunityId = :bookingId
+            WHERE OpportunityId = :bookingId AND Product2.RecordType.Name = 'Unit'
             LIMIT 1
         ];
 
