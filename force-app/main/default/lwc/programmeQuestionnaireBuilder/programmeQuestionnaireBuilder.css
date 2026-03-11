@@ -1,0 +1,304 @@
+.builder-shell {
+    --builder-ink: #14213d;
+    --builder-accent: #f77f00;
+    --builder-soft: #f6f2ea;
+    --builder-panel: #ffffff;
+    --builder-border: #d9d3c7;
+    --builder-muted: #5f6b7a;
+    background:
+        radial-gradient(circle at top left, #fff4dd 0, transparent 28%),
+        linear-gradient(135deg, #f8f6f1 0%, #eef3f8 100%);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    color: var(--builder-ink);
+}
+
+.hero-panel {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    color: var(--builder-accent);
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+}
+
+.hero-panel h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.35rem;
+    font-weight: 700;
+}
+
+.hero-copy {
+    color: var(--builder-muted);
+    max-width: 48rem;
+}
+
+.context-chip {
+    border: 1px solid var(--builder-border);
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 999px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.step-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.step-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--builder-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--builder-muted);
+    font-weight: 600;
+}
+
+.step-pill.active {
+    background: var(--builder-ink);
+    color: #ffffff;
+    border-color: var(--builder-ink);
+}
+
+.step-pill.completed {
+    background: #eef7ef;
+    color: #1d6b3d;
+    border-color: #b8d8c1;
+}
+
+.step-index {
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: rgba(20, 33, 61, 0.08);
+    font-size: 0.8rem;
+}
+
+.step-pill.active .step-index {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.step-pill.completed .step-index {
+    background: rgba(29, 107, 61, 0.12);
+}
+
+.wizard-panel {
+    background: var(--builder-panel);
+    border: 1px solid var(--builder-border);
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 12px 30px rgba(20, 33, 61, 0.06);
+}
+
+.editor-panel,
+.preview-panel {
+    padding: 0;
+}
+
+.editor-panel h2,
+.preview-panel h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.section-heading {
+    margin-bottom: 1rem;
+}
+
+.section-heading p,
+.preview-header p,
+.section-block p,
+.sheet-header p,
+.question-rubric {
+    color: var(--builder-muted);
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.summary-badge {
+    background: var(--builder-soft);
+    border: 1px solid var(--builder-border);
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.78rem;
+    color: var(--builder-ink);
+    white-space: nowrap;
+}
+
+.questionnaire-sheet {
+    background: linear-gradient(180deg, #fffdf9 0%, #f8f6f1 100%);
+    border: 1px solid var(--builder-border);
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.sheet-header {
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--builder-border);
+}
+
+.sheet-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.sheet-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.meta-card {
+    background: #ffffff;
+    border: 1px solid var(--builder-border);
+    border-radius: 0.8rem;
+    padding: 0.75rem;
+}
+
+.meta-label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--builder-muted);
+    margin-bottom: 0.35rem;
+}
+
+.meta-value {
+    font-weight: 700;
+    color: var(--builder-ink);
+}
+
+.section-block {
+    margin-bottom: 1rem;
+}
+
+.section-block h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+.questions-list {
+    list-style: decimal;
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.question-card {
+    border: 1px solid var(--builder-border);
+    border-radius: 0.85rem;
+    padding: 0.9rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 100%);
+    margin-bottom: 0.75rem;
+}
+
+.question-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--builder-accent);
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.question-prompt {
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.option-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+}
+
+.option-pill {
+    background: #eef3ff;
+    color: var(--builder-ink);
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+}
+
+.review-block {
+    background: #ffffff;
+    border: 1px solid var(--builder-border);
+    border-radius: 0.8rem;
+    padding: 0.9rem;
+}
+
+.wizard-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--builder-border);
+}
+
+.footer-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+@media (max-width: 900px) {
+    .hero-panel,
+    .step-nav,
+    .field-grid,
+    .sheet-meta,
+    .preview-header,
+    .wizard-footer {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .context-chip,
+    .summary-badge {
+        white-space: normal;
+    }
+
+    .footer-actions {
+        justify-content: flex-end;
+    }
+}

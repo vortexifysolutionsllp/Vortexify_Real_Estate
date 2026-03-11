@@ -1,0 +1,252 @@
+<template>
+    <div class="builder-shell">
+        <div class="hero-panel">
+            <div>
+                <p class="eyebrow">Programme Assignment</p>
+                <h1>Create a structured questionnaire for this programme</h1>
+                <p class="hero-copy">
+                    Define the assignment step by step and review the questionnaire
+                    before generating the final version.
+                </p>
+            </div>
+
+            <div class="context-chip">
+                {recordContextLabel}
+            </div>
+        </div>
+
+        <div class="step-nav">
+            <template for:each={steps} for:item="step">
+                <div key={step.id} class={step.className}>
+                    <span class="step-index">{step.id}</span>
+                    <span>{step.label}</span>
+                </div>
+            </template>
+        </div>
+
+        <div class="wizard-panel">
+            <template if:true={isStepOne}>
+                <section class="editor-panel">
+                    <div class="section-heading">
+                        <h2>Assignment Details</h2>
+                        <p>Start with the core information needed to prepare the questionnaire.</p>
+                    </div>
+
+                    <div class="field-grid">
+                        <lightning-input
+                            label="Assignment Name"
+                            name="assignmentTitle"
+                            value={form.assignmentTitle}
+                            onchange={handleInputChange}
+                            required
+                        ></lightning-input>
+
+                        <lightning-combobox
+                            label="Student Level"
+                            name="learnerLevel"
+                            value={form.learnerLevel}
+                            options={learnerLevelOptions}
+                            onchange={handleInputChange}
+                        ></lightning-combobox>
+
+                        <lightning-combobox
+                            label="Question Format"
+                            name="questionType"
+                            value={form.questionType}
+                            options={questionTypeOptions}
+                            onchange={handleInputChange}
+                        ></lightning-combobox>
+
+                        <lightning-input
+                            type="number"
+                            label="Number of Questions"
+                            name="questionCount"
+                            value={form.questionCount}
+                            min="1"
+                            max="20"
+                            onchange={handleInputChange}
+                            required
+                        ></lightning-input>
+
+                        <lightning-input
+                            type="number"
+                            label="Duration (Minutes)"
+                            name="durationMinutes"
+                            value={form.durationMinutes}
+                            min="5"
+                            onchange={handleInputChange}
+                        ></lightning-input>
+
+                        <lightning-combobox
+                            label="Evaluation Focus"
+                            name="evaluationFocus"
+                            value={form.evaluationFocus}
+                            options={evaluationFocusOptions}
+                            onchange={handleInputChange}
+                        ></lightning-combobox>
+                    </div>
+
+                    <lightning-textarea
+                        label="Instructions for Students"
+                        name="assignmentGoal"
+                        value={form.assignmentGoal}
+                        onchange={handleInputChange}
+                        required
+                    ></lightning-textarea>
+                </section>
+            </template>
+
+            <template if:true={isStepTwo}>
+                <section class="preview-panel">
+                    <div class="preview-header">
+                        <div>
+                            <h2>Questionnaire</h2>
+                            <p>Review the ordered questions that will be shown to students.</p>
+                        </div>
+                        <div class="summary-badge">{questionnaireSummary}</div>
+                    </div>
+
+                    <div class="questionnaire-sheet">
+                        <div class="sheet-header">
+                            <h3>{assignmentHeading}</h3>
+                            <p>{assignmentInstructions}</p>
+                        </div>
+
+                        <div class="sheet-meta">
+                            <div class="meta-card">
+                                <span class="meta-label">Student Level</span>
+                                <span class="meta-value">{learnerLevelLabel}</span>
+                            </div>
+                            <div class="meta-card">
+                                <span class="meta-label">Duration</span>
+                                <span class="meta-value">{form.durationMinutes} Minutes</span>
+                            </div>
+                            <div class="meta-card">
+                                <span class="meta-label">Evaluation Focus</span>
+                                <span class="meta-value">{evaluationFocusLabel}</span>
+                            </div>
+                        </div>
+
+                        <div class="section-block">
+                            <h4>Instructions</h4>
+                            <p>
+                                Answer each question carefully. Responses will be assessed for
+                                correctness, clarity, and relevance to the programme.
+                            </p>
+                        </div>
+
+                        <div class="section-block">
+                            <h4>Questions</h4>
+                        </div>
+
+                        <ol class="questions-list">
+                            <template for:each={generatedQuestions} for:item="question">
+                                <li key={question.id} class="question-card">
+                                    <div class="question-meta">
+                                        <span>{question.sectionLabel}</span>
+                                        <span>{question.typeLabel}</span>
+                                    </div>
+
+                                    <p class="question-prompt">{question.prompt}</p>
+                                    <p class="question-rubric">{question.rubric}</p>
+
+                                    <template if:true={question.options.length}>
+                                        <div class="option-row">
+                                            <template for:each={question.options} for:item="option">
+                                                <span key={option.id} class="option-pill">{option.label}</span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </li>
+                            </template>
+                        </ol>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={isStepThree}>
+                <section class="preview-panel">
+                    <div class="preview-header">
+                        <div>
+                            <h2>Review Criteria</h2>
+                            <p>Confirm the rules and structure before backend integration.</p>
+                        </div>
+                        <div class="summary-badge">{questionnaireSummary}</div>
+                    </div>
+
+                    <div class="questionnaire-sheet">
+                        <div class="sheet-header">
+                            <h3>{assignmentHeading}</h3>
+                            <p>{assignmentInstructions}</p>
+                        </div>
+
+                        <div class="sheet-meta">
+                            <div class="meta-card">
+                                <span class="meta-label">Student Level</span>
+                                <span class="meta-value">{learnerLevelLabel}</span>
+                            </div>
+                            <div class="meta-card">
+                                <span class="meta-label">Duration</span>
+                                <span class="meta-value">{form.durationMinutes} Minutes</span>
+                            </div>
+                            <div class="meta-card">
+                                <span class="meta-label">Evaluation Focus</span>
+                                <span class="meta-value">{evaluationFocusLabel}</span>
+                            </div>
+                        </div>
+
+                        <div class="section-block review-block">
+                            <h4>Evaluation Criteria</h4>
+                            <p>
+                                Submissions will be reviewed based on {evaluationFocusLabel},
+                                overall understanding, and the quality of explanation provided in each answer.
+                            </p>
+                        </div>
+
+                        <div class="section-block review-block">
+                            <h4>Question Structure Summary</h4>
+                            <p>
+                                This assignment contains {form.questionCount} questions in
+                                {form.durationMinutes} minutes for {learnerLevelLabel} students.
+                            </p>
+                        </div>
+
+                        <div class="section-block review-block">
+                            <h4>Next Phase</h4>
+                            <p>
+                                The next step is wiring this flow to Apex so the questionnaire can be generated and stored using OpenAI.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <div class="wizard-footer">
+                <div>
+                    <template if:true={showResetButton}>
+                        <lightning-button
+                            label="Reset"
+                            onclick={handleReset}
+                            disabled={isGenerating}
+                        ></lightning-button>
+                    </template>
+                </div>
+
+                <div class="footer-actions">
+                    <lightning-button
+                        label="Back"
+                        onclick={handleBack}
+                        disabled={disableBack}
+                    ></lightning-button>
+
+                    <lightning-button
+                        variant="brand"
+                        label={nextLabel}
+                        onclick={handleNext}
+                        disabled={isGenerating}
+                    ></lightning-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
